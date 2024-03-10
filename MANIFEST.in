@@ -1,0 +1,9 @@
+include COPYING
+recursive-include . *.rst
+recursive-include . *.toml
+recursive-include . *.cfg *.toml
+recursive-include . *.md *.rst *.txt
+recursive-include . *.css *.html
+recursive-include . *.jpg *.png *.mp3 *.wav *.webm
+recursive-include . *.js *.mjs
+recursive-include . *.woff *.woff2
