@@ -21,6 +21,8 @@ import unittest
 import textwrap
 from types import SimpleNamespace
 
+from busker.scraper import Scraper
+
 
 class ScraperTests(unittest.TestCase):
 
@@ -46,4 +48,8 @@ class ScraperTests(unittest.TestCase):
     )
 
     def test_find_session_begin(self):
-        self.fail(self.fixtures.Home)
+        scraper = Scraper()
+        body_re = scraper.tag_matcher("body")
+        match = body_re.search(self.fixtures.Home)
+        rv = scraper.find_forms(match[0])
+        self.fail(rv)
