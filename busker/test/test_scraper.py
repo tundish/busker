@@ -132,7 +132,6 @@ class ScraperTests(unittest.TestCase):
         match = body_re.search(self.fixtures.Home)
         rv = scraper.find_forms(match[0])
         self.assertEqual(len(rv), 1)
-        print(rv[0].attrib)
 
     def test_find_session_command(self):
         scraper = Scraper()
@@ -140,4 +139,3 @@ class ScraperTests(unittest.TestCase):
         match = body_re.search(self.fixtures.Session)
         rv = scraper.find_forms(match[0])
         self.assertEqual(len(rv), 1)
-        print(rv[0].attrib)

@@ -44,4 +44,4 @@ class Scraper:
     @staticmethod
     def find_forms(body: str):
         root = ET.fromstring(body)
-        return root.findall("form")
+        return root.findall(".//form")
