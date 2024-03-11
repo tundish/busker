@@ -23,6 +23,16 @@ import re
 
 import xml.etree.ElementTree as ET
 
+import httpx
+
+
+class Tactic:
+
+    def __call_(self):
+        dara = {}
+        response = httpx.post(url, data=data)
+        return response
+
 
 class Scraper:
 
@@ -34,4 +44,4 @@ class Scraper:
     @staticmethod
     def find_forms(body: str):
         root = ET.fromstring(body)
-        return root
+        return root.findall("form")

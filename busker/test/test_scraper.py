@@ -45,11 +45,99 @@ class ScraperTests(unittest.TestCase):
         </body>
         </html>
         """),
+        Session=textwrap.dedent("""
+        <!DOCTYPE html>
+        <html>
+        <head>
+        <title>Story</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <link rel="stylesheet" href="/static/basics.css" />
+        <link rel="stylesheet" href="/static/layout.css" />
+        <link rel="stylesheet" href="/static/object.css" />
+        <style type="text/css">
+        :root {
+        --ballad-ink-gravity: hsl(282.86, 100%, 14.12%);
+        --ballad-ink-shadows: hsl(203.33, 96.92%, 8.75%);
+        --ballad-ink-lolight: hsl(203.39, 96.72%, 11.96%);
+        --ballad-ink-midtone: hsl(203.39, 96.72%, 31.96%);
+        --ballad-ink-hilight: hsl(203.06, 97.3%, 56.47%);
+        --ballad-ink-washout: hsl(50.00, 0%, 100%);
+        --ballad-ink-glamour: hsl(66.77, 96.92%, 72.75%);
+        }
+        </style>
+        </head>
+        <body>
+        <main>
+        <div class="ballad cue">
+        <blockquote cite="&lt;GOAL&gt;">
+        <cite data-role="GOAL" data-entity="goal_00a"
+        style="animation-delay: 1.00s; animation-duration: 0.10s">goal_00a</cite>
+        <p style="animation-delay: 1.00s; animation-duration: 0.30s">I am goal_00a.</p>
+        </blockquote>
+        </div>
+        <div class="ballad cue">
+        <blockquote cite="&lt;GOAL.branching&gt;">
+        <cite data-role="GOAL" data-entity="goal_00a"
+        data-directives=".branching" style="animation-delay: 2.30s; animation-duration: 0.10s">goal_00a</cite>
+        <p style="animation-delay: 2.30s; animation-duration: 0.50s">Do you want to figure out where you are?</p>
+        <ol>
+        <li id="1"><p style="animation-delay: 3.80s; animation-duration: 0.10s">Yes</p></li>
+        <li id="2"><p style="animation-delay: 4.90s; animation-duration: 0.10s">No</p></li>
+        </ol>
+        </blockquote>
+        </div>
+        </main>
+
+        <datalist id="ballad-command-form-input-list">
+        <option value="1"></option>
+        <option value="2"></option>
+        <option value="i"></option>
+        <option value="info"></option>
+        <option value="no"></option>
+        <option value="yes"></option>
+        </datalist>
+
+        <div id="ballad-zone-inputs" class="ballad zone">
+
+        <form role="form"
+        action="http://localhost:8080/session/79453e2d-d200-44f5-84b1-7dde4f25fc90/command"
+        method="post" name="ballad-command-form">
+        <fieldset>
+        <label for="ballad-command-form-input-text" id="ballad-command-form-input-text-label">&gt;</label>
+
+        <input
+        name="ballad-command-form-input-text"
+        placeholder=""
+        pattern="[\w ]+"
+        autofocus="autofocus"
+        type="text"
+        title="Enter a command, or type 'help' for a list of options."
+        list="ballad-command-form-input-list"
+        />
+        <button type="submit">Enter</button>
+        </fieldset>
+        </form>
+
+        </div>
+        </body>
+        </html>
+        """),
     )
 
-    def test_find_session_begin(self):
+    def test_find_home_begin(self):
         scraper = Scraper()
         body_re = scraper.tag_matcher("body")
         match = body_re.search(self.fixtures.Home)
         rv = scraper.find_forms(match[0])
-        self.fail(rv)
+        self.assertEqual(len(rv), 1)
+        print(rv[0].attrib)
+
+    def test_find_session_command(self):
+        scraper = Scraper()
+        body_re = scraper.tag_matcher("body")
+        match = body_re.search(self.fixtures.Session)
+        rv = scraper.find_forms(match[0])
+        self.assertEqual(len(rv), 1)
+        print(rv[0].attrib)
