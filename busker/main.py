@@ -36,6 +36,7 @@ def main(args):
     page = visitor(tactic)
     logging.info(f"chars: {len(page)}")
     logging.info("Done.")
+    print(*visitor.toml_lines(visitor.history), sep="\n")
     return 0
 
 def parser():

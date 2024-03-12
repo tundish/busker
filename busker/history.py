@@ -20,6 +20,7 @@
 from collections import defaultdict
 from collections import deque
 import logging
+import pprint
 import tomllib
 
 
@@ -42,8 +43,26 @@ class SharedHistory:
         logger = logging.getLogger(self.log_name)
         logger.addHandler(self.LogMemo(self.history["records"]))
 
-    def to_toml(data: dict):
-        return ""
+    @staticmethod
+    def toml_type(obj):
+        if isinstance(obj, (set, tuple)):
+            return list(obj)
+        elif isinstance(obj, str):
+            return f'"{obj}"'
+        return obj
+
+    def toml_lines(self, data: dict):
+        record_fields = (
+            "args", "asctime", "funcName", "levelname", "levelno", "lineno",
+            "msg", "name", "pathname", "processName",
+        )
+        yield "[log]"
+        yield "records = ["
+        for record in data.get("records", []):
+            data = vars(record)
+            items = ", ".join(f'"{k}" = {self.toml_type(data.get(k))}' for k in record_fields)
+            yield f"{{ {items} }},"
+        yield "]"
 
     def log(self, msg="", level=logging.INFO, *args, **kwargs):
         logger = logging.getLogger(self.log_name)
