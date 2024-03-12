@@ -20,19 +20,17 @@
 import argparse
 import asyncio
 import sys
-
-import httpx
-
-from balladeer import discover_assets
+import urllib.request
 
 import busker
 
 
 def main(args):
-    # assets = discover_assets(args.source, "")
     print(f"Busker {busker.__version__}", file=sys.stderr)
-    page = httpx.get(args.url)
-    print(f"{page.text}", file=sys.stdout)
+    with urllib.request.urlopen(args.url) as response:
+        page = response.read()
+
+    print(f"{page}", file=sys.stdout)
     print("Done.", file=sys.stderr)
     return 0
 
