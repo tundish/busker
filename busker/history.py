@@ -24,6 +24,29 @@ import pprint
 import tomllib
 
 
+class SharedLogRecord(logging.LogRecord):
+
+    @classmethod
+    def factory(
+        cls, name: str, level: str, fn: str, lno: int,
+        msg: str, args: tuple | dict,
+        exc_info, func=None, sinfo=None,
+        **kwargs
+    ):
+        return cls(
+            name=name, level=level, pathname=fn, lineno=lno,
+            msg=msg, args=args,
+            exc_info=exc_info, func=func, sinfo=sinfo,
+            **kwargs
+        )
+
+    def getMessage(self):
+        try:
+            return str(self.msg).format(**self.args)
+        except TypeError:
+            return str(self.msg).format(*self.args)
+
+
 class SharedHistory:
 
     history = defaultdict(deque)
@@ -40,6 +63,7 @@ class SharedHistory:
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.log_name = self.__class__.__name__.lower()
+        logging.setLogRecordFactory(SharedLogRecord.factory)
         logger = logging.getLogger(self.log_name)
         logger.addHandler(self.LogMemo(self.history["records"]))
 

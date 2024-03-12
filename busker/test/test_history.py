@@ -24,6 +24,7 @@ import tomllib
 import unittest
 
 from busker.history import SharedHistory
+from busker.history import SharedLogRecord
 
 
 class TOMLTests(unittest.TestCase):
@@ -34,7 +35,7 @@ class TOMLTests(unittest.TestCase):
             funcName="test_log_records",
             levelname="INFO",
             levelno=20,
-            msg="Learn your %s%s%s 's",
+            msg="Learn your '{0}{1}{2}'s!",
             name="TOMLTestLogger",
             pathname="busker/test/test_history.py",
             processName="MainProcess",
@@ -52,5 +53,5 @@ class TOMLTests(unittest.TestCase):
         output = data.get("log", {}).get("records", [])
         self.assertTrue(output, data)
         record = logging.makeLogRecord(output[0])
-        print(vars(record))
-        self.assertEqual(record.getMessage(), "s", vars(record))
+        self.assertIsInstance(record, SharedLogRecord)
+        self.assertEqual(record.getMessage(), "Learn your 'abc's!", vars(record))
