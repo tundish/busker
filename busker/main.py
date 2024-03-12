@@ -24,24 +24,28 @@ import sys
 
 import busker
 from busker.scraper import Scraper
+from busker.visitor import Visitor
 
 
 def main(args):
     logging.info(f"Busker {busker.__version__}")
 
     scraper = Scraper()
-    page = scraper.step(args.url)
+    visitor = Visitor(args.url)
+    tactic = next(visitor)
+    page = visitor(tactic)
+    logging.info(f"chars: {len(page)}")
     logging.info("Done.")
     return 0
 
 def parser():
     rv = argparse.ArgumentParser()
     hosting_options = rv.add_argument_group("hosting")
-    scraper_options = rv.add_argument_group("scraping")
+    mapping_options = rv.add_argument_group("mapping")
     fuzzing_options = rv.add_argument_group("fuzzing")
     graphic_options = rv.add_argument_group("gui")
 
-    scraper_options.add_argument(
+    mapping_options.add_argument(
         "--url", default="http://localhost:8080",
         help="Set url path to begin session."
     )

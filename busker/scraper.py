@@ -26,15 +26,6 @@ import xml.etree.ElementTree as ET
 from busker.history import SharedHistory
 
 
-class Tactic:
-
-    def __call_(self):
-        with urllib.request.urlopen(url, data=data) as response:
-            # redirect
-            page = response.read()
-        return page
-
-
 class Scraper(SharedHistory):
 
     @staticmethod
