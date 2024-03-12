@@ -17,30 +17,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-
-import functools
-import re
-
-import xml.etree.ElementTree as ET
+import loggin
+import tomlib
 
 
-class Tactic:
-
-    def __call_(self):
-        with urllib.request.urlopen(url, data=data) as response:
-            # redirect
-            page = response.read()
-        return page
-
-
-class Scraper:
-
-    @staticmethod
-    @functools.cache
-    def tag_matcher(tag: str):
-        return re.compile(f"<{tag}>.*?<\\/{tag}>", re.DOTALL)
-
-    @staticmethod
-    def find_forms(body: str):
-        root = ET.fromstring(body)
-        return root.findall(".//form")
+class History:
+    pass
