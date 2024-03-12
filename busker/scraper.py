@@ -20,8 +20,10 @@
 
 import functools
 import re
-
+import urllib.request
 import xml.etree.ElementTree as ET
+
+from busker.history import SharedHistory
 
 
 class Tactic:
@@ -33,7 +35,7 @@ class Tactic:
         return page
 
 
-class Scraper:
+class Scraper(SharedHistory):
 
     @staticmethod
     @functools.cache
@@ -44,3 +46,9 @@ class Scraper:
     def find_forms(body: str):
         root = ET.fromstring(body)
         return root.findall(".//form")
+
+    def step(self, url=None):
+        self.log(f"{url=}")
+        with urllib.request.urlopen(url) as response:
+            page = response.read()
+

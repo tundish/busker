@@ -19,19 +19,19 @@
 
 import argparse
 import asyncio
+import logging
 import sys
-import urllib.request
 
 import busker
+from busker.scraper import Scraper
 
 
 def main(args):
-    print(f"Busker {busker.__version__}", file=sys.stderr)
-    with urllib.request.urlopen(args.url) as response:
-        page = response.read()
+    logging.info(f"Busker {busker.__version__}")
 
-    print(f"{page}", file=sys.stdout)
-    print("Done.", file=sys.stderr)
+    scraper = Scraper()
+    page = scraper.step(args.url)
+    logging.info("Done.")
     return 0
 
 def parser():
@@ -48,6 +48,13 @@ def parser():
     return rv
 
 def run():
+    logging.basicConfig(
+        format="{asctime}| {levelname:>8}| {name:<18} | {message}",
+        datefmt="",
+        style="{",
+        stream=sys.stderr,
+        level="INFO",
+    )
     p = parser()
     args = p.parse_args()
     rv = main(args)

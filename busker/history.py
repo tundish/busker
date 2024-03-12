@@ -17,9 +17,24 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import loggin
-import tomlib
+import logging
+import tomllib
 
 
-class History:
+class History(dict):
     pass
+
+
+class SharedHistory:
+
+    history = History()
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.log_name = self.__class__.__name__.lower()
+
+    def log(self, msg="", level=logging.INFO, *args, **kwargs):
+        logger = logging.getLogger(self.log_name)
+        return logger.log(level, msg, *args, **kwargs)
+
+
