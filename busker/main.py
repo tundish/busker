@@ -36,7 +36,12 @@ def main(args):
 
 def parser():
     rv = argparse.ArgumentParser()
-    rv.add_argument(
+    hosting_options = rv.add_argument_group("hosting")
+    scraper_options = rv.add_argument_group("scraping")
+    fuzzing_options = rv.add_argument_group("fuzzing")
+    graphic_options = rv.add_argument_group("gui")
+
+    scraper_options.add_argument(
         "--url", default="http://localhost:8080",
         help="Set url path to begin session."
     )
