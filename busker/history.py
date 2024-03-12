@@ -17,24 +17,34 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+from collections import defaultdict
+from collections import deque
 import logging
 import tomllib
 
 
-class History(dict):
-    pass
-
-
 class SharedHistory:
 
-    history = History()
+    history = defaultdict(deque)
+
+    class LogMemo(logging.Handler):
+
+        def __init__(self, buffer, level=logging.NOTSET):
+            super().__init__(level=level)
+            self.buffer = buffer
+
+        def emit(self, record):
+            self.buffer.append(record)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.log_name = self.__class__.__name__.lower()
+        logger = logging.getLogger(self.log_name)
+        logger.addHandler(self.LogMemo(self.history["records"]))
+
+    def to_toml(data: dict):
+        return ""
 
     def log(self, msg="", level=logging.INFO, *args, **kwargs):
         logger = logging.getLogger(self.log_name)
         return logger.log(level, msg, *args, **kwargs)
-
-
