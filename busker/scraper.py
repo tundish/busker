@@ -38,7 +38,13 @@ class Scraper(SharedHistory):
         root = ET.fromstring(body)
         return root.findall(".//form")
 
-    def step(self, url=None):
+    def get_page(self, url=None):
+        self.log(f"GET {url=}")
+        with urllib.request.urlopen(url) as response:
+            page = response.read()
+        return page
+
+    def post(self, url, data=None):
         self.log(f"{url=}")
         with urllib.request.urlopen(url) as response:
             page = response.read()

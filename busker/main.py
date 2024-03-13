@@ -30,12 +30,15 @@ from busker.visitor import Visitor
 def main(args):
     logging.info(f"Busker {busker.__version__}")
 
-    scraper = Scraper()
     visitor = Visitor(args.url)
-    tactic = next(visitor)
-    page = visitor(tactic)
-    logging.info(f"chars: {len(page)}")
+    while visitor.active:
+        tactic = visitor.tactics[0]
+        result = visitor(tactic)
+        logging.info(f"chars: {len(result)}")
+
     logging.info("Done.")
+
+    print(visitor.ledger)
     print(*visitor.toml_lines(visitor.history), sep="\n")
     return 0
 
