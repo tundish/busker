@@ -31,10 +31,10 @@ def main(args):
     logging.info(f"Busker {busker.__version__}")
 
     visitor = Visitor(args.url)
-    while visitor.active:
-        tactic = visitor.tactics[0]
-        result = visitor(tactic)
-        logging.info(f"chars: {len(result)}")
+    while visitor.tactics:
+        tactic = visitor.tactics.pop(0)
+        for msg in visitor(tactic):
+            logging.debug(f"{msg=}")
 
     logging.info("Done.")
 
