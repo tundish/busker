@@ -21,6 +21,7 @@ from collections import deque
 from collections import namedtuple
 import datetime
 import functools
+import itertools
 import logging
 import hashlib
 import re
@@ -54,7 +55,7 @@ class Tactic:
         body_match = body_re.search(text)
 
         title_match = scraper.find_title(text)
-        forms = body_match and scraper.find_forms(body_match[0])
+        forms = body_match and tuple(scraper.get_forms(body_match[0]))
 
         node=Node(
             datetime.datetime.now(datetime.timezone.utc),
@@ -63,7 +64,9 @@ class Tactic:
             tuple(kwargs.items()),
             self.url,
             title=title_match and title_match.group(),
-            actions=forms and tuple(forms),
+
+            options=tuple(itertools.chain(i.values for f in forms for i in f.inputs)),
+            actions=forms,
         )
         return node, reply
 
