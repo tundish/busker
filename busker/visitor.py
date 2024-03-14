@@ -44,11 +44,13 @@ class Tactic:
     def registry(cls):
         return cls.__subclasses__()
 
-    def __init__(self, url=None, method="post"):
-        self.url=url
+    def __init__(self, node=None, url=None):
+        self.node = node
+        self.url = url
 
     def run(self, scraper: Scraper, prior: Node = None, **kwargs):
-        reply = scraper.get_page(self.url, **kwargs)
+        url = self.node.uri if self.node else self.url
+        reply = scraper.get_page(url, **kwargs)
         text = reply.decode("utf8")
 
         body_re = scraper.tag_matcher("body")
@@ -62,7 +64,7 @@ class Tactic:
             hashlib.blake2b(reply).hexdigest(),
             self.__class__.__name__,
             tuple(kwargs.items()),
-            self.url,
+            url,
             title=title_match and title_match.group(),
 
             options=tuple(itertools.chain(i.values for f in forms for i in f.inputs)),
@@ -87,7 +89,7 @@ class Visitor(SharedHistory):
         self.scraper = Scraper()
         self.ledger = {}
         self.tactics = deque([
-            PostSession(self.url),
+            Tactic(url=self.url),
         ])
 
     def __call__(self, tactic, *args, **kwargs):
@@ -95,5 +97,11 @@ class Visitor(SharedHistory):
 
         node, doc = tactic.run(self.scraper, **kwargs)
         self.log(doc.decode("utf8"), level=logging.DEBUG)
-        self.tactics.append(PostText(self.url))
+        if len(node.actions) == 0:
+            pass
+        if len(node.actions) == 1:
+            if not node.actions[0].inputs:
+                self.tactics.append(PostSession(node))
+            else:
+                self.tactics.append(PostText(node))
         return node
