@@ -25,6 +25,7 @@ import itertools
 import logging
 import hashlib
 import re
+import urllib.parse
 import urllib.request
 import xml.etree.ElementTree as ET
 
@@ -74,7 +75,35 @@ class Tactic:
 
 
 class PostSession(Tactic):
-    pass
+    def run(self, scraper: Scraper, prior: Node = None, **kwargs):
+        node, reply = super().run(scraper, prior, **kwargs)
+        form = next(iter(node.actions), None)
+        if form and form.method.lower() == "post":
+            parts = urllib.parse.urlparse(form.action)
+            if not parts.scheme:
+                parts = urllib.parse.urlparse(f"{node.uri}{form.action}")
+            url = urllib.parse.urlunparse(parts)
+            data = dict({}, **kwargs)
+            response = scraper.post(url, data)
+            reply = response.read()
+            text = reply.decode("utf8")
+            print(f"{text=}")
+
+            body_re = scraper.tag_matcher("body")
+            body_match = body_re.search(text)
+
+            title_match = scraper.find_title(text)
+            forms = body_match and tuple(scraper.get_forms(body_match[0]))
+            print(f"{forms=}")
+
+            node = node._replace(
+                url = response.url,
+                title=title_match and title_match.group(),
+
+                options=tuple(itertools.chain(i.values for f in forms for i in f.inputs)),
+                actions=forms,
+            )
+        return node, reply
 
 
 class PostText(Tactic):

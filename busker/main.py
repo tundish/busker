@@ -42,6 +42,7 @@ def main(args):
     print(*visitor.toml_lines(visitor.history), sep="\n")
     return 0
 
+
 def parser():
     rv = argparse.ArgumentParser()
     hosting_options = rv.add_argument_group("hosting")
@@ -54,6 +55,7 @@ def parser():
         help="Set url path to begin session."
     )
     return rv
+
 
 def run():
     logging.basicConfig(

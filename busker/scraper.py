@@ -86,7 +86,10 @@ class Scraper(SharedHistory):
             ))
 
     def post(self, url, data=None):
-        self.log(f"{url=}")
-        with urllib.request.urlopen(url) as response:
-            page = response.read()
+        params = urllib.parse.urlencode(data).encode("utf8")
+        self.log(f"POST {url=} {params=}")
+        with urllib.request.urlopen(url, params) as response:
+            reply = response.read()
+            print(f"{reply=}")
+            return response
 
