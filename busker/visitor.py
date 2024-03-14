@@ -58,15 +58,7 @@ class Tactic:
         return node, reply
 
 
-class GetButtons(Tactic):
-    pass
-
-
 class PostSession(Tactic):
-    pass
-
-
-class GetOptions(Tactic):
     pass
 
 
@@ -82,10 +74,7 @@ class Visitor(SharedHistory):
         self.scraper = Scraper()
         self.ledger = {}
         self.tactics = deque([
-            GetButtons(self.url),
-            # PostSession(self.url),
-            # GetOptions(self.url),
-            # PostText(self.url),
+            PostSession(self.url),
         ])
 
     def __call__(self, tactic, *args, **kwargs):
@@ -93,4 +82,5 @@ class Visitor(SharedHistory):
 
         node, doc = tactic.run(self.scraper, **kwargs)
         self.log(doc.decode("utf8"), level=logging.DEBUG)
+        self.tactics.append(PostText(self.url))
         return node
