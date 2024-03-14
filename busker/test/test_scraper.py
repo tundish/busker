@@ -139,3 +139,13 @@ class ScraperTests(unittest.TestCase):
         match = body_re.search(self.fixtures.Session)
         rv = scraper.find_forms(match[0])
         self.assertEqual(len(rv), 1)
+
+    def test_find_title(self):
+        scraper = Scraper()
+        for n, text in enumerate((self.fixtures.Home, self.fixtures.Session)):
+            with self.subTest(n=n, text=text):
+                match = scraper.find_title(text)
+                if n == 0:
+                    self.assertIsNone(match)
+                else:
+                    self.assertTrue(match)

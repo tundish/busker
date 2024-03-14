@@ -38,6 +38,11 @@ class Scraper(SharedHistory):
         root = ET.fromstring(body)
         return root.findall(".//form")
 
+    @staticmethod
+    def find_title(doc: str):
+        matcher = Scraper.tag_matcher("title")
+        return matcher.search(doc)
+
     def get_page(self, url=None):
         self.log(f"GET {url=}")
         with urllib.request.urlopen(url) as response:

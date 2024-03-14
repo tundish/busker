@@ -32,7 +32,7 @@ def main(args):
 
     visitor = Visitor(args.url)
     while visitor.tactics:
-        tactic = visitor.tactics.pop(0)
+        tactic = visitor.tactics.popleft()
         for msg in visitor(tactic):
             logging.debug(f"{msg=}")
 
