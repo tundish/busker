@@ -40,7 +40,7 @@ class ScraperTests(unittest.TestCase):
         </head>
         <body>
         <form role="form" action="/sessions" method="POST" name="ballad-form-start">
-        <button action="submit">Begin</button>
+        <button type="submit">Begin</button>
         </form>
         </body>
         </html>
@@ -149,3 +149,18 @@ class ScraperTests(unittest.TestCase):
                     self.assertIsNone(match)
                 else:
                     self.assertTrue(match)
+
+    def test_get_forms_from_session(self):
+        scraper = Scraper()
+        for n, text in enumerate((self.fixtures.Home, self.fixtures.Session)):
+            with self.subTest(n=n, text=text):
+                body_re = scraper.tag_matcher("body")
+                match = body_re.search(text)
+                form = next(scraper.get_forms(match[0]), None)
+                self.assertTrue(form)
+                if n == 0:
+                    self.assertTrue(all(form._replace(inputs=True)), form)
+                else:
+                    self.assertTrue(all(form), form)
+                    self.assertTrue(all(form.inputs))
+                    self.assertTrue(all(i for i in form.inputs))

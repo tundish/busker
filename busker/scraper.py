@@ -18,12 +18,27 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
+from collections import namedtuple
 import functools
 import re
 import urllib.request
 import xml.etree.ElementTree as ET
 
 from busker.history import SharedHistory
+
+
+Form = namedtuple("Form", ["name", "action", "method", "inputs", "button"], defaults=[None])
+Input = namedtuple(
+    "Input", [
+        "name",
+        "type",
+        "placeholder", "pattern",
+        "autofocus", "required",
+        "values",
+        "title", "label",
+    ],
+    defaults = [None, None, None, None, None, None, None, None, None]
+)
 
 
 class Scraper(SharedHistory):
@@ -48,6 +63,27 @@ class Scraper(SharedHistory):
         with urllib.request.urlopen(url) as response:
             page = response.read()
         return page
+
+    def get_forms(self, body: str):
+        root = ET.fromstring(body)
+        for form_node in root.findall(".//form"):
+            inputs = tuple(
+                Input(**dict(
+                    {k: v for k, v in node.attrib.items() if k in Input._fields},
+                    values=tuple(filter(
+                        None,
+                        (i.attrib.get("value")
+                        for i in root.find(".//datalist[@id='{0}']".format(node.attrib.get("list"))))
+                    )),
+                    label=getattr(root.find(".//label[@for='{0}']".format(node.attrib.get("name"))), "text", "")
+                ))
+                for node in form_node.findall(".//input")
+            )
+            yield Form(**dict(
+                {k: v for k, v in form_node.attrib.items() if k in Form._fields},
+                inputs=inputs,
+                button=getattr(form_node.find(".//button[@type='submit']"), "text", None),
+            ))
 
     def post(self, url, data=None):
         self.log(f"{url=}")

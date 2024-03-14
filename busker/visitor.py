@@ -48,12 +48,22 @@ class Tactic:
 
     def run(self, scraper: Scraper, prior: Node = None, **kwargs):
         reply = scraper.get_page(self.url, **kwargs)
+        text = reply.decode("utf8")
+
+        body_re = scraper.tag_matcher("body")
+        body_match = body_re.search(text)
+
+        title_match = scraper.find_title(text)
+        forms = body_match and scraper.find_forms(body_match[0])
+
         node=Node(
             datetime.datetime.now(datetime.timezone.utc),
             hashlib.blake2b(reply).hexdigest(),
             self.__class__.__name__,
             tuple(kwargs.items()),
             self.url,
+            title=title_match and title_match.group(),
+            actions=forms and tuple(forms),
         )
         return node, reply
 
