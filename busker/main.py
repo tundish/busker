@@ -23,19 +23,22 @@ import logging
 import sys
 
 import busker
+from busker.history import SharedHistory
 from busker.scraper import Scraper
 from busker.visitor import Visitor
 
 
 def main(args):
-    logging.info(f"Busker {busker.__version__}")
+    history = SharedHistory(log_name="busker")
+    history.log(f"Busker {busker.__version__}")
 
     visitor = Visitor(args.url)
     while visitor.tactics:
         tactic = visitor.tactics.popleft()
         node = visitor(tactic)
+        history.log(f"{visitor.tactics=}")
 
-    logging.info("Done.")
+    history.log("Done.")
 
     print(visitor.ledger)
     print(*visitor.toml_lines(visitor.history), sep="\n")

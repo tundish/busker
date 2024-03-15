@@ -61,8 +61,9 @@ class SharedHistory:
             self.buffer.append(record)
 
     def __init__(self, *args, **kwargs):
+        self.log_name = kwargs.pop("log_name", "") or self.__class__.__name__.lower()
+
         super().__init__(*args, **kwargs)
-        self.log_name = self.__class__.__name__.lower()
         logging.setLogRecordFactory(SharedLogRecord.factory)
         logger = logging.getLogger(self.log_name)
         logger.addHandler(self.LogMemo(self.history["records"]))

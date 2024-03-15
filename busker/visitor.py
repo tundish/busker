@@ -17,12 +17,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+from collections import defaultdict
 from collections import deque
 from collections import namedtuple
 import datetime
 import functools
 import itertools
 import logging
+import random
 import re
 import urllib.parse
 import urllib.request
@@ -33,18 +35,27 @@ from busker.scraper import Scraper
 from busker.scraper import Node
 
 
+Choice = namedtuple("Choice", ["form", "input", "value"], defaults=[None, None])
+
+
 class Tactic:
 
     @classmethod
     def registry(cls):
         return cls.__subclasses__()
 
-    def __init__(self, node=None, url=None):
-        self.node = node
+    def __init__(self, prior=None, url=None, choice: Choice = None):
+        self.prior = prior
         self.url = url
+        self.choice = choice
 
-    def run(self, scraper: Scraper, prior: Node = None, **kwargs):
-        url = self.node.url if self.node else self.url
+    def run(self, scraper: Scraper, **kwargs) -> Node:
+        return Node(None, None)
+
+
+class Read(Tactic):
+    def run(self, scraper: Scraper, **kwargs) -> Node:
+        url = self.prior.url if self.prior else self.url
         node = scraper.get(url, **kwargs)
 
         body_re = scraper.tag_matcher("body")
@@ -58,22 +69,26 @@ class Tactic:
             params=tuple(kwargs.items()),
             title=title_match and title_match.group(),
 
-            options=tuple(itertools.chain(i.values for f in forms for i in f.inputs)),
+            options=tuple(i.values for f in forms for i in f.inputs),
             actions=forms,
         )
         return node
 
 
-class PostSession(Tactic):
-    def run(self, scraper: Scraper, prior: Node = None, **kwargs):
-        node = super().run(scraper, prior, **kwargs)
-        form = next(iter(node.actions), None)
+class Write(Tactic):
+    def run(self, scraper: Scraper, **kwargs) -> Node:
+        form = self.prior.actions[self.choice.form]
         if form and form.method.lower() == "post":
             parts = urllib.parse.urlparse(form.action)
             if not parts.scheme:
-                parts = urllib.parse.urlparse(f"{node.url}{form.action}")
+                parts = urllib.parse.urlparse(f"{self.prior.url}{form.action}")
             url = urllib.parse.urlunparse(parts)
-            data = dict({}, **kwargs)
+
+            if self.choice.input is None:
+                data = dict()
+            else:
+                data = {form.inputs[self.choice.input].name: self.choice.value}
+                print(f"{data=}")
 
             rv = scraper.post(url, data)
 
@@ -94,31 +109,41 @@ class PostSession(Tactic):
             return rv
 
 
-class PostText(Tactic):
-    pass
-
-
 class Visitor(SharedHistory):
 
     def __init__(self, url=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.url = url
         self.scraper = Scraper()
-        self.ledger = {}
+        self.record = defaultdict(deque)
         self.tactics = deque([
-            Tactic(url=self.url),
+            Read(url=self.url),
         ])
 
     def __call__(self, tactic, *args, **kwargs):
-        self.log(f"Tactic: '{tactic.__class__.__name__}'")
+        if any(tactic.choice or []):
+            self.log(f"Tactic: {tactic.__class__.__name__} {tactic.choice}")
+        else:
+            self.log(f"Tactic: {tactic.__class__.__name__}")
 
         node = tactic.run(self.scraper, **kwargs)
-        self.log(node.text, level=logging.DEBUG)
-        if len(node.actions) == 0:
+
+        options = [i for i in node.options if i not in self.record[node.title]]
+        self.log(f"New options: {options}", level=logging.DEBUG)
+        self.record[node.title].extend(options)
+
+        if not node.actions:
+            return node
+
+        # TODO: Back out of dead ends with empty body
+        choice = Choice(form=random.randrange(len(node.actions)))
+        try:
+            choice = choice._replace(input=random.randrange(len(node.actions[choice.form].inputs)))
+            choice = choice._replace(value=random.choice(node.actions[choice.form].inputs[choice.input].values))
+        except ValueError:
+            # No inputs to form
             pass
-        if len(node.actions) == 1:
-            if not node.actions[0].inputs:
-                self.tactics.append(PostSession(node))
-            else:
-                self.tactics.append(PostText(node))
+        finally:
+            self.tactics.append(Write(node, choice=choice))
+
         return node
