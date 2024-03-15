@@ -86,7 +86,7 @@ class Scraper(SharedHistory):
     @staticmethod
     @functools.cache
     def tag_matcher(tag: str):
-        return re.compile(f"<{tag}>.*?<\\/{tag}>", re.DOTALL)
+        return re.compile(f"<{tag}>(.*?)<\\/{tag}>", re.DOTALL)
 
     @staticmethod
     def find_forms(body: str):
@@ -96,7 +96,8 @@ class Scraper(SharedHistory):
     @staticmethod
     def find_title(doc: str):
         matcher = Scraper.tag_matcher("title")
-        return matcher.search(doc)
+        match = matcher.search(doc)
+        return match and match[1]
 
     def get_forms(self, body: str):
         root = ET.fromstring(body)

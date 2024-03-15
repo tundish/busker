@@ -95,13 +95,12 @@ class Write(Tactic):
             body_re = scraper.tag_matcher("body")
             body_match = body_re.search(rv.text)
 
-            title_match = scraper.find_title(rv.text)
             forms = body_match and tuple(scraper.get_forms(body_match[0]))
 
             rv = rv._replace(
                 tactic=self.__class__.__name__,
                 params=tuple(kwargs.items()),
-                title=title_match and title_match.group(),
+                title = scraper.find_title(rv.text),
 
                 options=tuple(itertools.chain(i.values for f in forms for i in f.inputs)),
                 actions=forms,
@@ -116,9 +115,7 @@ class Visitor(SharedHistory):
         self.url = url
         self.scraper = Scraper()
         self.record = defaultdict(deque)
-        self.tactics = deque([
-            Read(url=self.url),
-        ])
+        self.tactics = deque([Read(url=self.url)])
 
     def __call__(self, tactic, *args, **kwargs):
         if any(tactic.choice or []):

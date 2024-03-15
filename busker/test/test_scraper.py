@@ -144,11 +144,11 @@ class ScraperTests(unittest.TestCase):
         scraper = Scraper()
         for n, text in enumerate((self.fixtures.Home, self.fixtures.Session)):
             with self.subTest(n=n, text=text):
-                match = scraper.find_title(text)
+                title = scraper.find_title(text)
                 if n == 0:
-                    self.assertIsNone(match)
+                    self.assertIsNone(title)
                 else:
-                    self.assertTrue(match)
+                    self.assertEqual(title, "Story", title)
 
     def test_get_forms_from_session(self):
         scraper = Scraper()

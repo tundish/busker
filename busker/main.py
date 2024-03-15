@@ -36,7 +36,7 @@ def main(args):
     while visitor.tactics:
         tactic = visitor.tactics.popleft()
         node = visitor(tactic)
-        history.log(f"{visitor.tactics=}")
+        history.log(f"Page: {node.title}")
 
     history.log("Done.")
 
