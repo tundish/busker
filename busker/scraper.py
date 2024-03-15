@@ -41,6 +41,23 @@ Input = namedtuple(
 )
 
 
+class LocalClient(urllib.request.OpenerDirector):
+
+    def __init__(self, handlers: list=None):
+        super().__init__()
+        handlers = handlers or (
+            urllib.request.UnknownHandler,
+            urllib.request.HTTPDefaultErrorHandler,
+            urllib.request.HTTPRedirectHandler,
+            urllib.request.HTTPHandler,
+            urllib.request.HTTPSHandler,
+            urllib.request.HTTPErrorProcessor,
+        )
+
+        for handler_class in handlers:
+            self.add_handler(handler_class())
+
+
 class Scraper(SharedHistory):
 
     @staticmethod
@@ -60,7 +77,8 @@ class Scraper(SharedHistory):
 
     def get_page(self, url=None):
         self.log(f"GET {url=}")
-        with urllib.request.urlopen(url) as response:
+        client = LocalClient()
+        with client.open(url) as response:
             page = response.read()
         return page
 
@@ -88,8 +106,10 @@ class Scraper(SharedHistory):
     def post(self, url, data=None):
         params = urllib.parse.urlencode(data).encode("utf8")
         self.log(f"POST {url=} {params=}")
-        with urllib.request.urlopen(url, params) as response:
+        client = LocalClient()
+        with client.open(url, params) as response:
             reply = response.read()
             print(f"{reply=}")
+            print(f"{url=}")
             return response
 
