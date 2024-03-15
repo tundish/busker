@@ -110,6 +110,6 @@ class Scraper(SharedHistory):
         with client.open(url, params) as response:
             reply = response.read()
             print(f"{reply=}")
-            print(f"{url=}")
+            print(f"{response.url=}")
             return response
 
