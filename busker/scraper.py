@@ -19,6 +19,8 @@
 
 
 from collections import namedtuple
+import datetime
+import hashlib
 import functools
 import re
 import urllib.request
@@ -27,7 +29,28 @@ import xml.etree.ElementTree as ET
 from busker.history import SharedHistory
 
 
+Node = namedtuple(
+    "Node", [
+        "ts", "hash",
+        "tactic", "params",
+        "url",
+        "title", "links", "blocks", "media",
+        "options", "actions",
+        "text"
+    ],
+    defaults=[
+        None, None,
+        None,
+        None, None, None, None,
+        None, None,
+        None,
+    ],
+)
+
+
 Form = namedtuple("Form", ["name", "action", "method", "inputs", "button"], defaults=[None])
+
+
 Input = namedtuple(
     "Input", [
         "name",
@@ -75,13 +98,6 @@ class Scraper(SharedHistory):
         matcher = Scraper.tag_matcher("title")
         return matcher.search(doc)
 
-    def get_page(self, url=None):
-        self.log(f"GET {url=}")
-        client = LocalClient()
-        with client.open(url) as response:
-            page = response.read()
-        return page
-
     def get_forms(self, body: str):
         root = ET.fromstring(body)
         for form_node in root.findall(".//form"):
@@ -103,13 +119,29 @@ class Scraper(SharedHistory):
                 button=getattr(form_node.find(".//button[@type='submit']"), "text", None),
             ))
 
-    def post(self, url, data=None):
+    def get(self, url=None, **kwargs) -> Node:
+        self.log(f"GET {url=}")
+        client = LocalClient()
+        with client.open(url) as response:
+            reply = response.read()
+
+        return Node(
+            ts=datetime.datetime.now(datetime.timezone.utc),
+            hash=hashlib.blake2b(reply).hexdigest(),
+            url=response.url,
+            text = reply.decode("utf8"),
+        )
+
+    def post(self, url, data=None, **kwargs) -> Node:
         params = urllib.parse.urlencode(data).encode("utf8")
         self.log(f"POST {url=} {params=}")
         client = LocalClient()
         with client.open(url, params) as response:
             reply = response.read()
-            print(f"{reply=}")
-            print(f"{response.url=}")
-            return response
 
+        return Node(
+            ts=datetime.datetime.now(datetime.timezone.utc),
+            hash=hashlib.blake2b(reply).hexdigest(),
+            url=response.url,
+            text = reply.decode("utf8"),
+        )

@@ -23,7 +23,6 @@ import datetime
 import functools
 import itertools
 import logging
-import hashlib
 import re
 import urllib.parse
 import urllib.request
@@ -31,12 +30,7 @@ import xml.etree.ElementTree as ET
 
 from busker.history import SharedHistory
 from busker.scraper import Scraper
-
-
-Node = namedtuple(
-    "Node", ["ts", "hash", "tactic", "params", "uri", "title", "links", "blocks", "media", "options", "actions"],
-    defaults=[None, None, None, None, None, None],
-)
+from busker.scraper import Node
 
 
 class Tactic:
@@ -50,60 +44,54 @@ class Tactic:
         self.url = url
 
     def run(self, scraper: Scraper, prior: Node = None, **kwargs):
-        url = self.node.uri if self.node else self.url
-        reply = scraper.get_page(url, **kwargs)
-        text = reply.decode("utf8")
+        url = self.node.url if self.node else self.url
+        node = scraper.get(url, **kwargs)
 
         body_re = scraper.tag_matcher("body")
-        body_match = body_re.search(text)
+        body_match = body_re.search(node.text)
 
-        title_match = scraper.find_title(text)
+        title_match = scraper.find_title(node.text)
         forms = body_match and tuple(scraper.get_forms(body_match[0]))
 
-        node=Node(
-            datetime.datetime.now(datetime.timezone.utc),
-            hashlib.blake2b(reply).hexdigest(),
-            self.__class__.__name__,
-            tuple(kwargs.items()),
-            url,
+        return node._replace(
+            tactic=self.__class__.__name__,
+            params=tuple(kwargs.items()),
             title=title_match and title_match.group(),
 
             options=tuple(itertools.chain(i.values for f in forms for i in f.inputs)),
             actions=forms,
         )
-        return node, reply
+        return node
 
 
 class PostSession(Tactic):
     def run(self, scraper: Scraper, prior: Node = None, **kwargs):
-        node, reply = super().run(scraper, prior, **kwargs)
+        node = super().run(scraper, prior, **kwargs)
         form = next(iter(node.actions), None)
         if form and form.method.lower() == "post":
             parts = urllib.parse.urlparse(form.action)
             if not parts.scheme:
-                parts = urllib.parse.urlparse(f"{node.uri}{form.action}")
+                parts = urllib.parse.urlparse(f"{node.url}{form.action}")
             url = urllib.parse.urlunparse(parts)
             data = dict({}, **kwargs)
-            response = scraper.post(url, data)
-            reply = response.read()
-            text = reply.decode("utf8")
-            print(f"{text=}")
+
+            rv = scraper.post(url, data)
 
             body_re = scraper.tag_matcher("body")
-            body_match = body_re.search(text)
+            body_match = body_re.search(rv.text)
 
-            title_match = scraper.find_title(text)
+            title_match = scraper.find_title(rv.text)
             forms = body_match and tuple(scraper.get_forms(body_match[0]))
-            print(f"{forms=}")
 
-            node = node._replace(
-                url = response.url,
+            rv = rv._replace(
+                tactic=self.__class__.__name__,
+                params=tuple(kwargs.items()),
                 title=title_match and title_match.group(),
 
                 options=tuple(itertools.chain(i.values for f in forms for i in f.inputs)),
                 actions=forms,
             )
-        return node, reply
+            return rv
 
 
 class PostText(Tactic):
@@ -124,8 +112,8 @@ class Visitor(SharedHistory):
     def __call__(self, tactic, *args, **kwargs):
         self.log(f"Tactic: '{tactic.__class__.__name__}'")
 
-        node, doc = tactic.run(self.scraper, **kwargs)
-        self.log(doc.decode("utf8"), level=logging.DEBUG)
+        node = tactic.run(self.scraper, **kwargs)
+        self.log(node.text, level=logging.DEBUG)
         if len(node.actions) == 0:
             pass
         if len(node.actions) == 1:

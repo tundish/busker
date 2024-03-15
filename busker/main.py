@@ -34,7 +34,6 @@ def main(args):
     while visitor.tactics:
         tactic = visitor.tactics.popleft()
         node = visitor(tactic)
-        logging.info(f"{node=}")
 
     logging.info("Done.")
 
