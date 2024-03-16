@@ -118,6 +118,10 @@ class Visitor(SharedHistory):
         self.records = defaultdict(deque)
         self.tactics = deque([Read(url=self.url)])
 
+    @property
+    def turns(self):
+        return len([i for record in self.records.values() for i in record])
+
     def __call__(self, tactic, *args, **kwargs):
 
         self.log(f"Tactic: {tactic.__class__.__name__} {tactic.choice}")
