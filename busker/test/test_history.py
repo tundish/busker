@@ -50,10 +50,17 @@ class TOMLTests(unittest.TestCase):
                 for n in range(12)
             ])
         )
-        lines = list(SharedHistory().toml_lines(records))
+
+        obj = SharedHistory()
+        self.assertIsInstance(obj.history["head"], list)
+        self.assertIsInstance(obj.history["tail"], deque)
+
+        lines = list(obj.toml_lines(records))
+
         text = "\n".join(lines)
         data = tomllib.loads("\n".join(lines))
         self.assertTrue(data)
+
         for log in ("head", "tail"):
             with self.subTest(log=log):
                 output = data.get("log", {}).get(log, [])

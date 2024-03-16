@@ -21,6 +21,7 @@ from collections import defaultdict
 from collections import deque
 import logging
 import pprint
+import sys
 import tomllib
 
 
@@ -92,9 +93,9 @@ class SharedHistory:
         yield "[log]"
         for buffer in ("head", "tail"):
             yield f"{buffer} = ["
-            for record in data.get(buffer, []):
-                data = vars(record)
-                items = ", ".join(f'"{k}" = {self.toml_type(data.get(k))}' for k in record_fields)
+            for entry in data.get(buffer, []):
+                record = vars(entry)
+                items = ", ".join(f'"{k}" = {self.toml_type(record.get(k))}' for k in record_fields)
                 yield f"{{ {items} }},"
             yield "]"
 
