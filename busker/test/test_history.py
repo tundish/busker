@@ -41,7 +41,11 @@ class TOMLTests(unittest.TestCase):
             processName="MainProcess",
         )
         records = dict(
-            records=deque([
+            head=[
+                logging.makeLogRecord(dict(data, asctime=datetime.datetime.now().isoformat(), lineno=n * 10))
+                for n in range(12)
+            ],
+            tail=deque([
                 logging.makeLogRecord(dict(data, asctime=datetime.datetime.now().isoformat(), lineno=n * 10))
                 for n in range(12)
             ])
@@ -50,8 +54,11 @@ class TOMLTests(unittest.TestCase):
         text = "\n".join(lines)
         data = tomllib.loads("\n".join(lines))
         self.assertTrue(data)
-        output = data.get("log", {}).get("records", [])
-        self.assertTrue(output, data)
-        record = logging.makeLogRecord(output[0])
-        self.assertIsInstance(record, SharedLogRecord)
-        self.assertEqual(record.getMessage(), "Learn your 'abc's!", vars(record))
+        for log in ("head", "tail"):
+            with self.subTest(log=log):
+                output = data.get("log", {}).get(log, [])
+                self.assertTrue(output, data)
+
+                record = logging.makeLogRecord(output[0])
+                self.assertIsInstance(record, SharedLogRecord)
+                self.assertEqual(record.getMessage(), "Learn your 'abc's!", vars(record))

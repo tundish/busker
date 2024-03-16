@@ -90,12 +90,13 @@ class SharedHistory:
             "msg", "name", "pathname", "processName",
         )
         yield "[log]"
-        yield "tail = ["
-        for record in data.get("tail", []):
-            data = vars(record)
-            items = ", ".join(f'"{k}" = {self.toml_type(data.get(k))}' for k in record_fields)
-            yield f"{{ {items} }},"
-        yield "]"
+        for buffer in ("head", "tail"):
+            yield f"{buffer} = ["
+            for record in data.get(buffer, []):
+                data = vars(record)
+                items = ", ".join(f'"{k}" = {self.toml_type(data.get(k))}' for k in record_fields)
+                yield f"{{ {items} }},"
+            yield "]"
 
     def log(self, msg="", level=logging.INFO, *args, **kwargs):
         logger = logging.getLogger(self.log_name)
