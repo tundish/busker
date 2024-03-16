@@ -59,17 +59,18 @@ class SharedHistory:
             self.tail = tail
 
         def emit(self, record):
-            self.head.append(record)
+            if len(self.head) < self.tail.maxlen:
+                self.head.append(record)
             self.tail.append(record)
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, maxlen: int = 24, **kwargs):
         self.log_name = kwargs.pop("log_name", "") or self.__class__.__name__.lower()
 
         super().__init__(*args, **kwargs)
         if "head" not in self.history:
-            self.history["head"] = deque()
+            self.history["head"] = list()
         if "tail" not in self.history:
-            self.history["tail"] = deque()
+            self.history["tail"] = deque(maxlen=maxlen)
 
         logging.setLogRecordFactory(SharedLogRecord.factory)
         logger = logging.getLogger(self.log_name)
