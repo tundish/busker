@@ -19,6 +19,7 @@
 
 import argparse
 import asyncio
+from collections import Counter
 import logging
 import sys
 
@@ -32,16 +33,25 @@ def main(args):
     history = SharedHistory(log_name="busker")
     history.log(f"Busker {busker.__version__}")
 
-    visitor = Visitor(args.url)
-    while visitor.tactics:
-        tactic = visitor.tactics.popleft()
-        node = visitor(tactic)
-        if node:
-            history.log(f"Page: {node.title}")
+    witness = Counter()
+
+    n = 0
+    while n < args.number:
+        n += 1
+        history.log(f"Run: {n:03d}")
+        visitor = Visitor(args.url)
+        while visitor.tactics:
+            tactic = visitor.tactics.popleft()
+            node = visitor(tactic)
+            if node:
+                history.log(f"Page: {node.title}")
+
+        witness[visitor.turns] += 1
 
     history.log(f"{visitor.turns} done.")
 
     print(*visitor.toml_lines(visitor.history), sep="\n")
+    print({k: witness[k] for k in sorted(witness.keys())})
     return 0
 
 
@@ -55,6 +65,10 @@ def parser():
     mapping_options.add_argument(
         "--url", default="http://localhost:8080",
         help="Set url path to begin session."
+    )
+    fuzzing_options.add_argument(
+        "--number", type=int, default="64",
+        help="Set the number of times to run the fuzzer."
     )
     return rv
 
