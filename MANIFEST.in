@@ -1,4 +1,4 @@
-include COPYING
+include LICENSE
 recursive-include . *.rst
 recursive-include . *.toml
 recursive-include . *.cfg *.toml
