@@ -40,7 +40,7 @@ def main(args):
 
     history.log("Done.")
 
-    print(visitor.ledger)
+    print(visitor.records)
     print(*visitor.toml_lines(visitor.history), sep="\n")
     return 0
 

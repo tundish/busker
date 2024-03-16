@@ -26,6 +26,7 @@ import itertools
 import logging
 import random
 import re
+import sys
 import urllib.parse
 import urllib.request
 import xml.etree.ElementTree as ET
@@ -69,7 +70,7 @@ class Read(Tactic):
             params=tuple(kwargs.items()),
             title=title_match and title_match.group(),
 
-            options=tuple(i.values for f in forms for i in f.inputs),
+            options=tuple(v for f in forms for i in f.inputs for v in i.values),
             actions=forms,
         )
         return node
@@ -102,7 +103,7 @@ class Write(Tactic):
                 params=tuple(kwargs.items()),
                 title = scraper.find_title(rv.text),
 
-                options=tuple(itertools.chain(i.values for f in forms for i in f.inputs)),
+                options=tuple(v for f in forms for i in f.inputs for v in i.values),
                 actions=forms,
             )
             return rv
@@ -114,7 +115,8 @@ class Visitor(SharedHistory):
         super().__init__(*args, **kwargs)
         self.url = url
         self.scraper = Scraper()
-        self.record = defaultdict(deque)
+        self.options = defaultdict(deque)
+        self.records = defaultdict(deque)
         self.tactics = deque([Read(url=self.url)])
 
     def __call__(self, tactic, *args, **kwargs):
@@ -124,23 +126,34 @@ class Visitor(SharedHistory):
             self.log(f"Tactic: {tactic.__class__.__name__}")
 
         node = tactic.run(self.scraper, **kwargs)
+        if tactic.choice:
+            self.records[node.hash].append(tactic.choice.value)
 
-        options = [i for i in node.options if i not in self.record[node.title]]
+        options = [i for i in node.options if i not in self.options[node.hash]]
         self.log(f"New options: {options}", level=logging.DEBUG)
-        self.record[node.title].extend(options)
+        self.options[node.hash].extend(options)
 
         if not node.actions:
             return node
 
-        # TODO: Back out of dead ends with empty body
         choice = Choice(form=random.randrange(len(node.actions)))
         try:
+            # TODO: Better understanding of input fields
             choice = choice._replace(input=random.randrange(len(node.actions[choice.form].inputs)))
             choice = choice._replace(value=random.choice(node.actions[choice.form].inputs[choice.input].values))
         except ValueError:
-            # No inputs to form
+            # No inputs in form
             pass
-        finally:
+
+        # Back out of dead ends
+        if self.records[node.hash] and set(self.records[node.hash]) == set(self.options[node.hash]):
+            choice = choice._replace(value=None)
+
+        print(f"{self.options=}", file=sys.stderr)
+        print(f"{self.records=}", file=sys.stderr)
+        self.log(f"{choice=}")
+
+        if node.url != self.url:
             self.tactics.append(Write(node, choice=choice))
 
         return node
