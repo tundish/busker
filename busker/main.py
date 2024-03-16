@@ -43,7 +43,6 @@ def main(args):
 
     history.log(f"{n} done.")
 
-    print(visitor.records)
     print(*visitor.toml_lines(visitor.history), sep="\n")
     return 0
 

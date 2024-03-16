@@ -53,20 +53,27 @@ class SharedHistory:
 
     class LogMemo(logging.Handler):
 
-        def __init__(self, buffer, level=logging.NOTSET):
+        def __init__(self, head, tail, level=logging.NOTSET):
             super().__init__(level=level)
-            self.buffer = buffer
+            self.head = head
+            self.tail = tail
 
         def emit(self, record):
-            self.buffer.append(record)
+            self.head.append(record)
+            self.tail.append(record)
 
     def __init__(self, *args, **kwargs):
         self.log_name = kwargs.pop("log_name", "") or self.__class__.__name__.lower()
 
         super().__init__(*args, **kwargs)
+        if "head" not in self.history:
+            self.history["head"] = deque()
+        if "tail" not in self.history:
+            self.history["tail"] = deque()
+
         logging.setLogRecordFactory(SharedLogRecord.factory)
         logger = logging.getLogger(self.log_name)
-        logger.addHandler(self.LogMemo(self.history["records"]))
+        logger.addHandler(self.LogMemo(self.history["head"], self.history["tail"]))
 
     @staticmethod
     def toml_type(obj):
@@ -82,8 +89,8 @@ class SharedHistory:
             "msg", "name", "pathname", "processName",
         )
         yield "[log]"
-        yield "records = ["
-        for record in data.get("records", []):
+        yield "tail = ["
+        for record in data.get("tail", []):
             data = vars(record)
             items = ", ".join(f'"{k}" = {self.toml_type(data.get(k))}' for k in record_fields)
             yield f"{{ {items} }},"
