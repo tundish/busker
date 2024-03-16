@@ -83,15 +83,14 @@ class Write(Tactic):
             parts = urllib.parse.urlparse(form.action)
             if not parts.scheme:
                 parts = urllib.parse.urlparse(f"{self.prior.url}{form.action}")
-            url = urllib.parse.urlunparse(parts)
+            self.url = urllib.parse.urlunparse(parts)
 
             if self.choice.input is None:
                 data = dict()
             else:
                 data = {form.inputs[self.choice.input].name: self.choice.value}
-                print(f"{data=}")
 
-            rv = scraper.post(url, data)
+            rv = scraper.post(self.url, data)
 
             body_re = scraper.tag_matcher("body")
             body_match = body_re.search(rv.text)
@@ -120,12 +119,20 @@ class Visitor(SharedHistory):
         self.tactics = deque([Read(url=self.url)])
 
     def __call__(self, tactic, *args, **kwargs):
-        if any(tactic.choice or []):
-            self.log(f"Tactic: {tactic.__class__.__name__} {tactic.choice}")
-        else:
-            self.log(f"Tactic: {tactic.__class__.__name__}")
 
-        node = tactic.run(self.scraper, **kwargs)
+        self.log(f"Tactic: {tactic.__class__.__name__} {tactic.choice}")
+
+        try:
+            node = tactic.run(self.scraper, **kwargs)
+        except urllib.error.HTTPError as e:
+            value = f'{tactic.choice.value}' if tactic.choice.value is not None else "None"
+            self.log(
+                f"Stopped trying {tactic.__class__.__name__} of {value} to {tactic.url}",
+                level=logging.WARNING
+            )
+            self.log(f"Caught error {e}", level=logging.WARNING)
+            return
+
         if tactic.choice:
             self.records[node.hash].append(tactic.choice.value)
 
@@ -146,14 +153,10 @@ class Visitor(SharedHistory):
             pass
 
         # Back out of dead ends
-        if self.records[node.hash] and set(self.records[node.hash]) == set(self.options[node.hash]):
+        if self.records[node.hash] and set(self.records[node.hash]) >= set(self.options[node.hash]):
             choice = choice._replace(value=None)
 
-        print(f"{self.options=}", file=sys.stderr)
-        print(f"{self.records=}", file=sys.stderr)
-        self.log(f"{choice=}")
-
-        if node.url != self.url:
+        if node.url != self.url or len(self.records) == 1:
             self.tactics.append(Write(node, choice=choice))
 
         return node

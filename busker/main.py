@@ -32,13 +32,16 @@ def main(args):
     history = SharedHistory(log_name="busker")
     history.log(f"Busker {busker.__version__}")
 
+    n = 0
     visitor = Visitor(args.url)
     while visitor.tactics:
         tactic = visitor.tactics.popleft()
         node = visitor(tactic)
-        history.log(f"Page: {node.title}")
+        if node:
+            history.log(f"Page: {node.title}")
+        n += 1
 
-    history.log("Done.")
+    history.log(f"{n} done.")
 
     print(visitor.records)
     print(*visitor.toml_lines(visitor.history), sep="\n")
