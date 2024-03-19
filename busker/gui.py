@@ -41,18 +41,23 @@ pages = [
     tk.Frame(notebook),
 ]
 
+
 zones = [
     ttk.LabelFrame(pages[1], text="Package"),
     ttk.LabelFrame(pages[1], text="Environment"),
+    ttk.LabelFrame(pages[1], text="Server"),
+    ttk.LabelFrame(pages[1], text="Session"),
 ]
 
 for page, title in zip(pages, ("Interactive", "Setup", "Automation")):
     # Alt - l/r cursor to cwselectswitch
     page.grid()
+    page.columnconfigure(0, weight=1)
     notebook.add(page, text=title)
 
-for zone in zones:
-    zone.grid()
+for n, zone in enumerate(zones):
+    pages[1].rowconfigure(n, weight=1)
+    zone.grid(row=n, column=0, sticky=tk.N + tk.E + tk.S + tk.W)
 
 label = ttk.Label(zones[0], text="Test")
 label.grid(row=0, column=0, sticky=tk.W, padx=(10, 10))
