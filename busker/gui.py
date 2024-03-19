@@ -29,8 +29,12 @@ class GUI:
 
 root = tk.Tk()
 root.title(f"Busker {busker.__version__}")
+root.columnconfigure(0, weight=1)
+root.rowconfigure(0, weight=1)
+
 notebook = ttk.Notebook(root)
-notebook.grid()
+notebook.grid(row=0, column=0, sticky=tk.N + tk.E + tk.S + tk.W)
+
 pages = [
     tk.Frame(notebook),
     tk.Frame(notebook),
@@ -50,5 +54,7 @@ for page, title in zip(pages, ("Interactive", "Setup", "Automation")):
 for zone in zones:
     zone.grid()
 
+label = ttk.Label(zones[0], text="Test")
+label.grid(row=0, column=0, sticky=tk.W, padx=(10, 10))
 root.minsize(720, 480)
 root.mainloop()
