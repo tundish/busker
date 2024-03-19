@@ -31,15 +31,24 @@ root = tk.Tk()
 root.title(f"Busker {busker.__version__}")
 notebook = ttk.Notebook(root)
 notebook.grid()
-frames = [
+pages = [
     tk.Frame(notebook),
     tk.Frame(notebook),
     tk.Frame(notebook),
 ]
 
-for frame, title in zip(frames, ("Interactive", "Setup", "Automation")):
-    # Alt - l/r cursor to cwselectswitch
-    frame.grid()
-    notebook.add(frame, text=title)
+zones = [
+    ttk.LabelFrame(pages[1], text="Package"),
+    ttk.LabelFrame(pages[1], text="Environment"),
+]
 
+for page, title in zip(pages, ("Interactive", "Setup", "Automation")):
+    # Alt - l/r cursor to cwselectswitch
+    page.grid()
+    notebook.add(page, text=title)
+
+for zone in zones:
+    zone.grid()
+
+root.minsize(720, 480)
 root.mainloop()
