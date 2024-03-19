@@ -29,4 +29,17 @@ class GUI:
 
 root = tk.Tk()
 root.title(f"Busker {busker.__version__}")
+notebook = ttk.Notebook(root)
+notebook.grid()
+frames = [
+    tk.Frame(notebook),
+    tk.Frame(notebook),
+    tk.Frame(notebook),
+]
+
+for frame, title in zip(frames, ("Interactive", "Setup", "Automation")):
+    # Alt - l/r cursor to cwselectswitch
+    frame.grid()
+    notebook.add(frame, text=title)
+
 root.mainloop()
