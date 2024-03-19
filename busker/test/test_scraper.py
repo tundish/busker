@@ -124,6 +124,26 @@ class ScraperTests(unittest.TestCase):
         </body>
         </html>
         """),
+        blockquote=textwrap.dedent("""
+        <blockquote cite="&lt;STAFF.approaching.proposing@TABLE,GUEST:mutters/male/rhubarb?pause=0.3&amp;dwell=0.1#3&gt;">
+        <cite data-role="STAFF" data-directives=".approaching.proposing@TABLE,GUEST" data-mode=":mutters/male/rhubarb" data-parameters="?pause=0.3&amp;dwell=0.1" data-fragments="#3">STAFF</cite>
+        <p>
+
+        What would you like sir? We have some very good fish today.
+        </p>
+        <ol>
+        <li id="1"><p>
+        Order the Beef Wellington
+        </p></li>
+        <li id="2"><p>
+        Go for the Cottage Pie
+        </p></li>
+        <li id="3"><p>
+        Try the Dover Sole
+        </p></li>
+        </ol>
+        </blockquote
+        """),
     )
 
     def test_find_home_begin(self):
