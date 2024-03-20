@@ -17,6 +17,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+from collections import defaultdict
 from types import SimpleNamespace as Structure
 import tkinter as tk
 from tkinter import ttk
@@ -30,9 +31,37 @@ class GUI:
 
 class Zone:
 
+    registry = defaultdict(list)
+
     def __init__(self, parent, name="", **kwargs):
         self.parent = parent
+        self.name = name
         self.frame = ttk.LabelFrame(parent, text=name)
+
+        container = defaultdict(list)
+        for attr, obj in self.build(self.frame):
+            container["attr"].append(obj)
+        self.controls = Structure(**container)
+
+    @staticmethod
+    def build(frame: ttk.Frame):
+        return
+        yield
+
+
+class PackageZone(Zone):
+
+    @staticmethod
+    def build(frame: ttk.Frame):
+        frame.rowconfigure(0, weight=1)
+        frame.rowconfigure(1, weight=1)
+        yield "label", ttk.Label(frame, text="Source").grid(row=0, column=0, padx=(10, 10))
+        yield "entry", ttk.Entry(frame, justify=tk.LEFT, width=64).grid(row=0, column=1, padx=(10, 10))
+
+
+class SessionZone(Zone):
+    pass
+
 
 root = tk.Tk()
 root.title(f"Busker {busker.__version__}")
@@ -62,10 +91,10 @@ pages = [
 ]
 
 pages[1].zones.extend([
-    Zone(pages[1].frame, name="Package"),
+    PackageZone(pages[1].frame, name="Package"),
     Zone(pages[1].frame, name="Environment"),
     Zone(pages[1].frame, name="Server"),
-    Zone(pages[1].frame, name="Session"),
+    SessionZone(pages[1].frame, name="Session"),
 ])
 
 
@@ -79,7 +108,5 @@ for page in pages:
         page.frame.rowconfigure(n, weight=1)
         zone.frame.grid(row=n, column=0, sticky=tk.N + tk.E + tk.S + tk.W)
 
-# label = ttk.Label(zones[0], text="Test")
-# label.grid(row=0, column=0, sticky=tk.W, padx=(10, 10))
 root.minsize(720, 480)
 root.mainloop()
