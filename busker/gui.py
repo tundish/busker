@@ -109,7 +109,17 @@ class InfoZone(Zone):
 
 
 class InteractiveZone(Zone):
-    pass
+
+    def build(self, frame: ttk.Frame):
+        frame.rowconfigure(0, weight=1)
+        frame.rowconfigure(1, weight=1)
+        frame.columnconfigure(0, weight=1)
+
+        text_widget = tk.Text(frame)
+        scroll_bar = ttk.Scrollbar(frame, orient=tk.VERTICAL, command=text_widget.yview)
+        text_widget.configure(yscrollcommand=scroll_bar.set)
+        yield "text", self.grid(text_widget, row=0, column=0, padx=(10, 10), sticky=tk.W + tk.N + tk.E + tk.S)
+        yield "scroll", self.grid(scroll_bar, row=0, column=1, pady=(10, 10), sticky=tk.N + tk.S)
 
 
 class PackageZone(Zone):
