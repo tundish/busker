@@ -18,11 +18,20 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 from collections import defaultdict
+import enum
 from types import SimpleNamespace as Structure
 import tkinter as tk
 from tkinter import ttk
 
 import busker
+
+
+class Host(enum.Enum):
+
+    IPV4_LOOPBACK = "127.0.0.1"
+    IPV4_NET_HOST = "0.0.0.0"
+    IPV6_LOOPBACK = "::1"
+    IPV6_NET_HOST = "::"
 
 
 class GUI:
@@ -40,8 +49,13 @@ class Zone:
 
         container = defaultdict(list)
         for attr, obj in self.build(self.frame):
-            container["attr"].append(obj)
+            container[attr].append(obj)
         self.controls = Structure(**container)
+
+    @staticmethod
+    def grid(arg, **kwargs):
+        arg.grid(**kwargs)
+        return arg
 
     @staticmethod
     def build(frame: ttk.Frame):
@@ -51,15 +65,49 @@ class Zone:
 
 class PackageZone(Zone):
 
-    @staticmethod
-    def build(frame: ttk.Frame):
+    def build(self, frame: ttk.Frame):
         frame.rowconfigure(0, weight=1)
         frame.rowconfigure(1, weight=1)
-        yield "label", ttk.Label(frame, text="Source").grid(row=0, column=0, padx=(10, 10))
-        yield "entry", ttk.Entry(frame, justify=tk.LEFT, width=64).grid(row=0, column=1, padx=(10, 10))
+        yield "label", self.grid(ttk.Label(frame, text="Source"), row=0, column=0, padx=(10, 10))
+        yield "entry", self.grid(ttk.Entry(frame, justify=tk.LEFT, width=64), row=0, column=1, padx=(10, 10))
 
 
-class SessionZone(Zone):
+class ServerZone(Zone):
+
+    def build(self, frame: ttk.Frame):
+        frame.rowconfigure(0, weight=1)
+        frame.rowconfigure(0, weight=5)
+        frame.columnconfigure(1, weight=1)
+
+        yield "label", self.grid(ttk.Label(frame, text="Entry point"), row=0, column=0, padx=(10, 10))
+        yield "entry", self.grid(ttk.Entry(frame, justify=tk.LEFT, width=24), row=0, column=1, padx=(10, 10))
+
+        yield "label", self.grid(ttk.Label(frame, text="Host"), row=0, column=2, padx=(10, 10))
+        combo_box = ttk.Combobox(frame, justify=tk.LEFT, width=14, values=[i.value for i in Host])
+        combo_box.current(0)
+        yield "entry", self.grid(combo_box, row=0, column=3, padx=(10, 10))
+
+        yield "label", self.grid(ttk.Label(frame, text="Port"), row=0, column=4, padx=(10, 10))
+        spin_box = ttk.Spinbox(frame, justify=tk.LEFT, width=4, values=(80, 8000, 8001, 8080, 8081, 8082, 8088))
+        spin_box.set(8080)
+        yield "entry", self.grid(spin_box, row=0, column=5, padx=(10, 10))
+
+        yield "button", self.grid(
+            tk.Button(frame, text="Activate", command=self.on_activate),
+            row=0, column=6, padx=(10, 10), sticky=tk.E
+        )
+        text_widget = tk.Text(frame)
+        text_widget.insert(tk.END, "asdfghjrtyuhjk\njnion" * 150)
+        scroll_bar = ttk.Scrollbar(frame, orient=tk.VERTICAL, command=text_widget.yview)
+        text_widget.configure(yscrollcommand=scroll_bar.set)
+        yield "text", self.grid(text_widget, row=1, column=0, columnspan=6, padx=(10, 10), sticky=tk.E + tk.W)
+        yield "scroll", self.grid(scroll_bar, row=1, column=6, pady=(10, 10), sticky=tk.N + tk.S)
+
+    def on_activate(self):
+        print(self.controls)
+
+
+class InfoZone(Zone):
     pass
 
 
@@ -93,8 +141,8 @@ pages = [
 pages[1].zones.extend([
     PackageZone(pages[1].frame, name="Package"),
     Zone(pages[1].frame, name="Environment"),
-    Zone(pages[1].frame, name="Server"),
-    SessionZone(pages[1].frame, name="Session"),
+    ServerZone(pages[1].frame, name="Server"),
+    InfoZone(pages[1].frame, name="Info"),
 ])
 
 
