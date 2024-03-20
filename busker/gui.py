@@ -62,10 +62,10 @@ pages = [
 ]
 
 pages[1].zones.extend([
-    ttk.LabelFrame(pages[1].frame, text="Package"),
-    ttk.LabelFrame(pages[1].frame, text="Environment"),
-    ttk.LabelFrame(pages[1].frame, text="Server"),
-    ttk.LabelFrame(pages[1].frame, text="Session"),
+    Zone(pages[1].frame, name="Package"),
+    Zone(pages[1].frame, name="Environment"),
+    Zone(pages[1].frame, name="Server"),
+    Zone(pages[1].frame, name="Session"),
 ])
 
 
@@ -77,7 +77,7 @@ for page in pages:
 
     for n, zone in enumerate(page.zones):
         page.frame.rowconfigure(n, weight=1)
-        zone.grid(row=n, column=0, sticky=tk.N + tk.E + tk.S + tk.W)
+        zone.frame.grid(row=n, column=0, sticky=tk.N + tk.E + tk.S + tk.W)
 
 # label = ttk.Label(zones[0], text="Test")
 # label.grid(row=0, column=0, sticky=tk.W, padx=(10, 10))
