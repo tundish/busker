@@ -1,8 +1,10 @@
 Busker
 ======
 
-Latest
-------
+Operation
+---------
+
+Python 3.11 or later is required.
 
 This is a work-in-progress.
 
