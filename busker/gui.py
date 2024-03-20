@@ -63,6 +63,30 @@ class Zone:
         yield
 
 
+class InfoZone(Zone):
+
+    def build(self, frame: ttk.Frame):
+        frame.rowconfigure(0, weight=1)
+        frame.columnconfigure(0, weight=1)
+        frame.columnconfigure(1, weight=2)
+        frame.columnconfigure(2, weight=1)
+        frame.columnconfigure(3, weight=4)
+        yield "label", self.grid(ttk.Label(frame, text="URL"), row=0, column=0, padx=(1, 1) )
+        yield "entry", self.grid(ttk.Entry(frame, justify=tk.LEFT), row=0, column=1, padx=(1, 1), sticky=tk.W + tk.E)
+        yield "button", self.grid(
+            tk.Button(frame, text="Connect", command=self.on_connect),
+            row=0, column=2, padx=(10, 10), sticky=tk.E
+        )
+        yield "label", self.grid(ttk.Label(frame, text="No connection to host"), row=0, column=3, padx=(1, 1))
+
+    def on_connect(self):
+        print(self.controls)
+
+
+class InteractiveZone(Zone):
+    pass
+
+
 class PackageZone(Zone):
 
     def build(self, frame: ttk.Frame):
@@ -107,54 +131,66 @@ class ServerZone(Zone):
         print(self.controls)
 
 
-class InfoZone(Zone):
-    pass
+def build(config: dict = {}):
+    root = tk.Tk()
+    root.title(f"Busker {busker.__version__}")
+    root.columnconfigure(0, weight=1)
+    root.rowconfigure(0, weight=1)
+
+    notebook = ttk.Notebook(root)
+    notebook.grid(row=0, column=0, sticky=tk.N + tk.E + tk.S + tk.W)
 
 
-root = tk.Tk()
-root.title(f"Busker {busker.__version__}")
-root.columnconfigure(0, weight=1)
-root.rowconfigure(0, weight=1)
+    pages = [
+        Structure(
+            name="Playing",
+            frame=tk.Frame(notebook),
+            zones = []
+        ),
+        Structure(
+            name="Hosting",
+            frame=tk.Frame(notebook),
+            zones = []
+        ),
+        Structure(
+            name="Plugins",
+            frame=tk.Frame(notebook),
+            zones = []
+        ),
+    ]
 
-notebook = ttk.Notebook(root)
-notebook.grid(row=0, column=0, sticky=tk.N + tk.E + tk.S + tk.W)
-
-
-pages = [
-    Structure(
-        name="Interactive",
-        frame=tk.Frame(notebook),
-        zones = []
-    ),
-    Structure(
-        name="Setup",
-        frame=tk.Frame(notebook),
-        zones = []
-    ),
-    Structure(
-        name="Automation",
-        frame=tk.Frame(notebook),
-        zones = []
-    ),
-]
-
-pages[1].zones.extend([
-    PackageZone(pages[1].frame, name="Package"),
-    Zone(pages[1].frame, name="Environment"),
-    ServerZone(pages[1].frame, name="Server"),
-    InfoZone(pages[1].frame, name="Info"),
-])
+    pages[0].zones.extend([
+        InfoZone(pages[0].frame, name="Info"),
+        InteractiveZone(pages[0].frame, name="Interactive"),
+    ])
+    pages[1].zones.extend([
+        PackageZone(pages[1].frame, name="Package"),
+        Zone(pages[1].frame, name="Environment"),
+        ServerZone(pages[1].frame, name="Server"),
+    ])
 
 
-for page in pages:
-    # Alt - l/r cursor to cwselectswitch
-    page.frame.grid()
-    page.frame.columnconfigure(0, weight=1)
-    notebook.add(page.frame, text=page.name)
+    for p, page in enumerate(pages):
+        page.frame.grid()
+        notebook.add(page.frame, text=page.name)
+        if p == 0:
+            page.frame.rowconfigure(0, weight=1)
+            page.frame.rowconfigure(1, weight=15)
+            page.frame.columnconfigure(0, weight=1)
+            page.zones[0].frame.grid(row=0, column=0, padx=(2, 2), pady=(6, 1), sticky=tk.N + tk.E + tk.S + tk.W)
+            page.zones[1].frame.grid(row=1, column=0, padx=(2, 2), pady=(6, 1), sticky=tk.N + tk.E + tk.S + tk.W)
+            continue
+        else:
+            page.frame.columnconfigure(0, weight=1)
 
-    for n, zone in enumerate(page.zones):
-        page.frame.rowconfigure(n, weight=1)
-        zone.frame.grid(row=n, column=0, sticky=tk.N + tk.E + tk.S + tk.W)
+        for z, zone in enumerate(page.zones):
+            page.frame.rowconfigure(z, weight=1)
+            zone.frame.grid(row=z, column=0, sticky=tk.N + tk.E + tk.S + tk.W)
 
-root.minsize(720, 480)
-root.mainloop()
+    root.minsize(720, 480)
+    return root
+
+
+if __name__ == "__main__":
+    root = build()
+    root.mainloop()
