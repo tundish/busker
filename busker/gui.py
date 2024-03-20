@@ -100,7 +100,7 @@ class InfoZone(Zone):
         info = self.controls.label[1]
         try:
             node = self.reader.run(self.scraper)
-        except urllib.error.URLError as e:
+        except (ValueError, urllib.error.URLError) as e:
             info.configure(text="No connection to host")
             self.log(f"{e!s}", level=logging.WARNING)
             return
