@@ -63,7 +63,7 @@ class Read(Tactic):
         body_match = body_re.search(node.text)
 
         title_match = scraper.find_title(node.text)
-        forms = body_match and tuple(scraper.get_forms(body_match[0]))
+        forms = body_match and tuple(scraper.get_forms(body_match[0])) or []
 
         return node._replace(
             tactic=self.__class__.__name__,

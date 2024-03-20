@@ -19,11 +19,19 @@
 
 from collections import defaultdict
 import enum
+import logging
 from types import SimpleNamespace as Structure
+
 import tkinter as tk
 from tkinter import ttk
 
+import urllib.error
+import urllib.parse
+
 import busker
+from busker.history import SharedHistory
+from busker.scraper import Scraper
+import busker.visitor
 
 
 class Host(enum.Enum):
@@ -38,11 +46,12 @@ class GUI:
     pass
 
 
-class Zone:
+class Zone(SharedHistory):
 
     registry = defaultdict(list)
 
     def __init__(self, parent, name="", **kwargs):
+        super().__init__(log_name=f"busker.gui.{name.lower()}", **kwargs)
         self.parent = parent
         self.name = name
         self.frame = ttk.LabelFrame(parent, text=name)
@@ -65,6 +74,11 @@ class Zone:
 
 class InfoZone(Zone):
 
+    def __init__(self, parent, name="", **kwargs):
+        super().__init__(parent, name=name, **kwargs)
+        self.scraper = Scraper()
+        self.reader = None
+
     def build(self, frame: ttk.Frame):
         frame.rowconfigure(0, weight=1)
         frame.columnconfigure(0, weight=1)
@@ -80,7 +94,18 @@ class InfoZone(Zone):
         yield "label", self.grid(ttk.Label(frame, text="No connection to host"), row=0, column=3, padx=(1, 1))
 
     def on_connect(self):
-        print(self.controls)
+        host = self.controls.entry[0].get()
+        url = urllib.parse.urljoin(host, "about")
+        self.reader = busker.visitor.Read(url=url)
+        info = self.controls.label[1]
+        try:
+            node = self.reader.run(self.scraper)
+        except urllib.error.URLError as e:
+            info.configure(text="No connection to host")
+            self.log(f"{e!s}", level=logging.WARNING)
+            return
+
+        info.configure(text=node.text.strip())
 
 
 class InteractiveZone(Zone):
