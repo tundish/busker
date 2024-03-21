@@ -52,6 +52,8 @@ class Zone(SharedHistory):
 
     def __init__(self, parent, name="", **kwargs):
         super().__init__(log_name=f"busker.gui.{name.lower()}", **kwargs)
+        self.registry[self.__class__.__name__].append(self)
+
         self.parent = parent
         self.name = name
         self.frame = ttk.LabelFrame(parent, text=name)

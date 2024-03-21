@@ -24,9 +24,16 @@ from busker.gui import Zone
 
 class ZoneTests(unittest.TestCase):
 
+    def tearDown(self):
+        Zone.registry.clear()
+
     def test_registry(self):
 
         class A(Zone):
             pass
 
-        self.fail()
+        self.assertNotIn("A", Zone.registry)
+        a = A(None)
+
+        self.assertIn("A", Zone.registry)
+        self.assertIsInstance(Zone.registry["A"], list)
