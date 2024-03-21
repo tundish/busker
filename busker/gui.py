@@ -147,6 +147,36 @@ class PackageZone(Zone):
         yield "entry", self.grid(ttk.Entry(frame, justify=tk.LEFT, width=64), row=0, column=1, padx=(10, 10))
 
 
+class EnvironmentZone(Zone):
+
+    def build(self, frame: ttk.Frame):
+        frame.rowconfigure(0, weight=1)
+        frame.rowconfigure(1, weight=1)
+        frame.columnconfigure(0, weight=1)
+        frame.columnconfigure(1, weight=10)
+
+        yield "label", self.grid(ttk.Label(frame, text="Directory"), row=0, column=0, padx=(10, 10))
+        combo_box = ttk.Combobox(frame, justify=tk.LEFT)
+        yield "entry", self.grid(combo_box, row=0, column=1, pady=(10, 10), sticky=tk.W + tk.E)
+
+        yield "button", self.grid(
+            tk.Button(frame, text="Install", command=self.on_install),
+            row=0, column=2,  columnspan=2, padx=(10, 10), sticky=tk.E
+        )
+
+        text_widget = tk.Text(frame)
+        scroll_bar = ttk.Scrollbar(frame, orient=tk.VERTICAL, command=text_widget.yview)
+        text_widget.configure(yscrollcommand=scroll_bar.set)
+        yield "text", self.grid(text_widget, row=1, column=0, columnspan=2, padx=(10, 10), sticky=tk.W + tk.N + tk.E + tk.S)
+        yield "scroll", self.grid(scroll_bar, row=1, column=2, pady=(10, 10), sticky=tk.N + tk.S)
+
+    def on_install(self):
+        host = self.controls.entry[0].get()
+        url = urllib.parse.urljoin(host, "about")
+        self.reader = busker.visitor.Read(url=url)
+        info = self.controls.label[1]
+
+
 class ServerZone(Zone):
 
     def build(self, frame: ttk.Frame):
@@ -216,7 +246,7 @@ def build(config: dict = {}):
     ])
     pages[1].zones.extend([
         PackageZone(pages[1].frame, name="Package"),
-        Zone(pages[1].frame, name="Environment"),
+        EnvironmentZone(pages[1].frame, name="Environment"),
         ServerZone(pages[1].frame, name="Server"),
     ])
 
