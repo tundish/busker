@@ -18,15 +18,17 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 from collections import defaultdict
+import concurrent.futures
 import enum
 import logging
-from types import SimpleNamespace as Structure
-
+import pathlib
+import tempfile
 import tkinter as tk
 from tkinter import ttk
-
+from types import SimpleNamespace as Structure
 import urllib.error
 import urllib.parse
+import venv
 
 import busker
 from busker.history import SharedHistory
@@ -62,6 +64,14 @@ class Zone(SharedHistory):
         for attr, obj in self.build(self.frame):
             container[attr].append(obj)
         self.controls = Structure(**container)
+
+    @staticmethod
+    def walk_files(path: pathlib.Path, callback=None):
+        callback = callback or pathlib.Path
+        if path.is_dir():
+            for p in path.iterdir():
+                yield from Zone.walk_files(pathlib.Path(p))
+        yield callback(path)
 
     @staticmethod
     def grid(arg, **kwargs):
@@ -156,7 +166,11 @@ class EnvironmentZone(Zone):
         frame.columnconfigure(1, weight=10)
 
         yield "label", self.grid(ttk.Label(frame, text="Directory"), row=0, column=0, padx=(10, 10))
-        combo_box = ttk.Combobox(frame, justify=tk.LEFT)
+        combo_box = ttk.Combobox(
+            frame, justify=tk.LEFT,
+            values=[pathlib.Path.home(), pathlib.Path.cwd(), tempfile.gettempdir()]
+        )
+        combo_box.current(0)
         yield "entry", self.grid(combo_box, row=0, column=1, pady=(10, 10), sticky=tk.W + tk.E)
 
         yield "button", self.grid(
@@ -170,11 +184,18 @@ class EnvironmentZone(Zone):
         yield "text", self.grid(text_widget, row=1, column=0, columnspan=2, padx=(10, 10), sticky=tk.W + tk.N + tk.E + tk.S)
         yield "scroll", self.grid(scroll_bar, row=1, column=2, pady=(10, 10), sticky=tk.N + tk.S)
 
+    @staticmethod
+    def is_venv(path: pathlib.Path):
+        return path.is_dir() and path.joinpath("pyvenv.cfg").is_file()
+
     def on_install(self):
-        host = self.controls.entry[0].get()
-        url = urllib.parse.urljoin(host, "about")
-        self.reader = busker.visitor.Read(url=url)
-        info = self.controls.label[1]
+        path = pathlib.Path(self.controls.entry[0].get())
+        if not self.is_venv(path):
+            venv_path = pathlib.Path(tempfile.mkdtemp(prefix="busker_", suffix="_venv", dir=path))
+            # Needs a future
+            venv.create(venv_path, system_site_packages=True, with_pip=True, upgrade_deps=True)
+            files = list(self.walk_files(venv_path))
+            print(venv_path, len(files))
 
 
 class ServerZone(Zone):
