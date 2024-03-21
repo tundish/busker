@@ -199,6 +199,7 @@ class EnvironmentZone(Zone):
         return path.is_dir() and path.joinpath("pyvenv.cfg").is_file()
 
     def on_install(self):
+        # TODO: Store path to pyvenv.cfg data
         path = pathlib.Path(self.controls.entry[0].get())
         if not self.is_venv(path):
             venv_path = pathlib.Path(tempfile.mkdtemp(prefix="busker_", suffix="_venv", dir=path))
@@ -214,6 +215,7 @@ class EnvironmentZone(Zone):
             self.update_progress(venv_path, future)
 
     def on_complete(self, future):
+        # TODO: Find python executable
         for bar in self.controls.progress:
             bar["value"] = 0
             self.activity.clear()
