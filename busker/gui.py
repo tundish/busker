@@ -18,6 +18,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 from collections import defaultdict
+from collections import deque
 import concurrent.futures
 import enum
 import logging
@@ -159,6 +160,10 @@ class PackageZone(Zone):
 
 class EnvironmentZone(Zone):
 
+    def __init__(self, parent, name="", **kwargs):
+        super().__init__(parent, name=name, **kwargs)
+        self.activity = list()
+
     def build(self, frame: ttk.Frame):
         frame.rowconfigure(0, weight=1)
         frame.rowconfigure(1, weight=1)
@@ -178,11 +183,16 @@ class EnvironmentZone(Zone):
             row=0, column=2,  columnspan=2, padx=(10, 10), sticky=tk.E
         )
 
+        yield "progress", self.grid(
+            ttk.Progressbar(frame, orient=tk.HORIZONTAL),
+            row=1, column=0, columnspan=2, padx=(10, 10), pady=(10, 10), sticky=tk.W + tk.E
+        )
+
         text_widget = tk.Text(frame)
         scroll_bar = ttk.Scrollbar(frame, orient=tk.VERTICAL, command=text_widget.yview)
         text_widget.configure(yscrollcommand=scroll_bar.set)
-        yield "text", self.grid(text_widget, row=1, column=0, columnspan=2, padx=(10, 10), sticky=tk.W + tk.N + tk.E + tk.S)
-        yield "scroll", self.grid(scroll_bar, row=1, column=2, pady=(10, 10), sticky=tk.N + tk.S)
+        yield "text", self.grid(text_widget, row=2, column=0, columnspan=2, padx=(10, 10), sticky=tk.W + tk.N + tk.E + tk.S)
+        yield "scroll", self.grid(scroll_bar, row=2, column=2, pady=(10, 10), sticky=tk.N + tk.S)
 
     @staticmethod
     def is_venv(path: pathlib.Path):
@@ -193,9 +203,31 @@ class EnvironmentZone(Zone):
         if not self.is_venv(path):
             venv_path = pathlib.Path(tempfile.mkdtemp(prefix="busker_", suffix="_venv", dir=path))
             # Needs a future
-            venv.create(venv_path, system_site_packages=True, with_pip=True, upgrade_deps=True)
-            files = list(self.walk_files(venv_path))
-            print(venv_path, len(files))
+            future = self.executor.submit(
+                venv.create,
+                venv_path,
+                system_site_packages=True,
+                with_pip=True,
+                upgrade_deps=True
+            )
+            future.add_done_callback(self.on_complete)
+            self.update_progress(venv_path, future)
+
+    def on_complete(self, future):
+        for bar in self.controls.progress:
+            bar["value"] = 0
+            self.activity.clear()
+
+    def update_progress(self, path: pathlib.Path, future=None):
+        files = list(self.walk_files(path))
+        self.activity.append(len(files))
+
+        if future and not future.done():
+            for bar in self.controls.progress:
+                # TODO: Better approximation of progress
+                bar["value"] = min(len(self.activity) * 8, 100)
+
+            self.frame.after(1500, self.update_progress, path, future)
 
 
 class ServerZone(Zone):
