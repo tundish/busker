@@ -118,8 +118,22 @@ class InteractiveZone(Zone):
         text_widget = tk.Text(frame)
         scroll_bar = ttk.Scrollbar(frame, orient=tk.VERTICAL, command=text_widget.yview)
         text_widget.configure(yscrollcommand=scroll_bar.set)
-        yield "text", self.grid(text_widget, row=0, column=0, padx=(10, 10), sticky=tk.W + tk.N + tk.E + tk.S)
-        yield "scroll", self.grid(scroll_bar, row=0, column=1, pady=(10, 10), sticky=tk.N + tk.S)
+        yield "text", self.grid(text_widget, row=0, column=0, columnspan=2, padx=(10, 10), sticky=tk.W + tk.N + tk.E + tk.S)
+        yield "scroll", self.grid(scroll_bar, row=0, column=2, pady=(10, 10), sticky=tk.N + tk.S)
+
+        combo_box = ttk.Combobox(frame, justify=tk.LEFT)
+        yield "entry", self.grid(combo_box, row=1, column=0, padx=(10, 10), sticky=tk.W + tk.E)
+
+        yield "button", self.grid(
+            tk.Button(frame, text="Launch", command=self.on_launch),
+            row=1, column=1,  columnspan=2, padx=(10, 10), sticky=tk.E
+        )
+
+    def on_launch(self):
+        host = self.controls.entry[0].get()
+        url = urllib.parse.urljoin(host, "about")
+        self.reader = busker.visitor.Read(url=url)
+        info = self.controls.label[1]
 
 
 class PackageZone(Zone):
