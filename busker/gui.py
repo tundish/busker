@@ -32,9 +32,9 @@ import urllib.parse
 import venv
 
 import busker
-from busker.history import SharedHistory
 from busker.runner import Runner
 from busker.scraper import Scraper
+from busker.zone import Zone
 import busker.visitor
 
 
@@ -44,46 +44,6 @@ class Host(enum.Enum):
     IPV4_NET_HOST = "0.0.0.0"
     IPV6_LOOPBACK = "::1"
     IPV6_NET_HOST = "::"
-
-
-class GUI:
-    pass
-
-
-class Zone(SharedHistory):
-
-    registry = defaultdict(list)
-
-    def __init__(self, parent, name="", **kwargs):
-        super().__init__(log_name=f"busker.gui.{name.lower()}", **kwargs)
-        self.registry[self.__class__.__name__].append(self)
-
-        self.parent = parent
-        self.name = name
-        self.frame = ttk.LabelFrame(parent, text=name)
-
-        container = defaultdict(list)
-        for attr, obj in self.build(self.frame):
-            container[attr].append(obj)
-        self.controls = Structure(**container)
-
-    @staticmethod
-    def walk_files(path: pathlib.Path, callback=None):
-        callback = callback or pathlib.Path
-        if path.is_dir():
-            for p in path.iterdir():
-                yield from Zone.walk_files(pathlib.Path(p))
-        yield callback(path)
-
-    @staticmethod
-    def grid(arg, **kwargs):
-        arg.grid(**kwargs)
-        return arg
-
-    @staticmethod
-    def build(frame: ttk.Frame):
-        return
-        yield
 
 
 class InfoZone(Zone):
