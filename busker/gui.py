@@ -124,18 +124,20 @@ class EnvironmentZone(Zone, Runner):
         frame.rowconfigure(2, weight=10)
         frame.columnconfigure(0, weight=1)
         frame.columnconfigure(1, weight=10)
+        frame.columnconfigure(2, weight=2)
+        frame.columnconfigure(3, weight=2)
 
         yield "label", self.grid(ttk.Label(frame, text="Directory"), row=0, column=0, padx=(10, 10))
         yield "entry", self.grid(ttk.Entry(frame), row=0, column=1, pady=(10, 10), ipadx=1, ipady=2, sticky=tk.W + tk.E)
 
         yield "button", self.grid(
             tk.Button(frame, text="Select", command=self.on_select),
-            row=0, column=2, padx=(10, 10), sticky=tk.E
+            row=0, column=2, padx=(10, 10), sticky=tk.W + tk.E
         )
 
         yield "button", self.grid(
             tk.Button(frame, text="Build", command=self.on_build),
-            row=0, column=3, columnspan=2, padx=(10, 10), sticky=tk.E
+            row=0, column=3, columnspan=2, padx=(10, 10), sticky=tk.W + tk.E
         )
 
         yield "progress", self.grid(
@@ -197,18 +199,21 @@ class PackageZone(Zone):
     def build(self, frame: ttk.Frame):
         frame.rowconfigure(0, weight=0)
         frame.columnconfigure(0, weight=1)
+        frame.columnconfigure(1, weight=10)
+        frame.columnconfigure(2, weight=2)
+        frame.columnconfigure(3, weight=2)
 
         yield "label", self.grid(ttk.Label(frame, text="Source"), row=0, column=0, padx=(10, 10))
         yield "entry", self.grid(ttk.Entry(frame), row=0, column=1, pady=(10, 10), ipadx=1, ipady=2, sticky=tk.W + tk.E)
 
         yield "button", self.grid(
             tk.Button(frame, text="Select", command=self.on_select),
-            row=0, column=2, padx=(10, 10), sticky=tk.E
+            row=0, column=2, padx=(10, 10), sticky=tk.W + tk.E
         )
 
         yield "button", self.grid(
             tk.Button(frame, text="Install", command=self.on_install),
-            row=0, column=3, columnspan=2, padx=(10, 10), sticky=tk.E
+            row=0, column=3, columnspan=2, padx=(10, 10), sticky=tk.W + tk.E
         )
 
     def on_select(self):
@@ -341,12 +346,14 @@ def build(config: dict = {}):
             page.frame.rowconfigure(1, weight=0)
             page.frame.rowconfigure(2, weight=1)
             page.frame.columnconfigure(0, weight=1)
+            page.zones[0].frame.grid(row=0, column=0, padx=(2, 2), pady=(6, 1), sticky=tk.N + tk.E + tk.S + tk.W)
+            page.zones[1].frame.grid(row=1, column=0, padx=(2, 2), pady=(6, 1), sticky=tk.E + tk.W)
         else:
             page.frame.columnconfigure(0, weight=1)
 
-        for z, zone in enumerate(page.zones):
-            page.frame.rowconfigure(z, weight=1)
-            zone.frame.grid(row=z, column=0, sticky=tk.N + tk.E + tk.S + tk.W)
+            for z, zone in enumerate(page.zones):
+                page.frame.rowconfigure(z, weight=1)
+                zone.frame.grid(row=z, column=0, sticky=tk.N + tk.E + tk.S + tk.W)
 
     root.minsize(720, 480)
     return root
