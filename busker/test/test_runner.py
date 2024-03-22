@@ -18,6 +18,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import datetime
+import pathlib
 import textwrap
 from types import SimpleNamespace
 import tomllib
@@ -28,10 +29,32 @@ from busker.runner import Runner
 
 class RunnerTests(unittest.TestCase):
 
-    pyvenv_cfg = textwrap.dedent("""
-    home = /usr/local/bin
-    include-system-site-packages = true
-    version = 3.11.2
-    executable = /usr/local/bin/python3.11
-    command = /home/user/py3.11-dev/bin/python -m venv --copies --system-site-packages --upgrade-deps /home/user/src/busker/busker_t9p2rtkw_venv
-    """)
+    data = SimpleNamespace(
+        pyvenv_cfg = textwrap.dedent("""
+        home = /usr/local/bin
+        include-system-site-packages = true
+        version = 3.11.2
+        executable = /usr/local/bin/python3.11
+        command = /home/user/py3.11-dev/bin/python -m venv --copies --system-site-packages --upgrade-deps /home/user/src/busker/busker_t9p2rtkw_venv
+        """),
+    )
+
+    def test_venv_dict(self):
+        rv = dict(Runner.venv_data(self.data.pyvenv_cfg))
+        self.assertIsInstance(rv, dict)
+        self.assertEqual(len(rv), 5)
+        self.assertEqual(rv.get("home"), "/usr/local/bin")
+
+    def test_venv_dict_empty(self):
+        rv = dict(Runner.venv_data(""))
+        self.assertIsInstance(rv, dict)
+        self.assertFalse(rv)
+
+    def test_venv_exe(self):
+        data = dict(Runner.venv_data(self.data.pyvenv_cfg))
+        path = pathlib.Path(data.get("command", "").split()[-1])
+        rv = Runner.venv_exe(path, **data)
+        self.assertIsInstance(rv, pathlib.Path)
+        self.assertEqual(rv.name, "python3.11")
+        self.assertEqual(rv.parent.name, "bin")
+        self.assertEqual(rv.parent.parent.name, "busker_t9p2rtkw_venv", rv)

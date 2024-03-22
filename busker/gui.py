@@ -25,6 +25,7 @@ import logging
 import pathlib
 import tempfile
 import tkinter as tk
+from tkinter import filedialog
 from tkinter import ttk
 from types import SimpleNamespace as Structure
 import urllib.error
@@ -141,24 +142,39 @@ class EnvironmentZone(Zone, Runner):
         yield "entry", self.grid(combo_box, row=0, column=1, pady=(10, 10), sticky=tk.W + tk.E)
 
         yield "button", self.grid(
+            tk.Button(frame, text="Select", command=self.on_select),
+            row=0, column=2, padx=(10, 10), sticky=tk.E
+        )
+
+        yield "button", self.grid(
             tk.Button(frame, text="Install", command=self.on_install),
-            row=0, column=2,  columnspan=2, padx=(10, 10), sticky=tk.E
+            row=0, column=3, columnspan=2, padx=(10, 10), sticky=tk.E
         )
 
         yield "progress", self.grid(
             ttk.Progressbar(frame, orient=tk.HORIZONTAL),
-            row=1, column=0, columnspan=2, padx=(10, 10), pady=(10, 10), sticky=tk.W + tk.E
+            row=1, column=0, columnspan=4, padx=(10, 10), pady=(10, 10), sticky=tk.W + tk.E
         )
 
         text_widget = tk.Text(frame)
         scroll_bar = ttk.Scrollbar(frame, orient=tk.VERTICAL, command=text_widget.yview)
         text_widget.configure(yscrollcommand=scroll_bar.set)
-        yield "text", self.grid(text_widget, row=2, column=0, columnspan=2, padx=(10, 10), sticky=tk.W + tk.N + tk.E + tk.S)
-        yield "scroll", self.grid(scroll_bar, row=2, column=2, pady=(10, 10), sticky=tk.N + tk.S)
+        yield "text", self.grid(text_widget, row=2, column=0, columnspan=4, padx=(10, 10), sticky=tk.W + tk.N + tk.E + tk.S)
+        yield "scroll", self.grid(scroll_bar, row=2, column=4, pady=(10, 10), sticky=tk.N + tk.S)
 
     @staticmethod
     def is_venv(path: pathlib.Path):
         return path.is_dir() and path.joinpath("pyvenv.cfg").is_file()
+
+    def on_select(self):
+        path = pathlib.Path(filedialog.askdirectory(
+            parent=self.frame,
+            title="Select virtual environment",
+            initialdir=pathlib.Path.cwd()
+        ))
+        if not self.venv_cfg(path):
+            path = pathlib.Path(tempfile.mkdtemp(prefix="busker_", suffix="_venv", dir=path))
+        self.controls.entry[0]["value"] = path
 
     def on_install(self):
         # TODO: Store path to pyvenv.cfg data
