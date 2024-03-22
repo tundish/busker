@@ -19,7 +19,6 @@
 
 from collections import defaultdict
 from collections import deque
-import concurrent.futures
 import logging
 import pprint
 import sys
@@ -52,7 +51,6 @@ class SharedLogRecord(logging.LogRecord):
 class SharedHistory:
 
     history = defaultdict(deque)
-    executor = concurrent.futures.ProcessPoolExecutor()
 
     class LogMemo(logging.Handler):
 

@@ -28,17 +28,6 @@ from busker.history import SharedHistory
 from busker.history import SharedLogRecord
 
 
-class VenvTests(unittest.TestCase):
-
-    pyvenv_cfg = textwrap.dedent("""
-    home = /usr/local/bin
-    include-system-site-packages = true
-    version = 3.11.2
-    executable = /usr/local/bin/python3.11
-    command = /home/user/py3.11-dev/bin/python -m venv --copies --system-site-packages --upgrade-deps /home/user/src/busker/busker_t9p2rtkw_venv
-    """)
-
-
 class TOMLTests(unittest.TestCase):
 
     def test_log_records(self):

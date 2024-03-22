@@ -33,6 +33,7 @@ import venv
 
 import busker
 from busker.history import SharedHistory
+from busker.runner import Runner
 from busker.scraper import Scraper
 import busker.visitor
 
@@ -158,7 +159,7 @@ class PackageZone(Zone):
         yield "entry", self.grid(ttk.Entry(frame, justify=tk.LEFT, width=64), row=0, column=1, padx=(10, 10))
 
 
-class EnvironmentZone(Zone):
+class EnvironmentZone(Zone, Runner):
 
     def __init__(self, parent, name="", **kwargs):
         super().__init__(parent, name=name, **kwargs)
