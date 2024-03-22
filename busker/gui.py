@@ -32,6 +32,7 @@ import urllib.parse
 import venv
 
 import busker
+from busker.history import SharedHistory
 from busker.runner import Runner
 from busker.scraper import Scraper
 from busker.zone import Zone
@@ -188,7 +189,8 @@ class EnvironmentZone(Zone, Runner):
         if future and not future.done():
             for bar in self.controls.progress:
                 # TODO: Better approximation of progress
-                bar["value"] = min(len(self.activity) * 8, 100)
+                half = 50 if self.activity[-1] < max(self.activity) else 0
+                bar["value"] = min(half + len(self.activity) * 8, 100)
 
             self.frame.after(1500, self.update_progress, path, future)
 
