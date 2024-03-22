@@ -19,6 +19,7 @@
 
 import datetime
 import pathlib
+import platform
 import textwrap
 from types import SimpleNamespace
 import tomllib
@@ -56,5 +57,8 @@ class RunnerTests(unittest.TestCase):
         rv = Runner.venv_exe(path, **data)
         self.assertIsInstance(rv, pathlib.Path)
         self.assertEqual(rv.name, "python3.11")
-        self.assertEqual(rv.parent.name, "bin")
+        if platform.system().lower() == "windows":
+            self.assertEqual(rv.parent.name, "Scripts")
+        else:
+            self.assertEqual(rv.parent.name, "bin")
         self.assertEqual(rv.parent.parent.name, "busker_t9p2rtkw_venv", rv)

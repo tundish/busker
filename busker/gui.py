@@ -174,7 +174,7 @@ class EnvironmentZone(Zone, Runner):
         ))
         if not self.venv_cfg(path):
             path = pathlib.Path(tempfile.mkdtemp(prefix="busker_", suffix="_venv", dir=path))
-        self.controls.entry[0]["value"] = path
+        self.controls.entry[0]["value"] = str(path)
 
     def on_install(self):
         # TODO: Store path to pyvenv.cfg data
