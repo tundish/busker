@@ -91,7 +91,7 @@ class InteractiveZone(Zone):
         frame.rowconfigure(1, weight=1)
         frame.columnconfigure(0, weight=1)
 
-        text_widget = tk.Text(frame)
+        text_widget = tk.Text(frame, height=6)
         scroll_bar = ttk.Scrollbar(frame, orient=tk.VERTICAL, command=text_widget.yview)
         text_widget.configure(yscrollcommand=scroll_bar.set)
         yield "text", self.grid(text_widget, row=0, column=0, columnspan=2, padx=(10, 10), sticky=tk.W + tk.N + tk.E + tk.S)
@@ -112,15 +112,6 @@ class InteractiveZone(Zone):
         info = self.controls.label[1]
 
 
-class PackageZone(Zone):
-
-    def build(self, frame: ttk.Frame):
-        frame.rowconfigure(0, weight=1)
-        frame.rowconfigure(1, weight=1)
-        yield "label", self.grid(ttk.Label(frame, text="Source"), row=0, column=0, padx=(10, 10))
-        yield "entry", self.grid(ttk.Entry(frame, justify=tk.LEFT, width=64), row=0, column=1, padx=(10, 10))
-
-
 class EnvironmentZone(Zone, Runner):
 
     def __init__(self, parent, name="", **kwargs):
@@ -129,17 +120,86 @@ class EnvironmentZone(Zone, Runner):
 
     def build(self, frame: ttk.Frame):
         frame.rowconfigure(0, weight=1)
-        frame.rowconfigure(1, weight=1)
+        frame.rowconfigure(1, weight=0)
+        frame.rowconfigure(2, weight=10)
         frame.columnconfigure(0, weight=1)
         frame.columnconfigure(1, weight=10)
 
         yield "label", self.grid(ttk.Label(frame, text="Directory"), row=0, column=0, padx=(10, 10))
-        combo_box = ttk.Combobox(
-            frame, justify=tk.LEFT,
-            values=[pathlib.Path.home(), pathlib.Path.cwd(), tempfile.gettempdir()]
+        yield "entry", self.grid(ttk.Entry(frame), row=0, column=1, pady=(10, 10), ipadx=1, ipady=2, sticky=tk.W + tk.E)
+
+        yield "button", self.grid(
+            tk.Button(frame, text="Select", command=self.on_select),
+            row=0, column=2, padx=(10, 10), sticky=tk.E
         )
-        combo_box.current(0)
-        yield "entry", self.grid(combo_box, row=0, column=1, pady=(10, 10), sticky=tk.W + tk.E)
+
+        yield "button", self.grid(
+            tk.Button(frame, text="Build", command=self.on_build),
+            row=0, column=3, columnspan=2, padx=(10, 10), sticky=tk.E
+        )
+
+        yield "progress", self.grid(
+            ttk.Progressbar(frame, orient=tk.HORIZONTAL),
+            row=1, column=0, columnspan=4, padx=(10, 10), pady=(10, 10), sticky=tk.W + tk.E
+        )
+
+        text_widget = tk.Text(frame, height=6)
+        scroll_bar = ttk.Scrollbar(frame, orient=tk.VERTICAL, command=text_widget.yview)
+        text_widget.configure(yscrollcommand=scroll_bar.set)
+        yield "text", self.grid(text_widget, row=2, column=0, columnspan=4, padx=(10, 10), sticky=tk.W + tk.N + tk.E + tk.S)
+        yield "scroll", self.grid(scroll_bar, row=2, column=4, pady=(10, 10), sticky=tk.N + tk.S)
+
+    def on_select(self):
+        path = pathlib.Path(filedialog.askdirectory(
+            parent=self.frame,
+            title="Select virtual environment",
+            initialdir=pathlib.Path.cwd(),
+            mustexist=True,
+        ))
+        if not self.venv_cfg(path) and not path.name.startswith("busker_"):
+            path = pathlib.Path(tempfile.mkdtemp(prefix="busker_", suffix="_venv", dir=path))
+        self.controls.entry[0].delete(0, tk.END)
+        self.controls.entry[0].insert(0, str(path))
+
+    def on_build(self):
+        path = pathlib.Path(self.controls.entry[0].get())
+        future = self.executor.submit(
+            venv.create,
+            path,
+            system_site_packages=True,
+            clear=True,
+            with_pip=True,
+            upgrade_deps=True
+        )
+        future.add_done_callback(self.on_complete)
+        self.update_progress(path, future)
+
+    def on_complete(self, future):
+        for bar in self.controls.progress:
+            bar["value"] = 0
+            self.activity.clear()
+
+    def update_progress(self, path: pathlib.Path, future=None):
+        files = list(self.walk_files(path))
+        self.activity.append(len(files))
+
+        if future and not future.done():
+            for bar in self.controls.progress:
+                # TODO: Better approximation of progress
+                half = 50 if self.activity[-1] < max(self.activity) else 0
+                bar["value"] = min(half + len(self.activity) * 8, 100)
+
+            self.frame.after(1500, self.update_progress, path, future)
+
+
+class PackageZone(Zone):
+
+    def build(self, frame: ttk.Frame):
+        frame.rowconfigure(0, weight=0)
+        frame.columnconfigure(0, weight=1)
+
+        yield "label", self.grid(ttk.Label(frame, text="Source"), row=0, column=0, padx=(10, 10))
+        yield "entry", self.grid(ttk.Entry(frame), row=0, column=1, pady=(10, 10), ipadx=1, ipady=2, sticky=tk.W + tk.E)
 
         yield "button", self.grid(
             tk.Button(frame, text="Select", command=self.on_select),
@@ -151,49 +211,32 @@ class EnvironmentZone(Zone, Runner):
             row=0, column=3, columnspan=2, padx=(10, 10), sticky=tk.E
         )
 
-        yield "progress", self.grid(
-            ttk.Progressbar(frame, orient=tk.HORIZONTAL),
-            row=1, column=0, columnspan=4, padx=(10, 10), pady=(10, 10), sticky=tk.W + tk.E
-        )
-
-        text_widget = tk.Text(frame)
-        scroll_bar = ttk.Scrollbar(frame, orient=tk.VERTICAL, command=text_widget.yview)
-        text_widget.configure(yscrollcommand=scroll_bar.set)
-        yield "text", self.grid(text_widget, row=2, column=0, columnspan=4, padx=(10, 10), sticky=tk.W + tk.N + tk.E + tk.S)
-        yield "scroll", self.grid(scroll_bar, row=2, column=4, pady=(10, 10), sticky=tk.N + tk.S)
-
-    @staticmethod
-    def is_venv(path: pathlib.Path):
-        return path.is_dir() and path.joinpath("pyvenv.cfg").is_file()
-
     def on_select(self):
         path = pathlib.Path(filedialog.askdirectory(
             parent=self.frame,
             title="Select virtual environment",
-            initialdir=pathlib.Path.cwd()
+            initialdir=pathlib.Path.cwd(),
+            mustexist=True,
         ))
-        if not self.venv_cfg(path):
+        if not self.venv_cfg(path) and not path.name.startswith("busker_"):
             path = pathlib.Path(tempfile.mkdtemp(prefix="busker_", suffix="_venv", dir=path))
-        self.controls.entry[0]["value"] = str(path)
+        self.controls.entry[0].delete(0, tk.END)
+        self.controls.entry[0].insert(0, str(path))
 
     def on_install(self):
-        # TODO: Store path to pyvenv.cfg data
         path = pathlib.Path(self.controls.entry[0].get())
-        if not self.is_venv(path):
-            venv_path = pathlib.Path(tempfile.mkdtemp(prefix="busker_", suffix="_venv", dir=path))
-            # Needs a future
-            future = self.executor.submit(
-                venv.create,
-                venv_path,
-                system_site_packages=True,
-                with_pip=True,
-                upgrade_deps=True
-            )
-            future.add_done_callback(self.on_complete)
-            self.update_progress(venv_path, future)
+        future = self.executor.submit(
+            venv.create,
+            path,
+            system_site_packages=True,
+            clear=True,
+            with_pip=True,
+            upgrade_deps=True
+        )
+        future.add_done_callback(self.on_complete)
+        self.update_progress(path, future)
 
     def on_complete(self, future):
-        # TODO: Find python executable
         for bar in self.controls.progress:
             bar["value"] = 0
             self.activity.clear()
@@ -215,8 +258,7 @@ class ServerZone(Zone):
 
     def build(self, frame: ttk.Frame):
         frame.rowconfigure(0, weight=1)
-        frame.rowconfigure(0, weight=5)
-        frame.columnconfigure(1, weight=1)
+        frame.columnconfigure(0, weight=1)
 
         yield "label", self.grid(ttk.Label(frame, text="Entry point"), row=0, column=0, padx=(10, 10))
         yield "entry", self.grid(ttk.Entry(frame, justify=tk.LEFT, width=24), row=0, column=1, padx=(10, 10))
@@ -235,7 +277,7 @@ class ServerZone(Zone):
             tk.Button(frame, text="Activate", command=self.on_activate),
             row=0, column=6, padx=(10, 10), sticky=tk.E
         )
-        text_widget = tk.Text(frame)
+        text_widget = tk.Text(frame, height=6)
         text_widget.insert(tk.END, "asdfghjrtyuhjk\njnion" * 150)
         scroll_bar = ttk.Scrollbar(frame, orient=tk.VERTICAL, command=text_widget.yview)
         text_widget.configure(yscrollcommand=scroll_bar.set)
@@ -279,8 +321,8 @@ def build(config: dict = {}):
         InteractiveZone(pages[0].frame, name="Interactive"),
     ])
     pages[1].zones.extend([
-        PackageZone(pages[1].frame, name="Package"),
         EnvironmentZone(pages[1].frame, name="Environment"),
+        PackageZone(pages[1].frame, name="Package"),
         ServerZone(pages[1].frame, name="Server"),
     ])
 
@@ -294,7 +336,11 @@ def build(config: dict = {}):
             page.frame.columnconfigure(0, weight=1)
             page.zones[0].frame.grid(row=0, column=0, padx=(2, 2), pady=(6, 1), sticky=tk.N + tk.E + tk.S + tk.W)
             page.zones[1].frame.grid(row=1, column=0, padx=(2, 2), pady=(6, 1), sticky=tk.N + tk.E + tk.S + tk.W)
-            continue
+        elif p == 1:
+            page.frame.rowconfigure(0, weight=1)
+            page.frame.rowconfigure(1, weight=0)
+            page.frame.rowconfigure(2, weight=1)
+            page.frame.columnconfigure(0, weight=1)
         else:
             page.frame.columnconfigure(0, weight=1)
 
