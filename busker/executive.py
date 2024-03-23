@@ -31,7 +31,7 @@ import venv
 
 
 @dataclasses.dataclass
-class VirtualEnvironment:
+class ExecutionEnvironment:
     location: pathlib.Path
     interpreter: pathlib.Path = None
     config: dict = None
@@ -45,16 +45,16 @@ class Executive:
     pools = {}
 
     @classmethod
-    def initializer(cls, venv: VirtualEnvironment, *args):
-        print(venv, *args, sep="\n", file=sys.stderr)
+    def initializer(cls, exenv: ExecutionEnvironment, *args):
+        print(exenv, *args, sep="\n", file=sys.stderr)
 
     @classmethod
-    def pool_factory(cls, venv: VirtualEnvironment, *args, **kwargs):
+    def pool_factory(cls, exenv: ExecutionEnvironment, *args, **kwargs):
         context = multiprocessing.get_context("spawn")
         context.set_executable(...)  # <<< set worker executable
         pool = concurrent.futures.ProcessPoolExecutor(
             mp_context=context, max_tasks_per_child=1,
-            initializer=cls.initializer, initargs=(venv, *args)
+            initializer=cls.initializer, initargs=(exenv, *args)
         )
         return pool
 
@@ -122,8 +122,8 @@ if __name__ == "__main__":
     pool = context.Pool(processes=1, maxtasksperchild=1)
     manager = multiprocessing.managers.SyncManager(ctx=context)
 
-    venv = VirtualEnvironment(sys.executable)
-    manager.start(initializer=Executive.initializer, initargs=(venv,))
+    exenv = ExecutionEnvironment(pathlib.Path(sys.executable).parent.parent, pathlib.Path(sys.executable))
+    manager.start(initializer=Executive.initializer, initargs=(exenv,))
     q = manager.Queue()
 
     ar = pool.apply_async(Remote.hello, args=(), kwds=dict(q=q), callback=Local.done, error_callback=Local.error)
