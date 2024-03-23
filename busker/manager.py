@@ -21,9 +21,12 @@ from collections import namedtuple
 import concurrent.futures
 import datetime
 import multiprocessing
+import multiprocessing.context
+import multiprocessing.pool
 import pathlib
 import subprocess
 import sys
+import time
 import venv
 
 
@@ -52,13 +55,30 @@ class Manager:
         )
         return pool
 
-    @staticmethod
-    def hello(*args, **kwargs):
-        return "Hello!"
+
+class Local:
 
     @staticmethod
     def bye(*args, **kwargs):
         print("Bye!", file=sys.stderr)
+
+    @staticmethod
+    def done(*args, **kwargs):
+        print("Done.", file=sys.stderr)
+
+    @staticmethod
+    def error(error, *args, **kwargs):
+        print(f"{error=}", file=sys.stderr)
+
+
+class Remote:
+
+    @staticmethod
+    def hello(*args, q=None, **kwargs):
+        for n in range(10):
+            print("Hello.", file=sys.stderr)
+            time.sleep(1)
+        return n
 
 
 class Example:
@@ -96,9 +116,17 @@ if __name__ == "__main__":
     context = multiprocessing.get_context("spawn")
     context.set_executable(sys.executable)
 
-    pool = concurrent.futures.ProcessPoolExecutor(mp_context=context, max_tasks_per_child=1)
-    fut = pool.submit(Manager.hello)
-    fut.add_done_callback(Manager.bye)
-    print(fut.result(timeout=2))
-    pool.shutdown(wait=True, cancel_futures=True)
-
+    # pool = concurrent.futures.ProcessPoolExecutor(mp_context=context, max_tasks_per_child=1)
+    #fut = pool.submit(Remote.hello, q=q)
+    #fut.add_done_callback(Local.bye)
+    #print(fut.result(timeout=2))
+    #pool.shutdown(wait=True, cancel_futures=True)
+    pool = multiprocessing.pool.Pool(processes=1, maxtasksperchild=1, context=context)
+    ar = pool.apply_async(Remote.hello, callback=Local.done, error_callback=Local.error)
+    while not ar.ready():
+        try:
+            rv = ar.get(timeout=2)
+            print(f"{rv=}")
+        except multiprocessing.context.TimeoutError:
+            print("Nope")
+    pool.terminate()
