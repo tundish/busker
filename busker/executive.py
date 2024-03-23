@@ -28,50 +28,14 @@ import sysconfig
 import time
 import venv
 
+from busker.history import SharedHistory
 from busker.runner import Runner
 from busker.types import ExecutionEnvironment
 
 
-class Executive:
+class Executive(SharedHistory):
 
     registry = {}
-
-    @classmethod
-    def initializer(cls, location: pathlib.Path, interpreter: pathlib.Path, config: dict, *args):
-        print(f"{interpreter=}", *args, sep="\n", file=sys.stderr)
-
-    @classmethod
-    def register(
-        cls,
-        interpreter: str | pathlib.Path, location: pathlib.Path=None, config: dict=None,
-        processes: int = None, maxtasksperchild: int = None
-    ):
-        interpreter = pathlib.Path(interpreter)
-        exenv = cls.registry.setdefault(
-            interpreter,
-            ExecutionEnvironment(
-                location = location or interpreter.parent.parent,
-                interpreter=interpreter,
-                config=config,
-            )
-        )
-        if exenv.queue:
-            return exenv
-
-        cfg = cls.venv_cfg(exenv.location)
-        exenv.config = dict(cls.venv_data(cfg))
-
-        context = multiprocessing.get_context("spawn")
-        context.set_executable(exenv.interpreter)
-
-        pool = context.Pool(processes=processes, maxtasksperchild=maxtasksperchild)
-        manager = multiprocessing.managers.SyncManager(ctx=context)
-
-        manager.start(initializer=cls.initializer, initargs=dataclasses.astuple(exenv))
-        exenv.pool = pool
-        exenv.manager = manager
-        exenv.queue = manager.Queue()
-        return exenv
 
     @staticmethod
     def venv_cfg(path: pathlib.Path, name="pyvenv.cfg") -> str:
@@ -97,7 +61,8 @@ class Executive:
         exec_path = pathlib.Path(kwargs.get("executable", ""))
         return location.joinpath(script_path.name, exec_path.name)
 
-    def __init__(self):
+    def __init__(self, *args, maxlen: int = 24, **kwargs):
+        super().__init__(*args, maxlen=maxlen, **kwargs)
         self.register(sys.executable)
 
     def callback(self, result):
@@ -106,14 +71,57 @@ class Executive:
     def error_callback(self, exc: Exception, *args):
         return
 
-    def run(self, interpreter: str | pathlib.Path, *jobs: tuple[Runner], **kwargs):
+    def initializer(self, location: pathlib.Path, interpreter: pathlib.Path, config: dict, *args):
+        self.log(f"Initializing execution environment at {location!s}")
+
+    def register(
+        self,
+        interpreter: str | pathlib.Path, location: pathlib.Path=None, config: dict=None,
+        processes: int = None, maxtasksperchild: int = None
+    ):
+        interpreter = pathlib.Path(interpreter)
+        exenv = self.registry.setdefault(
+            interpreter,
+            ExecutionEnvironment(
+                location = location or interpreter.parent.parent,
+                interpreter=interpreter,
+                config=config,
+            )
+        )
+        if exenv.queue:
+            return exenv
+
+        cfg = self.venv_cfg(exenv.location)
+        exenv.config = dict(self.venv_data(cfg))
+
+        context = multiprocessing.get_context("spawn")
+        context.set_executable(exenv.interpreter)
+
+        pool = context.Pool(processes=processes, maxtasksperchild=maxtasksperchild)
+        manager = multiprocessing.managers.SyncManager(ctx=context)
+
+        manager.start(initializer=self.initializer, initargs=dataclasses.astuple(exenv))
+        exenv.pool = pool
+        exenv.manager = manager
+        exenv.queue = manager.Queue()
+        return exenv
+
+    def run(
+        self,
+        interpreter: str | pathlib.Path,
+        *jobs: tuple[Runner],
+        callback=None,
+        error_callback=None,
+        **kwargs
+    ):
         interpreter = pathlib.Path(interpreter)
         exenv = self.registry[interpreter]
         for job in jobs:
             env = dataclasses.replace(exenv, pool=None, manager=None)
             rv = exenv.pool.apply_async(
                 job, args=(env,), kwds=kwargs,
-                callback=self.callback, error_callback=self.error_callback
+                callback=callback or self.callback,
+                error_callback=error_callback or self.error_callback
             )
             rv.environment = env
             yield rv
@@ -128,35 +136,6 @@ class Executive:
                 pass
             exenv.manager.shutdown()
             exenv.pool.terminate()
-
-
-class Example:
-
-    def update_progress(self, path: pathlib.Path, future=None):
-        files = list(self.walk_files(path))
-        self.activity.append(len(files))
-
-        if future and not future.done():
-            for bar in self.controls.progress:
-                # TODO: Better approximation of progress
-                half = 50 if self.activity[-1] < max(self.activity) else 0
-                bar["value"] = min(half + len(self.activity) * 8, 100)
-
-            self.frame.after(1500, self.update_progress, path, future)
-
-    def on_build(self):
-        path = pathlib.Path(self.controls.entry[0].get())
-
-        future = self.executor.submit(
-            venv.create,
-            path,
-            system_site_packages=True,
-            clear=True,
-            with_pip=True,
-            upgrade_deps=True
-        )
-        future.add_done_callback(self.on_complete)
-        self.update_progress(path, future)
 
 
 class Hello(Runner):

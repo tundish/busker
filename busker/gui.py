@@ -22,19 +22,23 @@ from collections import deque
 import concurrent.futures
 import enum
 import logging
+import multiprocessing.context
 import pathlib
+import queue
 import tempfile
 import tkinter as tk
 from tkinter import filedialog
 from tkinter import ttk
 from types import SimpleNamespace as Structure
+import sys
 import urllib.error
 import urllib.parse
 import venv
 
 import busker
+from busker.executive import Executive
 from busker.history import SharedHistory
-from busker.runner import Runner
+from busker.runner import VirtualEnv
 from busker.scraper import Scraper
 from busker.types import Host
 from busker.zone import Zone
@@ -106,11 +110,13 @@ class InteractiveZone(Zone):
         info = self.controls.label[1]
 
 
-class EnvironmentZone(Zone, Runner):
+class EnvironmentZone(Zone):
 
     def __init__(self, parent, name="", **kwargs):
         super().__init__(parent, name=name, **kwargs)
+        self.executive = Executive()
         self.activity = list()
+        self.runners = list()
 
     def build(self, frame: ttk.Frame):
         frame.rowconfigure(0, weight=1)
@@ -152,40 +158,44 @@ class EnvironmentZone(Zone, Runner):
             initialdir=pathlib.Path.cwd(),
             mustexist=True,
         ))
-        if not self.venv_cfg(path) and not path.name.startswith("busker_"):
+        if not self.executive.venv_cfg(path) and not path.name.startswith("busker_"):
             path = pathlib.Path(tempfile.mkdtemp(prefix="busker_", suffix="_venv", dir=path))
         self.controls.entry[0].delete(0, tk.END)
         self.controls.entry[0].insert(0, str(path))
 
     def on_build(self):
         path = pathlib.Path(self.controls.entry[0].get())
-        future = self.executor.submit(
-            venv.create,
-            path,
-            system_site_packages=True,
-            clear=True,
-            with_pip=True,
-            upgrade_deps=True
+        runner = VirtualEnv(path)
+        running = list(
+            self.executive.run(
+                sys.executable,
+                *runner.jobs,
+                callback=self.on_complete
+            )
         )
-        future.add_done_callback(self.on_complete)
-        self.update_progress(path, future)
+        self.update_progress(running)
 
-    def on_complete(self, future):
+    def on_complete(self, result):
         for bar in self.controls.progress:
             bar["value"] = 0
             self.activity.clear()
 
-    def update_progress(self, path: pathlib.Path, future=None):
-        files = list(self.walk_files(path))
-        self.activity.append(len(files))
+    def update_progress(self, running: list = None):
+        while not all(r.ready() for r in running):
+            for result in running:
+                try:
+                    rv = result.get(timeout=1)
+                    print(f"{rv=}")
+                except multiprocessing.context.TimeoutError:
+                    while not result.environment.queue.empty():
+                        self.activity.append(result.environment.queue.get(block=False))
 
-        if future and not future.done():
             for bar in self.controls.progress:
                 # TODO: Better approximation of progress
                 half = 50 if self.activity[-1] < max(self.activity) else 0
                 bar["value"] = min(half + len(self.activity) * 8, 100)
 
-            self.frame.after(1500, self.update_progress, path, future)
+            self.frame.after(1500, self.update_progress, running)
 
 
 class PackageZone(Zone):
