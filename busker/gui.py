@@ -36,16 +36,9 @@ import busker
 from busker.history import SharedHistory
 from busker.runner import Runner
 from busker.scraper import Scraper
+from busker.types import Host
 from busker.zone import Zone
 import busker.visitor
-
-
-class Host(enum.Enum):
-
-    IPV4_LOOPBACK = "127.0.0.1"
-    IPV4_NET_HOST = "0.0.0.0"
-    IPV6_LOOPBACK = "::1"
-    IPV6_NET_HOST = "::"
 
 
 class InfoZone(Zone):

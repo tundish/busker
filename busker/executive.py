@@ -25,19 +25,11 @@ import multiprocessing.pool
 import pathlib
 import sys
 import sysconfig
+import time
 import venv
 
 from busker.runner import Runner
-
-
-@dataclasses.dataclass
-class ExecutionEnvironment:
-    location: pathlib.Path
-    interpreter: pathlib.Path = None
-    config: dict = None
-    pool: multiprocessing.pool.Pool = None
-    manager: multiprocessing.managers.SyncManager = None
-    queue: multiprocessing.Queue = None
+from busker.types import ExecutionEnvironment
 
 
 class Executive:
@@ -164,22 +156,22 @@ class Example:
         self.update_progress(path, future)
 
 
+class Hello(Runner):
+
+    def say_hello(self, exenv: ExecutionEnvironment, **kwargs):
+        for n in range(10):
+            print("Hello, world!", file=sys.stderr)
+            exenv.queue.put(n)
+            time.sleep(1)
+        return n
+
+    @property
+    def jobs(self):
+        return [self.say_hello]
+
+
 if __name__ == "__main__":
     import time
-
-    class Hello(Runner):
-
-        def say_hello(self, exenv: ExecutionEnvironment, **kwargs):
-            for n in range(10):
-                print("Hello, world!", file=sys.stderr)
-                exenv.queue.put(n)
-                time.sleep(1)
-            return n
-
-        @property
-        def jobs(self):
-            return [self.say_hello]
-
 
     executive = Executive()
     runner = Hello()
