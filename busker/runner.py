@@ -23,7 +23,6 @@ import concurrent.futures
 import logging
 import pathlib
 import sys
-import sysconfig
 import tomllib
 
 
@@ -39,27 +38,6 @@ class Runner:
                 yield from Runner.walk_files(pathlib.Path(p))
         yield callback(path)
 
-    @staticmethod
-    def venv_data(text: str) -> dict:
-        for line in text.splitlines():
-            bits = line.partition("=")
-            if bits[1] == "=":
-                yield (bits[0].strip(), bits[2].strip())
-
-    @staticmethod
-    def venv_exe(path: pathlib.Path, **kwargs) -> pathlib.Path:
-        scheme = sysconfig.get_default_scheme()
-        script_path = pathlib.Path(sysconfig.get_path("scripts", scheme))
-        exec_path = pathlib.Path(kwargs.get("executable", ""))
-        return path.joinpath(script_path.name, exec_path.name)
-
-    @staticmethod
-    def venv_cfg(path: pathlib.Path, name="pyvenv.cfg") -> str:
-        if path.is_dir():
-            path = path.joinpath(name)
-
-        if path.is_file() and path.name == name:
-            return rv.read_text()
-        else:
-            return ""
-
+    @property
+    def jobs(self) -> list:
+        return []

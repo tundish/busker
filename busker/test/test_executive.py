@@ -25,10 +25,10 @@ from types import SimpleNamespace
 import tomllib
 import unittest
 
-from busker.runner import Runner
+from busker.executive import Executive
 
 
-class RunnerTests(unittest.TestCase):
+class ExecutiveTests(unittest.TestCase):
 
     data = SimpleNamespace(
         pyvenv_cfg = textwrap.dedent("""
@@ -41,20 +41,20 @@ class RunnerTests(unittest.TestCase):
     )
 
     def test_venv_dict(self):
-        rv = dict(Runner.venv_data(self.data.pyvenv_cfg))
+        rv = dict(Executive.venv_data(self.data.pyvenv_cfg))
         self.assertIsInstance(rv, dict)
         self.assertEqual(len(rv), 5)
         self.assertEqual(rv.get("home"), "/usr/local/bin")
 
     def test_venv_dict_empty(self):
-        rv = dict(Runner.venv_data(""))
+        rv = dict(Executive.venv_data(""))
         self.assertIsInstance(rv, dict)
         self.assertFalse(rv)
 
     def test_venv_exe(self):
-        data = dict(Runner.venv_data(self.data.pyvenv_cfg))
+        data = dict(Executive.venv_data(self.data.pyvenv_cfg))
         path = pathlib.Path(data.get("command", "").split()[-1])
-        rv = Runner.venv_exe(path, **data)
+        rv = Executive.venv_exe(path, **data)
         self.assertIsInstance(rv, pathlib.Path)
         self.assertEqual(rv.name, "python3.11")
         if platform.system().lower() == "windows":
