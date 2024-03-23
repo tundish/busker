@@ -68,7 +68,6 @@ class VirtualEnv(Runner):
         while len(values) < repeat:
             files = list(self.walk_files(self.location))
             values.append(len(files))
-            print(f"{values=}")
             exenv.queue.put(values[-1])
             if len(values) > 3 and values[-3] == values[-1] and values[-1] <= max(values):
                 break
