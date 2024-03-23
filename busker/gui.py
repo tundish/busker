@@ -104,6 +104,7 @@ class InteractiveZone(Zone):
             tk.Button(frame, text="Launch", command=self.on_launch),
             row=1, column=1,  columnspan=2, padx=(10, 10), sticky=tk.E
         )
+        # TODO: assist checkbox
 
     def on_launch(self):
         host = self.controls.entry[0].get()
