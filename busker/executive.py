@@ -22,6 +22,7 @@ import concurrent.futures
 import datetime
 import multiprocessing
 import multiprocessing.context
+import multiprocessing.managers
 import multiprocessing.pool
 import pathlib
 import subprocess
@@ -37,7 +38,7 @@ VirtualEnvironment = namedtuple(
 )
 
 
-class Manager:
+class Executive:
 
     pools = {}
 
@@ -122,11 +123,16 @@ if __name__ == "__main__":
     #print(fut.result(timeout=2))
     #pool.shutdown(wait=True, cancel_futures=True)
     pool = multiprocessing.pool.Pool(processes=1, maxtasksperchild=1, context=context)
-    ar = pool.apply_async(Remote.hello, callback=Local.done, error_callback=Local.error)
+    manager = multiprocessing.managers.SyncManager(ctx=context)
+    venv = VirtualEnvironment(None)
+    manager.start(initializer=Executive.initializer, initargs=(venv,))
+    q = multiprocessing.Queue()
+    ar = pool.apply_async(Remote.hello, args=(), kwds=dict(), callback=Local.done, error_callback=Local.error)
     while not ar.ready():
         try:
             rv = ar.get(timeout=2)
             print(f"{rv=}")
         except multiprocessing.context.TimeoutError:
             print("Nope")
+    manager.shutdown()
     pool.terminate()
