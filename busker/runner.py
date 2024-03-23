@@ -64,12 +64,16 @@ class VirtualEnv(Runner):
         )
 
     def check_virtualenv(self, exenv: ExecutionEnvironment, repeat=100, interval=2, **kwargs):
-        n = 0
-        while n < repeat:
-            n += 1
+        values = []
+        while len(values) < repeat:
             files = list(self.walk_files(self.location))
-            exenv.queue.put(len(files))
-            time.sleep(interval)
+            values.append(len(files))
+            print(f"{values=}")
+            exenv.queue.put(values[-1])
+            if len(values) > 3 and values[-3] == values[-1] and values[-1] <= max(values):
+                break
+            else:
+                time.sleep(interval)
 
     @property
     def jobs(self) -> list:

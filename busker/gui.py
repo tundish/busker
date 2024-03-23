@@ -182,7 +182,6 @@ class EnvironmentZone(Zone):
 
     def update_progress(self, running: list = None):
         for result in running:
-            print(f"{result=}")
             while not result.environment.queue.empty():
                 self.activity.append(result.environment.queue.get(block=False))
 
