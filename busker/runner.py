@@ -37,8 +37,11 @@ class Runner:
     def walk_files(path: pathlib.Path, callback=None):
         callback = callback or pathlib.Path
         if path.is_dir():
-            for p in path.iterdir():
-                yield from Runner.walk_files(pathlib.Path(p))
+            try:
+                for p in path.iterdir():
+                    yield from Runner.walk_files(pathlib.Path(p))
+            except Exception:
+                pass
         yield callback(path)
 
     @property

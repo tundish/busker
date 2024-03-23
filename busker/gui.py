@@ -170,7 +170,7 @@ class EnvironmentZone(Zone):
             self.executive.run(
                 sys.executable,
                 *runner.jobs,
-                callback=self.on_complete
+                # callback=self.on_complete
             )
         )
         self.update_progress(running)
@@ -181,20 +181,18 @@ class EnvironmentZone(Zone):
             self.activity.clear()
 
     def update_progress(self, running: list = None):
-        while not all(r.ready() for r in running):
-            for result in running:
-                try:
-                    rv = result.get(timeout=1)
-                    print(f"{rv=}")
-                except multiprocessing.context.TimeoutError:
-                    while not result.environment.queue.empty():
-                        self.activity.append(result.environment.queue.get(block=False))
+        for result in running:
+            print(f"{result=}")
+            while not result.environment.queue.empty():
+                self.activity.append(result.environment.queue.get(block=False))
 
-            for bar in self.controls.progress:
-                # TODO: Better approximation of progress
-                half = 50 if self.activity[-1] < max(self.activity) else 0
-                bar["value"] = min(half + len(self.activity) * 8, 100)
+        print(f"{self.activity=}")
+        for bar in self.controls.progress:
+            # TODO: Better approximation of progress
+            half = 50 if self.activity and self.activity[-1] < max(self.activity) else 0
+            bar["value"] = min(half + len(self.activity) * 8, 100)
 
+        if not all(r.ready() for r in running):
             self.frame.after(1500, self.update_progress, running)
 
 
