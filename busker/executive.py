@@ -140,6 +140,10 @@ if __name__ == "__main__":
             while not q.empty():
                 items.append(q.get(block=False))
             print(f"{items=}")
-    q.close()
+    try:
+        q.close()
+    except AttributeError:
+        # Windows
+        pass
     manager.shutdown()
     pool.terminate()
