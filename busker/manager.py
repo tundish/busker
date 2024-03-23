@@ -43,7 +43,7 @@ class Manager:
         print(venv, *args, sep="\n", file=sys.stderr)
 
     @classmethod
-    def pool_factory(cls, venv: VirtualEnvironment, *args, **kwargs):
+    def pool_factory(cls, venv: VirtualEnvironment, *args, **kwargs) -> concurrent.futures.Executor:
         context = multiprocessing.get_context("spawn")
         context.set_executable(...)  # <<< set worker executable
         pool = concurrent.futures.ProcessPoolExecutor(
@@ -51,6 +51,15 @@ class Manager:
             initializer=cls.initializer, initargs=(venv, *args)
         )
         return pool
+
+    @staticmethod
+    def hello(*args, **kwargs):
+        return "Hello!"
+
+    @staticmethod
+    def bye(*args, **kwargs):
+        print("Bye!", file=sys.stderr)
+
 
 class Example:
 
@@ -85,9 +94,11 @@ if __name__ == "__main__":
     #rv = subprocess.check_output([sys.executable, "-m", "turtle"])
     # rv = subprocess.check_output(["ping", "-i", "12", "8.8.8.8"])
     context = multiprocessing.get_context("spawn")
-    context.set_executable(...)  # <<< set worker executable
+    context.set_executable(sys.executable)
 
     pool = concurrent.futures.ProcessPoolExecutor(mp_context=context, max_tasks_per_child=1)
-    # pool.close()
-    pool.terminate()
+    fut = pool.submit(Manager.hello)
+    fut.add_done_callback(Manager.bye)
+    print(fut.result(timeout=2))
+    pool.shutdown(wait=True, cancel_futures=True)
 
