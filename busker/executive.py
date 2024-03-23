@@ -42,11 +42,11 @@ class ExecutionEnvironment:
 
 class Executive:
 
-    pools = {}
+    exenvs = {}
 
     @classmethod
-    def initializer(cls, exenv: ExecutionEnvironment, *args):
-        print(exenv, *args, sep="\n", file=sys.stderr)
+    def initializer(cls, location: pathlib.Path, interpreter: pathlib.Path, config: dict, *args):
+        print(f"{interpreter=}", *args, sep="\n", file=sys.stderr)
 
     @classmethod
     def pool_factory(cls, exenv: ExecutionEnvironment, *args, **kwargs):
@@ -114,34 +114,73 @@ class Example:
         self.update_progress(path, future)
 
 
+class Runner:
+
+    def callback(self, result):
+        return
+
+    def error_callback(self, exc: Exception, *args):
+        return
+
+    @property
+    def jobs(self) -> list:
+        return []
+
+    def run(self, exenv: ExecutionEnvironment, *jobs, **kwargs):
+        for job in jobs:
+            env = dataclasses.replace(exenv, pool=None, manager=None)
+            yield exenv.pool.apply_async(
+                job, args=(env,), kwds=kwargs,
+                callback=self.callback, error_callback=self.error_callback
+            )
+
+
+class Hello(Runner):
+
+    def say_hello(self, exenv: ExecutionEnvironment, **kwargs):
+        for n in range(10):
+            print("Hello.", file=sys.stderr)
+            exenv.queue.put(n)
+            time.sleep(1)
+        return n
+
+    @property
+    def jobs(self):
+        return [self.say_hello]
+
+
 if __name__ == "__main__":
 
+    exenv = ExecutionEnvironment(pathlib.Path(sys.executable).parent.parent, pathlib.Path(sys.executable))
     context = multiprocessing.get_context("spawn")
-    context.set_executable(sys.executable)
+    context.set_executable(exenv.interpreter)
 
     pool = context.Pool(processes=1, maxtasksperchild=1)
     manager = multiprocessing.managers.SyncManager(ctx=context)
 
-    exenv = ExecutionEnvironment(pathlib.Path(sys.executable).parent.parent, pathlib.Path(sys.executable))
-    manager.start(initializer=Executive.initializer, initargs=(exenv,))
-    q = manager.Queue()
+    manager.start(initializer=Executive.initializer, initargs=dataclasses.astuple(exenv))
+    exenv.pool = pool
+    exenv.manager = manager
+    exenv.queue = manager.Queue()
 
-    ar = pool.apply_async(Remote.hello, args=(), kwds=dict(q=q), callback=Local.done, error_callback=Local.error)
-    while not ar.ready():
-        try:
-            rv = ar.get(timeout=2)
-            print(f"{rv=}")
-        except multiprocessing.context.TimeoutError:
-            print("Nope")
-        finally:
-            items = []
-            while not q.empty():
-                items.append(q.get(block=False))
-            print(f"{items=}")
+    runner = Hello()
+    running = set(runner.run(exenv, *runner.jobs))
+    while not all(r.ready() for r in running):
+        for result in running:
+            try:
+                rv = result.get(timeout=2)
+                print(f"{rv=}")
+            except multiprocessing.context.TimeoutError:
+                print("Nope")
+            finally:
+                items = []
+                while not exenv.queue.empty():
+                    items.append(exenv.queue.get(block=False))
+                print(f"{items=}")
     try:
-        q.close()
+        exenv.queue.close()
     except AttributeError:
         # Windows
         pass
-    manager.shutdown()
-    pool.terminate()
+    exenv.manager.shutdown()
+    exenv.pool.terminate()
