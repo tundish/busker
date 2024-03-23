@@ -17,8 +17,77 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+from collections import namedtuple
+import concurrent.futures
+import datetime
+import multiprocessing
+import pathlib
 import subprocess
 import sys
+import venv
+
+
+VirtualEnvironment = namedtuple(
+    "VirtualEnvironment",
+    ["location", "interpreter", "config", "inspected_at", "inspection"],
+    defaults=[None, None, None, None],
+)
+
+
+class Manager:
+
+    pools = {}
+
+    @classmethod
+    def initializer(cls, venv: VirtualEnvironment, *args):
+        print(venv, *args, sep="\n", file=sys.stderr)
+
+    @classmethod
+    def pool_factory(cls, venv: VirtualEnvironment, *args, **kwargs):
+        context = multiprocessing.get_context("spawn")
+        context.set_executable(...)  # <<< set worker executable
+        pool = concurrent.futures.ProcessPoolExecutor(
+            mp_context=context, max_tasks_per_child=1,
+            initializer=cls.initializer, initargs=(venv, *args)
+        )
+        return pool
+
+class Example:
+
+    def update_progress(self, path: pathlib.Path, future=None):
+        files = list(self.walk_files(path))
+        self.activity.append(len(files))
+
+        if future and not future.done():
+            for bar in self.controls.progress:
+                # TODO: Better approximation of progress
+                half = 50 if self.activity[-1] < max(self.activity) else 0
+                bar["value"] = min(half + len(self.activity) * 8, 100)
+
+            self.frame.after(1500, self.update_progress, path, future)
+
+    def on_build(self):
+        path = pathlib.Path(self.controls.entry[0].get())
+
+        future = self.executor.submit(
+            venv.create,
+            path,
+            system_site_packages=True,
+            clear=True,
+            with_pip=True,
+            upgrade_deps=True
+        )
+        future.add_done_callback(self.on_complete)
+        self.update_progress(path, future)
+
 
 if __name__ == "__main__":
-    rv = subprocess.check_output([sys.executable, "-m", "turtle"])
+    #rv = subprocess.check_output([sys.executable, "-m", "turtle"])
+    # rv = subprocess.check_output(["ping", "-i", "12", "8.8.8.8"])
+    context = multiprocessing.get_context("spawn")
+    context.set_executable(...)  # <<< set worker executable
+
+    pool = concurrent.futures.ProcessPoolExecutor(mp_context=context, max_tasks_per_child=1)
+    # pool.close()
+    pool.terminate()
+
