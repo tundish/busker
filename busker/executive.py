@@ -17,8 +17,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-from collections import namedtuple
-import concurrent.futures
+import dataclasses
 import datetime
 import multiprocessing
 import multiprocessing.context
@@ -31,11 +30,14 @@ import time
 import venv
 
 
-VirtualEnvironment = namedtuple(
-    "VirtualEnvironment",
-    ["location", "interpreter", "config", "inspected_at", "inspection"],
-    defaults=[None, None, None, None],
-)
+@dataclasses.dataclass
+class VirtualEnvironment:
+    location: pathlib.Path
+    interpreter: pathlib.Path = None
+    config: dict = None
+    pool: multiprocessing.pool.Pool = None
+    manager: multiprocessing.managers.SyncManager = None
+    queue: multiprocessing.Queue = None
 
 
 class Executive:
@@ -47,7 +49,7 @@ class Executive:
         print(venv, *args, sep="\n", file=sys.stderr)
 
     @classmethod
-    def pool_factory(cls, venv: VirtualEnvironment, *args, **kwargs) -> concurrent.futures.Executor:
+    def pool_factory(cls, venv: VirtualEnvironment, *args, **kwargs):
         context = multiprocessing.get_context("spawn")
         context.set_executable(...)  # <<< set worker executable
         pool = concurrent.futures.ProcessPoolExecutor(
@@ -113,21 +115,17 @@ class Example:
 
 
 if __name__ == "__main__":
-    #rv = subprocess.check_output([sys.executable, "-m", "turtle"])
-    # rv = subprocess.check_output(["ping", "-i", "12", "8.8.8.8"])
+
     context = multiprocessing.get_context("spawn")
     context.set_executable(sys.executable)
 
-    # pool = concurrent.futures.ProcessPoolExecutor(mp_context=context, max_tasks_per_child=1)
-    #fut = pool.submit(Remote.hello, q=q)
-    #fut.add_done_callback(Local.bye)
-    #print(fut.result(timeout=2))
-    #pool.shutdown(wait=True, cancel_futures=True)
-    pool = multiprocessing.pool.Pool(processes=1, maxtasksperchild=1, context=context)
+    pool = context.Pool(processes=1, maxtasksperchild=1)
     manager = multiprocessing.managers.SyncManager(ctx=context)
-    venv = VirtualEnvironment(None)
+
+    venv = VirtualEnvironment(sys.executable)
     manager.start(initializer=Executive.initializer, initargs=(venv,))
     q = manager.Queue()
+
     ar = pool.apply_async(Remote.hello, args=(), kwds=dict(q=q), callback=Local.done, error_callback=Local.error)
     while not ar.ready():
         try:
