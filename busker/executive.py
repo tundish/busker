@@ -58,6 +58,9 @@ class Executive:
         if exenv.queue:
             return exenv
 
+        cfg = cls.venv_cfg(exenv.location)
+        exenv.config = dict(cls.venv_data(cfg))
+
         context = multiprocessing.get_context("spawn")
         context.set_executable(exenv.interpreter)
 
@@ -71,6 +74,16 @@ class Executive:
         return exenv
 
     @staticmethod
+    def venv_cfg(path: pathlib.Path, name="pyvenv.cfg") -> str:
+        if path.is_dir():
+            path = path.joinpath(name)
+
+        if path.is_file() and path.name == name:
+            return path.read_text()
+        else:
+            return ""
+
+    @staticmethod
     def venv_data(text: str) -> dict:
         for line in text.splitlines():
             bits = line.partition("=")
@@ -78,21 +91,11 @@ class Executive:
                 yield (bits[0].strip(), bits[2].strip())
 
     @staticmethod
-    def venv_exe(path: pathlib.Path, **kwargs) -> pathlib.Path:
+    def venv_exe(location: pathlib.Path, **kwargs) -> pathlib.Path:
         scheme = sysconfig.get_default_scheme()
         script_path = pathlib.Path(sysconfig.get_path("scripts", scheme))
         exec_path = pathlib.Path(kwargs.get("executable", ""))
-        return path.joinpath(script_path.name, exec_path.name)
-
-    @staticmethod
-    def venv_cfg(path: pathlib.Path, name="pyvenv.cfg") -> str:
-        if path.is_dir():
-            path = path.joinpath(name)
-
-        if path.is_file() and path.name == name:
-            return rv.read_text()
-        else:
-            return ""
+        return location.joinpath(script_path.name, exec_path.name)
 
     def __init__(self):
         self.register(sys.executable)
@@ -174,6 +177,8 @@ if __name__ == "__main__":
     import time
 
     executive = Executive()
+    print(executive.registry, file=sys.stderr)
+
     runner = Hello()
     running = set(executive.run(sys.executable, *runner.jobs))
     while not all(r.ready() for r in running):
