@@ -78,6 +78,7 @@ class Remote:
     def hello(*args, q=None, **kwargs):
         for n in range(10):
             print("Hello.", file=sys.stderr)
+            q.put(n)
             time.sleep(1)
         return n
 
@@ -126,13 +127,19 @@ if __name__ == "__main__":
     manager = multiprocessing.managers.SyncManager(ctx=context)
     venv = VirtualEnvironment(None)
     manager.start(initializer=Executive.initializer, initargs=(venv,))
-    q = multiprocessing.Queue()
-    ar = pool.apply_async(Remote.hello, args=(), kwds=dict(), callback=Local.done, error_callback=Local.error)
+    q = manager.Queue()
+    ar = pool.apply_async(Remote.hello, args=(), kwds=dict(q=q), callback=Local.done, error_callback=Local.error)
     while not ar.ready():
         try:
             rv = ar.get(timeout=2)
             print(f"{rv=}")
         except multiprocessing.context.TimeoutError:
             print("Nope")
+        finally:
+            items = []
+            while not q.empty():
+                items.append(q.get(block=False))
+            print(f"{items=}")
+    q.close()
     manager.shutdown()
     pool.terminate()
