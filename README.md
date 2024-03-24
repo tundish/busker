@@ -8,14 +8,15 @@ Python 3.11 or later is required.
 
 This is a work-in-progress.
 
-    usage: python -m busker.main [-h] [--url URL] [--number NUMBER]
+    usage: main.py [-h] [--config CONFIG] [--url URL] [--number NUMBER]
 
     options:
       -h, --help       show this help message and exit
 
-    mapping:
-      --url URL        Set url path to begin session.
+    Settings:
+      --config CONFIG  Set a path to a configuration file [/home/user/busker.toml].
 
-    fuzzing:
-      --number NUMBER  Set the number of times to run the fuzzer.
+    Plugins:
+      --url URL        Set url path to begin session.
+      --number NUMBER  Set the number of times to run the plugin.
 
