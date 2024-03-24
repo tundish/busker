@@ -38,5 +38,5 @@ include = [
 "busker/*",
 ]
 exclude = [
-"busker_/*",
+"busker_*",
 ]
