@@ -1,6 +1,11 @@
 History
 =======
 
+0.5.0
+-----
+
+Rerelease without stray venv directories.
+
 0.4.0
 -----
 
