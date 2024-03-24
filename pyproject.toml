@@ -29,7 +29,6 @@ test = [
 busker-cli = "busker.main:run"
 
 [build-system]
-# requires = ["hatchling == 1.21.1"]
 requires = ["hatchling >= 1.22.4"]
 build-backend = "hatchling.build"
 
