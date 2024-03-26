@@ -185,6 +185,7 @@ class EnvironmentZone(Zone):
         for result in running:
             while not result.environment.queue.empty():
                 self.activity.append(result.environment.queue.get(block=False))
+                self.controls.text[0].insert("1.0", f"{self.activity[-1]!s}\n")
 
         print(f"{self.activity=}")
         for bar in self.controls.progress:
