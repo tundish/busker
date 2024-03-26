@@ -116,7 +116,7 @@ class EnvironmentZone(Zone):
         super().__init__(parent, name=name, **kwargs)
         self.executive = Executive()
         self.activity = list()
-        self.runners = list()
+        self.running = list()
 
     def build(self, frame: ttk.Frame):
         frame.rowconfigure(0, weight=1)
@@ -166,16 +166,17 @@ class EnvironmentZone(Zone):
     def on_build(self):
         path = pathlib.Path(self.controls.entry[0].get())
         runner = VirtualEnv(path)
-        running = list(
+        self.running = list(
             self.executive.run(
                 sys.executable,
                 *runner.jobs,
-                # callback=self.on_complete
+                callback=self.on_complete
             )
         )
-        self.update_progress(running)
+        self.update_progress(self.running)
 
     def on_complete(self, result):
+        print(f"{result=}")
         for bar in self.controls.progress:
             bar["value"] = 0
             self.activity.clear()

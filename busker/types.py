@@ -17,12 +17,16 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+from collections import namedtuple
 import dataclasses
 import enum
 import multiprocessing
 import multiprocessing.managers
 import multiprocessing.pool
 import pathlib
+
+
+Completion = namedtuple("Completion", ["job", "exenv", "data"], defaults=[None])
 
 
 class Host(enum.Enum):

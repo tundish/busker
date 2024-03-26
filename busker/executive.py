@@ -17,6 +17,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+from collections.abc import Callable
 import dataclasses
 import multiprocessing
 import multiprocessing.context
@@ -30,6 +31,7 @@ import venv
 
 from busker.history import SharedHistory
 from busker.runner import Runner
+from busker.types import Completion
 from busker.types import ExecutionEnvironment
 
 
@@ -119,7 +121,7 @@ class Executive(SharedHistory):
         for job in jobs:
             env = dataclasses.replace(exenv, pool=None, manager=None)
             rv = exenv.pool.apply_async(
-                job, args=(env,), kwds=kwargs,
+                job, args=(job, env,), kwds=kwargs,
                 callback=callback or self.callback,
                 error_callback=error_callback or self.error_callback
             )
@@ -140,12 +142,12 @@ class Executive(SharedHistory):
 
 class Hello(Runner):
 
-    def say_hello(self, exenv: ExecutionEnvironment, **kwargs):
+    def say_hello(self, this: Callable, exenv: ExecutionEnvironment, **kwargs):
         for n in range(10):
             print("Hello, world!", file=sys.stderr)
             exenv.queue.put(n)
             time.sleep(1)
-        return n
+        return Completion(this, exenv, n)
 
     @property
     def jobs(self):
@@ -166,7 +168,7 @@ if __name__ == "__main__":
                 rv = result.get(timeout=2)
                 print(f"{rv=}")
             except multiprocessing.context.TimeoutError:
-                print("Nope")
+                print("No uodate")
             finally:
                 items = []
                 while not result.environment.queue.empty():

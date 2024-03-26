@@ -17,6 +17,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+from collections.abc import Callable
 from collections import defaultdict
 from collections import deque
 import concurrent.futures
@@ -28,6 +29,7 @@ import tomllib
 import venv
 
 
+from busker.types import Completion
 from busker.types import ExecutionEnvironment
 
 
@@ -54,7 +56,7 @@ class VirtualEnv(Runner):
     def __init__(self, location: pathlib.Path):
         self.location = location
 
-    def build_virtualenv(self, exenv: ExecutionEnvironment, **kwargs):
+    def build_virtualenv(self, this: Callable, exenv: ExecutionEnvironment, **kwargs):
         venv.create(
             self.location,
             system_site_packages=True,
@@ -62,8 +64,9 @@ class VirtualEnv(Runner):
             with_pip=True,
             upgrade_deps=True
         )
+        return Completion(this, exenv)
 
-    def check_virtualenv(self, exenv: ExecutionEnvironment, repeat=100, interval=2, **kwargs):
+    def check_virtualenv(self, this: Callable, exenv: ExecutionEnvironment, repeat=100, interval=2, **kwargs):
         values = []
         while len(values) < repeat:
             files = list(self.walk_files(self.location))
@@ -73,6 +76,7 @@ class VirtualEnv(Runner):
                 break
             else:
                 time.sleep(interval)
+        return Completion(this, exenv)
 
     @property
     def jobs(self) -> list:
