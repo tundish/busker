@@ -125,7 +125,7 @@ class EnvironmentZone(Zone):
         frame.columnconfigure(2, weight=2)
         frame.columnconfigure(3, weight=2)
 
-        yield "label", self.grid(ttk.Label(frame, text="Directory"), row=0, column=0, padx=(10, 10))
+        yield "label", self.grid(ttk.Label(frame, text="Directory", width=8), row=0, column=0, padx=(10, 10))
         yield "entry", self.grid(ttk.Entry(frame), row=0, column=1, pady=(10, 10), ipadx=1, ipady=2, sticky=tk.W + tk.E)
 
         yield "button", self.grid(
@@ -206,7 +206,7 @@ class PackageZone(Zone):
         frame.columnconfigure(2, weight=2)
         frame.columnconfigure(3, weight=2)
 
-        yield "label", self.grid(ttk.Label(frame, text="Source"), row=0, column=0, padx=(10, 10))
+        yield "label", self.grid(ttk.Label(frame, text="Source", width=8), row=0, column=0, padx=(10, 10))
         yield "entry", self.grid(ttk.Entry(frame), row=0, column=1, pady=(10, 10), ipadx=1, ipady=2, sticky=tk.W + tk.E)
 
         yield "button", self.grid(
@@ -218,6 +218,12 @@ class PackageZone(Zone):
             tk.Button(frame, text="Install", command=self.on_install),
             row=0, column=3, columnspan=2, padx=(10, 10), sticky=tk.W + tk.E
         )
+
+        yield "progress", self.grid(
+            ttk.Progressbar(frame, orient=tk.HORIZONTAL),
+            row=1, column=0, columnspan=4, padx=(10, 10), pady=(10, 10), sticky=tk.W + tk.E
+        )
+
 
     def on_select(self):
         path = pathlib.Path(filedialog.askdirectory(
@@ -268,7 +274,7 @@ class ServerZone(Zone):
         frame.rowconfigure(0, weight=1)
         frame.columnconfigure(0, weight=1)
 
-        yield "label", self.grid(ttk.Label(frame, text="Entry point"), row=0, column=0, padx=(10, 10))
+        yield "label", self.grid(ttk.Label(frame, text="Entry point", width=8), row=0, column=0, padx=(10, 10))
         yield "entry", self.grid(ttk.Entry(frame, justify=tk.LEFT, width=24), row=0, column=1, padx=(10, 10))
 
         yield "label", self.grid(ttk.Label(frame, text="Host"), row=0, column=2, padx=(10, 10))
