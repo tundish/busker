@@ -120,8 +120,6 @@ class EnvironmentZone(Zone):
 
     def build(self, frame: ttk.Frame):
         frame.rowconfigure(0, weight=1)
-        frame.rowconfigure(1, weight=0)
-        frame.rowconfigure(2, weight=10)
         frame.columnconfigure(0, weight=1)
         frame.columnconfigure(1, weight=10)
         frame.columnconfigure(2, weight=2)
@@ -144,12 +142,6 @@ class EnvironmentZone(Zone):
             ttk.Progressbar(frame, orient=tk.HORIZONTAL),
             row=1, column=0, columnspan=4, padx=(10, 10), pady=(10, 10), sticky=tk.W + tk.E
         )
-
-        text_widget = tk.Text(frame, height=6)
-        scroll_bar = ttk.Scrollbar(frame, orient=tk.VERTICAL, command=text_widget.yview)
-        text_widget.configure(yscrollcommand=scroll_bar.set)
-        yield "text", self.grid(text_widget, row=2, column=0, columnspan=4, padx=(10, 10), sticky=tk.W + tk.N + tk.E + tk.S)
-        yield "scroll", self.grid(scroll_bar, row=2, column=4, pady=(10, 10), sticky=tk.N + tk.S)
 
     def on_select(self):
         path = pathlib.Path(filedialog.askdirectory(
@@ -177,14 +169,14 @@ class EnvironmentZone(Zone):
                 )
             )
         }
-        self.controls.text[0].insert(tk.END, f"Environment build begins.\n")
+        self.registry["OutputZone"][0].controls.text[0].insert(tk.END, f"Environment build begins.\n")
         self.update_progress(self.running)
 
     def on_complete(self, result):
         self.running.pop(result.job.__name__)
         if self.running: return
 
-        self.controls.text[0].insert(tk.END, f"Environment build complete.\n")
+        self.registry["OutputZone"][0].controls.text[0].insert(tk.END, f"Environment build complete.\n")
         for bar in self.controls.progress:
             bar["value"] = 0
             self.activity.clear()
@@ -193,7 +185,9 @@ class EnvironmentZone(Zone):
         for job, result in running.items():
             while not result.environment.queue.empty():
                 self.activity.append(result.environment.queue.get(block=False))
-                self.controls.text[0].insert(tk.END, f"Objects counted: {self.activity[-1]!s}\n")
+                self.registry["OutputZone"][0].controls.text[0].insert(
+                    tk.END, f"Objects counted: {self.activity[-1]!s}\n"
+                )
 
         limit = 90 if len(self.running) == 1 else 50
         for bar in self.controls.progress:
@@ -291,15 +285,23 @@ class ServerZone(Zone):
             tk.Button(frame, text="Activate", command=self.on_activate),
             row=0, column=6, padx=(10, 10), sticky=tk.E
         )
-        text_widget = tk.Text(frame, height=6)
-        text_widget.insert(tk.END, "asdfghjrtyuhjk\njnion" * 150)
-        scroll_bar = ttk.Scrollbar(frame, orient=tk.VERTICAL, command=text_widget.yview)
-        text_widget.configure(yscrollcommand=scroll_bar.set)
-        yield "text", self.grid(text_widget, row=1, column=0, columnspan=6, padx=(10, 10), sticky=tk.E + tk.W)
-        yield "scroll", self.grid(scroll_bar, row=1, column=6, pady=(10, 10), sticky=tk.N + tk.S)
 
     def on_activate(self):
         print(self.controls)
+
+
+class OutputZone(Zone):
+
+    def build(self, frame: ttk.Frame):
+        frame.rowconfigure(0, weight=1)
+        frame.columnconfigure(0, weight=30)
+        frame.columnconfigure(1, weight=1)
+
+        text_widget = tk.Text(frame, height=6)
+        scroll_bar = ttk.Scrollbar(frame, orient=tk.VERTICAL, command=text_widget.yview)
+        text_widget.configure(yscrollcommand=scroll_bar.set)
+        yield "text", self.grid(text_widget, row=0, column=0, padx=(10, 10), sticky=tk.W + tk.N + tk.E + tk.S)
+        yield "scroll", self.grid(scroll_bar, row=0, column=1, pady=(10, 10), sticky=tk.N + tk.S)
 
 
 def build(config: dict = {}):
@@ -338,6 +340,7 @@ def build(config: dict = {}):
         EnvironmentZone(pages[1].frame, name="Environment"),
         PackageZone(pages[1].frame, name="Package"),
         ServerZone(pages[1].frame, name="Server"),
+        OutputZone(pages[1].frame, name="Output"),
     ])
 
 
@@ -352,11 +355,10 @@ def build(config: dict = {}):
             page.zones[1].frame.grid(row=1, column=0, padx=(2, 2), pady=(6, 1), sticky=tk.N + tk.E + tk.S + tk.W)
         elif p == 1:
             page.frame.rowconfigure(0, weight=1)
-            page.frame.rowconfigure(1, weight=0)
-            page.frame.rowconfigure(2, weight=1)
+            page.frame.rowconfigure(3, weight=10)
             page.frame.columnconfigure(0, weight=1)
-            page.zones[0].frame.grid(row=0, column=0, padx=(2, 2), pady=(6, 1), sticky=tk.N + tk.E + tk.S + tk.W)
-            page.zones[1].frame.grid(row=1, column=0, padx=(2, 2), pady=(6, 1), sticky=tk.E + tk.W)
+            for z, zone in enumerate(page.zones):
+                zone.frame.grid(row=z, column=0, padx=(2, 2), pady=(6, 1), sticky=tk.N + tk.E + tk.S + tk.W)
         else:
             page.frame.columnconfigure(0, weight=1)
 
