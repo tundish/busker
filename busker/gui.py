@@ -166,35 +166,41 @@ class EnvironmentZone(Zone):
     def on_build(self):
         path = pathlib.Path(self.controls.entry[0].get())
         runner = VirtualEnv(path)
-        self.running = list(
-            self.executive.run(
-                sys.executable,
-                *runner.jobs,
-                callback=self.on_complete
+        self.running = {
+            j.__name__: job
+            for j, job in zip(
+                runner.jobs,
+                self.executive.run(
+                    sys.executable,
+                    *runner.jobs,
+                    callback=self.on_complete
+                )
             )
-        )
+        }
+        self.controls.text[0].insert(tk.END, f"Environment build begins.\n")
         self.update_progress(self.running)
 
     def on_complete(self, result):
-        print(f"{result=}")
+        self.running.pop(result.job.__name__)
+        if self.running: return
+
+        self.controls.text[0].insert(tk.END, f"Environment build complete.\n")
         for bar in self.controls.progress:
             bar["value"] = 0
             self.activity.clear()
 
-    def update_progress(self, running: list = None):
-        for result in running:
+    def update_progress(self, running: dict = None):
+        for job, result in running.items():
             while not result.environment.queue.empty():
                 self.activity.append(result.environment.queue.get(block=False))
-                self.controls.text[0].insert("1.0", f"{self.activity[-1]!s}\n")
+                self.controls.text[0].insert(tk.END, f"Objects counted: {self.activity[-1]!s}\n")
 
-        print(f"{self.activity=}")
+        limit = 90 if len(self.running) == 1 else 50
         for bar in self.controls.progress:
-            # TODO: Better approximation of progress
-            half = 50 if self.activity and self.activity[-1] < max(self.activity) else 0
-            bar["value"] = min(half + len(self.activity) * 8, 100)
+            bar["value"] = min(len(self.activity) * limit / 10, limit)
 
-        if not all(r.ready() for r in running):
-            self.frame.after(1500, self.update_progress, running)
+        if not all(r.ready() for r in running.values()):
+            self.frame.after(500, self.update_progress, running)
 
 
 class PackageZone(Zone):
