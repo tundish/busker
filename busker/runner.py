@@ -100,7 +100,14 @@ class Installation(Runner):
     def __init__(self, distribution: pathlib.Path):
         self.distribution = distribution
 
-    def install_distribution(self, this: Callable, exenv: ExecutionEnvironment, **kwargs):
+    def install_distribution(
+        self,
+        this: Callable,
+        exenv: ExecutionEnvironment,
+        read: int = 0.5,
+        wait: int = 0.5,
+        **kwargs
+    ):
         args = self.pip_command_args(
             interpreter=exenv.interpreter,
             distribution=self.distribution,
@@ -112,24 +119,24 @@ class Installation(Runner):
             encodimg="utf8",
             text=True,
             stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
+            stderr=subprocess.PIPE,
             cwd=exenv.location,
             env=None,
         )
-        return Completion(this, exenv)
+        while True:
+            try:
+                outs, errs = proc.communicate(timeout=read)
+                for line in outs.splitlines():
+                    exenv.queue.put(line)
+                for line in errs.splitlines():
+                    exenv.queue.put(line)
+                rv = proc.poll()
+                if rv:
+                    return Completion(this, exenv, data=rv)
+            except subprocess.TimeoutExpired:
+                time.sleep(wait)
 
-    def check_installation(self, this: Callable, exenv: ExecutionEnvironment, repeat=100, interval=2, **kwargs):
-        values = []
-        while len(values) < repeat:
-            files = list(self.walk_files(self.location))
-            values.append(len(files))
-            exenv.queue.put(values[-1])
-            if len(values) > 3 and values[-3] == values[-1] and values[-1] <= max(values):
-                break
-            else:
-                time.sleep(interval)
-        return Completion(this, exenv)
 
     @property
     def jobs(self) -> list:
-        return [self.install_distribution, self.check_installation]
+        return [self.install_distribution]
