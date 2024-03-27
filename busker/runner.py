@@ -112,6 +112,7 @@ class Installation(Runner):
             interpreter=exenv.interpreter,
             distribution=self.distribution,
         )
+        print(f"{args=}")
         proc = subprocess.Popen(
             args,
             bufsize=1,
@@ -135,7 +136,6 @@ class Installation(Runner):
                     return Completion(this, exenv, data=rv)
             except subprocess.TimeoutExpired:
                 time.sleep(wait)
-
 
     @property
     def jobs(self) -> list:

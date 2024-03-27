@@ -38,6 +38,7 @@ import venv
 import busker
 from busker.executive import Executive
 from busker.history import SharedHistory
+from busker.runner import Installation
 from busker.runner import VirtualEnv
 from busker.scraper import Scraper
 from busker.types import Host
@@ -199,6 +200,11 @@ class EnvironmentZone(Zone):
 
 class PackageZone(Zone):
 
+    def __init__(self, parent, name="", **kwargs):
+        super().__init__(parent, name=name, **kwargs)
+        self.executive = Executive()
+        self.running = list()
+
     def build(self, frame: ttk.Frame):
         frame.rowconfigure(0, weight=0)
         frame.columnconfigure(0, weight=1)
@@ -239,7 +245,7 @@ class PackageZone(Zone):
 
     def on_install(self):
         path = pathlib.Path(self.controls.entry[0].get())
-        runner = VirtualEnv(path)
+        runner = Installation(path)
         self.running = {
             j.__name__: job
             for j, job in zip(
@@ -251,14 +257,15 @@ class PackageZone(Zone):
                 )
             )
         }
-        self.registry["Output"].controls.text[0].insert(tk.END, f"Environment build begins.\n")
+        self.registry["Output"].controls.text[0].insert(tk.END, f"Installation begins.\n")
         self.update_progress(self.running)
 
     def on_complete(self, result):
+        print(f"{result=}")
         self.running.pop(result.job.__name__)
         if self.running: return
 
-        self.registry["Output"].controls.text[0].insert(tk.END, f"Environment build complete.\n")
+        self.registry["Output"].controls.text[0].insert(tk.END, f"Installation complete.\n")
         for bar in self.controls.progress:
             bar["value"] = 0
             self.activity.clear()
@@ -266,17 +273,13 @@ class PackageZone(Zone):
     def update_progress(self, running: dict = None):
         for job, result in running.items():
             while not result.environment.queue.empty():
-                self.activity.append(result.environment.queue.get(block=False))
-                self.registry["Output"].controls.text[0].insert(
-                    tk.END, f"Objects counted: {self.activity[-1]!s}\n"
-                )
-
-        limit = 100 if len(self.running) == 1 else 50
-        for bar in self.controls.progress:
-            bar["value"] = min(len(self.activity) * limit / 10, limit)
+                # self.activity.append(result.environment.queue.get(block=False))
+                line = result.environment.queue.get(block=False)
+                self.registry["Output"].controls.text[0].insert(tk.END, line)
 
         if not all(r.ready() for r in running.values()):
             self.frame.after(500, self.update_progress, running)
+
 
 class ServerZone(Zone):
 
