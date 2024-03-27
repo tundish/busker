@@ -28,9 +28,13 @@ class InstallationTests(unittest.TestCase):
     def test_pip_command_args(self):
         exenv = ExecutionEnvironment(
             "/home/user/src/busker/busker_ejdaibaf_venv",
+            "/home/user/src/busker/busker_ejdaibaf_venv/bin/python",
         )
         distribution = "/home/user/src/busker/dist/busker-0.5.0.tar.gz"
         args = Installation.pip_command_args(
             interpreter=exenv.interpreter,
+            distribution=distribution,
+            update=True,
         )
         self.assertTrue(args)
+        self.assertTrue(all(isinstance(i, str) for i in args), args)

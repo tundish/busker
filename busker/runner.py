@@ -87,8 +87,15 @@ class Installation(Runner):
 
     def pip_command_args(
         interpreter: pathlib.Path,
+        distribution: pathlib.Path,
+        dependencies: list = ["test"],
+        update=False,
     ) -> list[str]:
-        return []
+        specification = f"{distribution}" + ("[{0}]".format(",".join(dependencies)) if dependencies else "")
+        rv = [interpreter, "-m", "pip", "install", specification]
+        if update:
+            rv.insert(4, "--upgrade")
+        return rv
 
     def __init__(self, location: pathlib.Path):
         self.location = location
