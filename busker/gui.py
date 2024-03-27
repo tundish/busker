@@ -169,14 +169,14 @@ class EnvironmentZone(Zone):
                 )
             )
         }
-        self.registry["OutputZone"][0].controls.text[0].insert(tk.END, f"Environment build begins.\n")
+        self.registry["Output"].controls.text[0].insert(tk.END, f"Environment build begins.\n")
         self.update_progress(self.running)
 
     def on_complete(self, result):
         self.running.pop(result.job.__name__)
         if self.running: return
 
-        self.registry["OutputZone"][0].controls.text[0].insert(tk.END, f"Environment build complete.\n")
+        self.registry["Output"].controls.text[0].insert(tk.END, f"Environment build complete.\n")
         for bar in self.controls.progress:
             bar["value"] = 0
             self.activity.clear()
@@ -185,11 +185,11 @@ class EnvironmentZone(Zone):
         for job, result in running.items():
             while not result.environment.queue.empty():
                 self.activity.append(result.environment.queue.get(block=False))
-                self.registry["OutputZone"][0].controls.text[0].insert(
+                self.registry["Output"].controls.text[0].insert(
                     tk.END, f"Objects counted: {self.activity[-1]!s}\n"
                 )
 
-        limit = 90 if len(self.running) == 1 else 50
+        limit = 100 if len(self.running) == 1 else 50
         for bar in self.controls.progress:
             bar["value"] = min(len(self.activity) * limit / 10, limit)
 

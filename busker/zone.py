@@ -33,6 +33,8 @@ class Zone(SharedHistory):
     def __init__(self, parent, name="", **kwargs):
         super().__init__(log_name=f"busker.gui.{name.lower()}", **kwargs)
         self.registry[self.__class__.__name__].append(self)
+        if name and name not in self.registry:
+            self.registry[name] = self
 
         self.parent = parent
         self.name = name
