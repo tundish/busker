@@ -118,6 +118,7 @@ class EnvironmentZone(Zone):
         self.executive = Executive()
         self.activity = list()
         self.running = list()
+        self.location = None
 
     def build(self, frame: ttk.Frame):
         frame.rowconfigure(0, weight=1)
@@ -155,6 +156,7 @@ class EnvironmentZone(Zone):
             path = pathlib.Path(tempfile.mkdtemp(prefix="busker_", suffix="_venv", dir=path))
         self.controls.entry[0].delete(0, tk.END)
         self.controls.entry[0].insert(0, str(path))
+        self.location = path
 
     def on_build(self):
         path = pathlib.Path(self.controls.entry[0].get())
@@ -177,6 +179,7 @@ class EnvironmentZone(Zone):
         self.running.pop(result.job.__name__)
         if self.running: return
 
+        # self.executive.register()
         self.registry["Output"].controls.text[0].insert(tk.END, f"Environment build complete.\n")
         for bar in self.controls.progress:
             bar["value"] = 0
@@ -257,6 +260,8 @@ class PackageZone(Zone):
                 )
             )
         }
+        print(f"{self.running=}")
+        print(f"{self.executive.registry=}")
         self.registry["Output"].controls.text[0].insert(tk.END, f"Installation begins.\n")
         self.update_progress(self.running)
 
@@ -271,6 +276,7 @@ class PackageZone(Zone):
             self.activity.clear()
 
     def update_progress(self, running: dict = None):
+        print(f"{running=}")
         for job, result in running.items():
             while not result.environment.queue.empty():
                 # self.activity.append(result.environment.queue.get(block=False))
