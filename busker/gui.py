@@ -239,34 +239,44 @@ class PackageZone(Zone):
 
     def on_install(self):
         path = pathlib.Path(self.controls.entry[0].get())
-        future = self.executor.submit(
-            venv.create,
-            path,
-            system_site_packages=True,
-            clear=True,
-            with_pip=True,
-            upgrade_deps=True
-        )
-        future.add_done_callback(self.on_complete)
-        self.update_progress(path, future)
+        runner = VirtualEnv(path)
+        self.running = {
+            j.__name__: job
+            for j, job in zip(
+                runner.jobs,
+                self.executive.run(
+                    sys.executable,
+                    *runner.jobs,
+                    callback=self.on_complete
+                )
+            )
+        }
+        self.registry["Output"].controls.text[0].insert(tk.END, f"Environment build begins.\n")
+        self.update_progress(self.running)
 
-    def on_complete(self, future):
+    def on_complete(self, result):
+        self.running.pop(result.job.__name__)
+        if self.running: return
+
+        self.registry["Output"].controls.text[0].insert(tk.END, f"Environment build complete.\n")
         for bar in self.controls.progress:
             bar["value"] = 0
             self.activity.clear()
 
-    def update_progress(self, path: pathlib.Path, future=None):
-        files = list(self.walk_files(path))
-        self.activity.append(len(files))
+    def update_progress(self, running: dict = None):
+        for job, result in running.items():
+            while not result.environment.queue.empty():
+                self.activity.append(result.environment.queue.get(block=False))
+                self.registry["Output"].controls.text[0].insert(
+                    tk.END, f"Objects counted: {self.activity[-1]!s}\n"
+                )
 
-        if future and not future.done():
-            for bar in self.controls.progress:
-                # TODO: Better approximation of progress
-                half = 50 if self.activity[-1] < max(self.activity) else 0
-                bar["value"] = min(half + len(self.activity) * 8, 100)
+        limit = 100 if len(self.running) == 1 else 50
+        for bar in self.controls.progress:
+            bar["value"] = min(len(self.activity) * limit / 10, limit)
 
-            self.frame.after(1500, self.update_progress, path, future)
-
+        if not all(r.ready() for r in running.values()):
+            self.frame.after(500, self.update_progress, running)
 
 class ServerZone(Zone):
 

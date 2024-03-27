@@ -81,3 +81,40 @@ class VirtualEnv(Runner):
     @property
     def jobs(self) -> list:
         return [self.build_virtualenv, self.check_virtualenv]
+
+
+class Installation(Runner):
+
+    def pip_command_args(
+        interpreter: pathlib.Path,
+    ) -> list[str]:
+        return []
+
+    def __init__(self, location: pathlib.Path):
+        self.location = location
+
+    def install_distribution(self, this: Callable, exenv: ExecutionEnvironment, **kwargs):
+        venv.create(
+            self.location,
+            system_site_packages=True,
+            clear=True,
+            with_pip=True,
+            upgrade_deps=True
+        )
+        return Completion(this, exenv)
+
+    def check_installation(self, this: Callable, exenv: ExecutionEnvironment, repeat=100, interval=2, **kwargs):
+        values = []
+        while len(values) < repeat:
+            files = list(self.walk_files(self.location))
+            values.append(len(files))
+            exenv.queue.put(values[-1])
+            if len(values) > 3 and values[-3] == values[-1] and values[-1] <= max(values):
+                break
+            else:
+                time.sleep(interval)
+        return Completion(this, exenv)
+
+    @property
+    def jobs(self) -> list:
+        return [self.install_distribution, self.check_installation]
