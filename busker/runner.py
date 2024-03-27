@@ -97,16 +97,24 @@ class Installation(Runner):
             rv.insert(4, "--upgrade")
         return rv
 
-    def __init__(self, location: pathlib.Path):
-        self.location = location
+    def __init__(self, distribution: pathlib.Path):
+        self.distribution = distribution
 
     def install_distribution(self, this: Callable, exenv: ExecutionEnvironment, **kwargs):
-        venv.create(
-            self.location,
-            system_site_packages=True,
-            clear=True,
-            with_pip=True,
-            upgrade_deps=True
+        args = self.pip_command_args(
+            interpreter=exenv.interpreter,
+            distribution=self.distribution,
+        )
+        proc = subprocess.Popen(
+            args,
+            bufsize=1,
+            shell=False,
+            encodimg="utf8",
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            cwd=exenv.location,
+            env=None,
         )
         return Completion(this, exenv)
 
