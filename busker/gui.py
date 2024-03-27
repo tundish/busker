@@ -224,16 +224,16 @@ class PackageZone(Zone):
             row=1, column=0, columnspan=4, padx=(10, 10), pady=(10, 10), sticky=tk.W + tk.E
         )
 
-
     def on_select(self):
-        path = pathlib.Path(filedialog.askdirectory(
+        path = pathlib.Path(filedialog.askopenfilename(
             parent=self.frame,
-            title="Select virtual environment",
+            title="Select Python package",
             initialdir=pathlib.Path.cwd(),
-            mustexist=True,
+            filetypes=[
+                ("Source packages", "*.tar.gz"),
+                ("Binary packages", "*.whl"),
+            ]
         ))
-        if not self.venv_cfg(path) and not path.name.startswith("busker_"):
-            path = pathlib.Path(tempfile.mkdtemp(prefix="busker_", suffix="_venv", dir=path))
         self.controls.entry[0].delete(0, tk.END)
         self.controls.entry[0].insert(0, str(path))
 
