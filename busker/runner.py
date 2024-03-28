@@ -112,7 +112,7 @@ class Installation(Runner):
             interpreter=exenv.interpreter,
             distribution=self.distribution,
         )
-        print(f"{args=}")
+        exenv.queue.put(args)
         proc = subprocess.Popen(
             args,
             bufsize=1,

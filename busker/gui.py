@@ -246,6 +246,7 @@ class PackageZone(Zone):
     def on_install(self):
         path = pathlib.Path(self.controls.entry[0].get())
         runner = Installation(path)
+        print("Registered: ", self.executive.registry)
         self.running = {
             j.__name__: job
             for j, job in zip(
