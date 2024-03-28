@@ -98,14 +98,14 @@ class Installation(Runner):
             rv.insert(4, "--upgrade")
         return rv
 
-    def __init__(self, distribution: pathlib.Path):
+    def __init__(self, distribution: pathlib.Path, read_interval: int = 0.5):
         self.distribution = distribution
+        self.read_interval = read_interval
+        self.proc = None
 
     def __call__(
         self,
         exenv: ExecutionEnvironment,
-        read: int = 0.5,
-        wait: int = 0.5,
         **kwargs
     ):
         args = self.pip_command_args(
@@ -113,29 +113,34 @@ class Installation(Runner):
             distribution=self.distribution,
         )
         exenv.queue.put(args)
-        proc = subprocess.Popen(
+        self.proc = subprocess.Popen(
             args,
             bufsize=1,
             shell=False,
-            encodimg="utf8",
+            encoding="utf8",
             text=True,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             cwd=exenv.location,
             env=None,
         )
-        while True:
-            try:
-                outs, errs = proc.communicate(timeout=read)
-                for line in outs.splitlines():
-                    exenv.queue.put(line)
-                for line in errs.splitlines():
-                    exenv.queue.put(line)
-                rv = proc.poll()
-                if rv:
-                    return Completion(this, exenv, data=rv)
-            except subprocess.TimeoutExpired:
-                time.sleep(wait)
+        return self.proc
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        try:
+            outs, errs = self.proc.communicate(timeout=self.read_interval)
+            for line in outs.splitlines():
+                exenv.queue.put(line)
+            for line in errs.splitlines():
+                exenv.queue.put(line)
+            rv = proc.poll()
+            if rv:
+                return Completion(this, exenv, data=rv)
+        except subprocess.TimeoutExpired:
+            return
 
     @property
     def jobs(self) -> list | typing.Self:

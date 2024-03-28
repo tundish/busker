@@ -123,13 +123,16 @@ class Executive(SharedHistory):
     ):
         interpreter = pathlib.Path(interpreter)
         exenv = self.registry[interpreter]
+        env = dataclasses.replace(exenv, pool=None, manager=None)
         for job in jobs:
-            env = dataclasses.replace(exenv, pool=None, manager=None)
-            rv = exenv.pool.apply_async(
-                job, args=(job, env,), kwds=kwargs,
-                callback=callback or self.callback,
-                error_callback=error_callback or self.error_callback
-            )
+            if isinstance(job, Runner):
+                rv = job(exenv, **kwargs)
+            else:
+                rv = exenv.pool.apply_async(
+                    job, args=(job, env,), kwds=kwargs,
+                    callback=callback or self.callback,
+                    error_callback=error_callback or self.error_callback
+                )
             rv.environment = env
             yield rv
 

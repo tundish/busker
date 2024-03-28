@@ -25,6 +25,7 @@ import logging
 import multiprocessing.context
 import pathlib
 import queue
+import subprocess
 import tempfile
 import tkinter as tk
 from tkinter import filedialog
@@ -41,6 +42,7 @@ from busker.history import SharedHistory
 from busker.runner import Installation
 from busker.runner import VirtualEnv
 from busker.scraper import Scraper
+from busker.types import ExecutionEnvironment
 from busker.types import Host
 from busker.zone import Zone
 import busker.visitor
@@ -120,6 +122,20 @@ class EnvironmentZone(Zone):
         self.running = list()
         self.location = None
 
+    @property
+    def exenv(self):
+        cfg = self.executive.venv_cfg(self.location)
+
+        rv = ExecutionEnvironment(
+            location=self.location,
+            config=dict(self.executive.venv_data(cfg)),
+        )
+        try:
+            rv.interpreter = self.executive.venv_exe(rv.location, **rv.config)
+        except (AttributeError, TypeError):
+            pass
+        return rv
+
     def build(self, frame: ttk.Frame):
         frame.rowconfigure(0, weight=1)
         frame.columnconfigure(0, weight=1)
@@ -178,11 +194,6 @@ class EnvironmentZone(Zone):
     def on_complete(self, result):
         self.running.pop(result.job.__name__)
         if self.running: return
-
-        exe = self.executive.venv_exe(self.location)
-        if exe.exists():
-            print("Don't dare register!")
-            # self.executive.register(exe, self.location)
 
         self.registry["Output"].controls.text[0].insert(tk.END, f"Environment build complete.\n")
         for bar in self.controls.progress:
@@ -253,6 +264,12 @@ class PackageZone(Zone):
     def on_install(self):
         path = pathlib.Path(self.controls.entry[0].get())
         runner = Installation(path)
+        exenv = self.registry["Environment"].exenv
+        if not exenv.interpreter or not exenv.interpreter.exists():
+            tk.messagebox.showwarning(message="No interpreter.\nPlease select and build an environment.")
+            return
+
+        self.running = next(self.executive.run(exenv.interpreter, runner))
         print("Registered: ", self.executive.registry)
         """
         self.running = {
@@ -282,16 +299,18 @@ class PackageZone(Zone):
             bar["value"] = 0
             self.activity.clear()
 
-    def update_progress(self, running: dict = None):
-        print(f"{running=}")
-        for job, result in running.items():
-            while not result.environment.queue.empty():
-                # self.activity.append(result.environment.queue.get(block=False))
-                line = result.environment.queue.get(block=False)
+    def update_progress(self, proc):
+        try:
+            outs, errs = proc.communicate(timeout=proc.read_interval)
+            for line in outs.splitlines():
                 self.registry["Output"].controls.text[0].insert(tk.END, line)
+            for line in errs.splitlines():
+                self.registry["Output"].controls.text[0].insert(tk.END, line)
+        except subprocess.TimeoutExpired:
+            pass
 
-        if not all(r.ready() for r in running.values()):
-            self.frame.after(500, self.update_progress, running)
+        if not proc.poll():
+            self.frame.after(500, self.update_progress, proc)
 
 
 class ServerZone(Zone):
