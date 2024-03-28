@@ -26,6 +26,7 @@ import pathlib
 import sys
 import time
 import tomllib
+import typing
 import venv
 
 
@@ -47,7 +48,7 @@ class Runner:
         yield callback(path)
 
     @property
-    def jobs(self) -> list:
+    def jobs(self) -> list | typing.Self:
         return []
 
 
@@ -100,9 +101,8 @@ class Installation(Runner):
     def __init__(self, distribution: pathlib.Path):
         self.distribution = distribution
 
-    def install_distribution(
+    def __call__(
         self,
-        this: Callable,
         exenv: ExecutionEnvironment,
         read: int = 0.5,
         wait: int = 0.5,
@@ -138,5 +138,5 @@ class Installation(Runner):
                 time.sleep(wait)
 
     @property
-    def jobs(self) -> list:
-        return [self.install_distribution]
+    def jobs(self) -> list | typing.Self:
+        return self
