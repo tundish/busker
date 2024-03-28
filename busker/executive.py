@@ -65,7 +65,7 @@ class Executive(SharedHistory):
 
     def __init__(self, *args, maxlen: int = 24, **kwargs):
         super().__init__(*args, maxlen=maxlen, **kwargs)
-        self.register(sys.executable)
+        self.build(sys.executable)
 
     def callback(self, result):
         return
@@ -76,7 +76,7 @@ class Executive(SharedHistory):
     def initializer(self, location: pathlib.Path, interpreter: pathlib.Path, config: dict, *args):
         self.log(f"Initializing execution environment at {location!s}")
 
-    def register(
+    def build(
         self,
         interpreter: str | pathlib.Path, location: pathlib.Path=None, config: dict=None,
         processes: int = None, maxtasksperchild: int = None
@@ -106,8 +106,7 @@ class Executive(SharedHistory):
         pool = context.Pool(processes=processes, maxtasksperchild=maxtasksperchild)
         manager = multiprocessing.managers.SyncManager(ctx=context)
 
-        # manager.start(initializer=self.initializer, initargs=dataclasses.astuple(exenv))
-        manager.start()
+        manager.start(initializer=self.initializer, initargs=dataclasses.astuple(exenv))
         exenv.pool = pool
         exenv.manager = manager
         exenv.queue = manager.Queue()
@@ -137,16 +136,14 @@ class Executive(SharedHistory):
             yield rv
 
     def shutdown(self, keys=None):
-        keys = keys or self.registry.keys()
-        for key in keys:
-            exenv = self.registry[key]
-            try:
-                exenv.queue.close()
-            except AttributeError:
-                # Windows
-                pass
-            exenv.manager.shutdown()
-            exenv.pool.terminate()
+        key, exenv = self.registry.popitem()
+        try:
+            exenv.queue.close()
+        except AttributeError:
+            # Windows
+            pass
+        exenv.manager.shutdown()
+        exenv.pool.terminate()
 
 
 class Hello(Runner):
