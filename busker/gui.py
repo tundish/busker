@@ -179,7 +179,11 @@ class EnvironmentZone(Zone):
         self.running.pop(result.job.__name__)
         if self.running: return
 
-        # self.executive.register()
+        exe = self.executive.venv_exe(self.location)
+        if exe.exists():
+            print("Don't dare register!")
+            # self.executive.register(exe, self.location)
+
         self.registry["Output"].controls.text[0].insert(tk.END, f"Environment build complete.\n")
         for bar in self.controls.progress:
             bar["value"] = 0
@@ -206,7 +210,7 @@ class PackageZone(Zone):
     def __init__(self, parent, name="", **kwargs):
         super().__init__(parent, name=name, **kwargs)
         self.executive = Executive()
-        self.running = list()
+        self.running = {}
 
     def build(self, frame: ttk.Frame):
         frame.rowconfigure(0, weight=0)
@@ -250,6 +254,7 @@ class PackageZone(Zone):
         path = pathlib.Path(self.controls.entry[0].get())
         runner = Installation(path)
         print("Registered: ", self.executive.registry)
+        """
         self.running = {
             j.__name__: job
             for j, job in zip(
@@ -261,6 +266,7 @@ class PackageZone(Zone):
                 )
             )
         }
+        """
         print(f"{self.running=}")
         print(f"{self.executive.registry=}")
         self.registry["Output"].controls.text[0].insert(tk.END, f"Installation begins.\n")

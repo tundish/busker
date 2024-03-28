@@ -82,6 +82,10 @@ class Executive(SharedHistory):
         processes: int = None, maxtasksperchild: int = None
     ):
         interpreter = pathlib.Path(interpreter)
+        if not interpreter.exists():
+            return
+
+        # self.shutdown()  # Not sure if multiple managers are possible.
         exenv = self.registry.setdefault(
             interpreter,
             ExecutionEnvironment(
@@ -102,7 +106,8 @@ class Executive(SharedHistory):
         pool = context.Pool(processes=processes, maxtasksperchild=maxtasksperchild)
         manager = multiprocessing.managers.SyncManager(ctx=context)
 
-        manager.start(initializer=self.initializer, initargs=dataclasses.astuple(exenv))
+        # manager.start(initializer=self.initializer, initargs=dataclasses.astuple(exenv))
+        manager.start()
         exenv.pool = pool
         exenv.manager = manager
         exenv.queue = manager.Queue()
@@ -128,9 +133,10 @@ class Executive(SharedHistory):
             rv.environment = env
             yield rv
 
-    def shutdown(self):
-        while self.registry:
-            key, exenv = self.registry.popitem()
+    def shutdown(self, keys=None):
+        keys = keys or self.registry.keys()
+        for key in keys:
+            exenv = self.registry[key]
             try:
                 exenv.queue.close()
             except AttributeError:
