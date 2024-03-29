@@ -123,7 +123,7 @@ class Executive(SharedHistory):
         cfg = self.venv_cfg(location)
 
         exenv = ExecutionEnvironment(
-            location=self.location,
+            location=location,
             config=dict(self.venv_data(cfg)),
             queue=queue,
         )
@@ -132,8 +132,8 @@ class Executive(SharedHistory):
         except (AttributeError, TypeError):
             return None
 
-        self.registry[interpreter] = exenv
-        return interpreter
+        self.registry[exenv.interpreter] = exenv
+        return exenv.interpreter
 
     def run(
         self,
@@ -157,7 +157,7 @@ class Executive(SharedHistory):
             yield rv
 
         if isinstance(runner, Callable):
-            rv = job(exenv, **kwargs)
+            rv = runner(exenv, **kwargs)
             rv.exenv = env
             yield rv
 

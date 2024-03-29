@@ -131,23 +131,3 @@ class Installation(Runner):
             env=None,
         )
         return self.proc
-
-    def __iter__(self):
-        return self
-
-    def __next__(self):
-        try:
-            outs, errs = self.proc.communicate(timeout=self.read_interval)
-            for line in outs.splitlines():
-                exenv.queue.put(line)
-            for line in errs.splitlines():
-                exenv.queue.put(line)
-            rv = proc.poll()
-            if rv:
-                return Completion(self, this, exenv, data=rv)
-        except subprocess.TimeoutExpired:
-            return
-
-    @property
-    def jobs(self) -> list | typing.Self:
-        return self

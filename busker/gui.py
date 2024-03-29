@@ -122,6 +122,7 @@ class EnvironmentZone(Zone):
         self.activity = list()
         self.running = defaultdict(list)
         self.location = None
+        self.interpreter = None
 
     @property
     def exenv(self):
@@ -183,12 +184,11 @@ class EnvironmentZone(Zone):
         self.update_progress(runner)
 
     def on_complete(self, result):
-        print(f"{self.running=}")
-        print(f"{result.runner=}")
         pending = self.running[result.runner.uid]
         pending.pop(0)
         if pending: return
 
+        self.interpreter = self.executive.register(self.location, queue=queue.Queue())
         self.registry["Output"].controls.text[0].insert(tk.END, f"Environment build complete.\n")
         for bar in self.controls.progress:
             bar["value"] = 0
@@ -216,7 +216,7 @@ class PackageZone(Zone):
     def __init__(self, parent, name="", **kwargs):
         super().__init__(parent, name=name, **kwargs)
         self.executive = Executive()
-        self.running = {}
+        self.running = defaultdict(list)
 
     def build(self, frame: ttk.Frame):
         frame.rowconfigure(0, weight=0)
@@ -257,54 +257,31 @@ class PackageZone(Zone):
         self.controls.entry[0].insert(0, str(path))
 
     def on_install(self):
-        path = pathlib.Path(self.controls.entry[0].get())
-        runner = Installation(path)
-        exenv = self.registry["Environment"].exenv
-        if not exenv.interpreter or not exenv.interpreter.exists():
+        interpreter = self.registry["Environment"].interpreter
+        if not interpreter or interpreter not in self.executive.registry:
             tk.messagebox.showwarning(message="No interpreter.\nPlease select and build an environment.")
             return
 
-        # self.executive.run(runner, interpreter)
-        self.running = next(self.executive.run(exenv.interpreter, runner))
-        print("Registered: ", self.executive.registry)
-        """
-        self.running = {
-            j.__name__: job
-            for j, job in zip(
-                runner.jobs,
-                self.executive.run(
-                    sys.executable,
-                    *runner.jobs,
-                    callback=self.on_complete
-                )
-            )
-        }
-        """
-        print(f"{self.running=}")
-        print(f"{self.executive.registry=}")
-        self.registry["Output"].controls.text[0].insert(tk.END, f"Installation begins.\n")
-        self.update_progress(self.running)
+        path = pathlib.Path(self.controls.entry[0].get())
+        runner = Installation(path)
 
-    def on_complete(self, result):
-        print(f"{result=}")
-        self.running.pop(result.job.__name__)
-        if self.running: return
+        self.running[runner.uid] = list(self.executive.run(runner, interpreter=interpreter))
+        self.registry["Output"].controls.text[0].insert(tk.END, f"Package installation begins.\n")
+        self.update_progress(runner)
 
-        self.registry["Output"].controls.text[0].insert(tk.END, f"Installation complete.\n")
-        for bar in self.controls.progress:
-            bar["value"] = 0
-            self.activity.clear()
-
-    def update_progress(self, proc):
+    def update_progress(self, runner: Runner):
+        runner = next(iter(self.running[runner.uid]), None)
         try:
-            outs, errs = proc.communicate(timeout=proc.read_interval)
+            outs, errs = runner.proc.communicate(timeout=runner.read_interval)
             for line in outs.splitlines():
                 self.registry["Output"].controls.text[0].insert(tk.END, line)
             for line in errs.splitlines():
                 self.registry["Output"].controls.text[0].insert(tk.END, line)
         except subprocess.TimeoutExpired:
-            pass
+            return
 
+        msg = result.exenv.queue.get(block=False)
+        print(f"{msg=}")
         if not proc.poll():
             self.frame.after(500, self.update_progress, proc)
 
