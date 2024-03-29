@@ -65,7 +65,7 @@ class VirtualEnv(Runner):
             with_pip=True,
             upgrade_deps=True
         )
-        return Completion(this, exenv)
+        return Completion(self, this, exenv)
 
     def check_virtualenv(self, this: Callable, exenv: ExecutionEnvironment, repeat=100, interval=2, **kwargs):
         values = []
@@ -77,7 +77,7 @@ class VirtualEnv(Runner):
                 break
             else:
                 time.sleep(interval)
-        return Completion(this, exenv)
+        return Completion(self, this, exenv)
 
     @property
     def jobs(self) -> list:
@@ -138,7 +138,7 @@ class Installation(Runner):
                 exenv.queue.put(line)
             rv = proc.poll()
             if rv:
-                return Completion(this, exenv, data=rv)
+                return Completion(self, this, exenv, data=rv)
         except subprocess.TimeoutExpired:
             return
 

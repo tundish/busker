@@ -26,7 +26,7 @@ import multiprocessing.pool
 import pathlib
 
 
-Completion = namedtuple("Completion", ["job", "exenv", "data"], defaults=[None])
+Completion = namedtuple("Completion", ["runner", "job", "exenv", "data"], defaults=[None])
 
 
 class Host(enum.Enum):

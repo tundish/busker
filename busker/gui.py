@@ -40,6 +40,7 @@ import busker
 from busker.executive import Executive
 from busker.history import SharedHistory
 from busker.runner import Installation
+from busker.runner import Runner
 from busker.runner import VirtualEnv
 from busker.scraper import Scraper
 from busker.types import ExecutionEnvironment
@@ -119,7 +120,7 @@ class EnvironmentZone(Zone):
         super().__init__(parent, name=name, **kwargs)
         self.executive = Executive()
         self.activity = list()
-        self.running = list()
+        self.running = defaultdict(list)
         self.location = None
 
     @property
@@ -177,34 +178,32 @@ class EnvironmentZone(Zone):
     def on_build(self):
         path = pathlib.Path(self.controls.entry[0].get())
         runner = VirtualEnv(path)
-        sef.executive.run(runner)
-        self.running = {
-            j.__name__: job
-            for j, job in zip(
-                runner.jobs,
-                self.executive.run(
-                    sys.executable,
-                    *runner.jobs,
-                    callback=self.on_complete
-                )
-            )
-        }
+        self.running[runner] = list(self.executive.run(runner, callback=self.on_complete))
         self.registry["Output"].controls.text[0].insert(tk.END, f"Environment build begins.\n")
-        self.update_progress(self.running)
+        self.update_progress(runner)
 
     def on_complete(self, result):
-        self.running.pop(result.job.__name__)
-        if self.running: return
+        print(f"{result=}")
+        print(f"{self.running=}")
+
+        pending = self.running[result.runner]
+        jobs = [i.job for i in pending]
+        print(f"{jobs=}")
+        job = next((i for i in pending if i.job.__name__ == result.job.__name__), None)
+        print(f"{job=}")
+        pending.remove(job)
+        if pending: return
 
         self.registry["Output"].controls.text[0].insert(tk.END, f"Environment build complete.\n")
         for bar in self.controls.progress:
             bar["value"] = 0
             self.activity.clear()
 
-    def update_progress(self, running: dict = None):
-        for job, result in running.items():
-            while not result.environment.queue.empty():
-                self.activity.append(result.environment.queue.get(block=False))
+    def update_progress(self, runner: Runner):
+        running = self.running[runner]
+        for result in running:
+            while not result.exenv.queue.empty():
+                self.activity.append(result.exenv.queue.get(block=False))
                 self.registry["Output"].controls.text[0].insert(
                     tk.END, f"Objects counted: {self.activity[-1]!s}\n"
                 )
@@ -213,8 +212,8 @@ class EnvironmentZone(Zone):
         for bar in self.controls.progress:
             bar["value"] = min(len(self.activity) * limit / 10, limit)
 
-        if not all(r.ready() for r in running.values()):
-            self.frame.after(500, self.update_progress, running)
+        if not all(r.ready() for r in running):
+            self.frame.after(500, self.update_progress, runner)
 
 
 class PackageZone(Zone):
@@ -270,6 +269,7 @@ class PackageZone(Zone):
             tk.messagebox.showwarning(message="No interpreter.\nPlease select and build an environment.")
             return
 
+        # self.executive.run(runner, interpreter)
         self.running = next(self.executive.run(exenv.interpreter, runner))
         print("Registered: ", self.executive.registry)
         """

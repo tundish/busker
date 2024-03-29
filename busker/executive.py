@@ -153,12 +153,13 @@ class Executive(SharedHistory):
                 callback=callback or self.callback,
                 error_callback=error_callback or self.error_callback
             )
-            rv.environment = env
+            rv.exenv = env
+            rv.job = job
             yield rv
 
         if isinstance(runner, Callable):
             rv = job(exenv, **kwargs)
-            rv.environment = env
+            rv.exenv = env
             yield rv
 
     def shutdown(self, keys=None):
@@ -179,7 +180,7 @@ class Hello(Runner):
             print("Hello, world!", file=sys.stderr)
             exenv.queue.put(n)
             time.sleep(1)
-        return Completion(this, exenv, n)
+        return Completion(self, this, exenv, n)
 
     @property
     def jobs(self):
@@ -203,8 +204,8 @@ if __name__ == "__main__":
                 print("No uodate")
             finally:
                 items = []
-                while not result.environment.queue.empty():
-                    items.append(result.environment.queue.get(block=False))
+                while not result.exenv.queue.empty():
+                    items.append(result.exenv.queue.get(block=False))
                 print(f"{items=}")
 
     executive.shutdown()
