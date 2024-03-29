@@ -177,6 +177,7 @@ class EnvironmentZone(Zone):
     def on_build(self):
         path = pathlib.Path(self.controls.entry[0].get())
         runner = VirtualEnv(path)
+        sef.executive.run(runner)
         self.running = {
             j.__name__: job
             for j, job in zip(

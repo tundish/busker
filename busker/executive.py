@@ -137,8 +137,8 @@ class Executive(SharedHistory):
 
     def run(
         self,
-        interpreter: str | pathlib.Path,
-        *jobs: tuple[Runner],
+        runner: Runner,
+        interpreter: str | pathlib.Path = sys.executable,
         callback=None,
         error_callback=None,
         **kwargs
@@ -146,15 +146,18 @@ class Executive(SharedHistory):
         interpreter = pathlib.Path(interpreter)
         exenv = self.registry[interpreter]
         env = dataclasses.replace(exenv, pool=None, manager=None)
-        for job in jobs:
-            if isinstance(job, Runner):
-                rv = job(exenv, **kwargs)
-            else:
-                rv = exenv.pool.apply_async(
-                    job, args=(job, env,), kwds=kwargs,
-                    callback=callback or self.callback,
-                    error_callback=error_callback or self.error_callback
-                )
+
+        for job in runner.jobs:
+            rv = self.pool.apply_async(
+                job, args=(job, env,), kwds=kwargs,
+                callback=callback or self.callback,
+                error_callback=error_callback or self.error_callback
+            )
+            rv.environment = env
+            yield rv
+
+        if isinstance(runner, Callable):
+            rv = job(exenv, **kwargs)
             rv.environment = env
             yield rv
 
@@ -190,7 +193,7 @@ if __name__ == "__main__":
     print(executive.registry, file=sys.stderr)
 
     runner = Hello()
-    running = set(executive.run(sys.executable, *runner.jobs))
+    running = set(executive.run(runner))
     while not all(r.ready() for r in running):
         for result in running:
             try:
