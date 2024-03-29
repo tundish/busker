@@ -270,20 +270,26 @@ class PackageZone(Zone):
         self.update_progress(runner)
 
     def update_progress(self, runner: Runner):
-        runner = next(iter(self.running[runner.uid]), None)
-        try:
-            outs, errs = runner.proc.communicate(timeout=runner.read_interval)
-            for line in outs.splitlines():
-                self.registry["Output"].controls.text[0].insert(tk.END, line)
-            for line in errs.splitlines():
-                self.registry["Output"].controls.text[0].insert(tk.END, line)
-        except subprocess.TimeoutExpired:
-            return
+        line = runner.proc.stdout.readline()
 
-        msg = result.exenv.queue.get(block=False)
-        print(f"{msg=}")
-        if not proc.poll():
-            self.frame.after(500, self.update_progress, proc)
+        text_widget = self.registry["Output"].controls.text[0]
+        text_widget.insert(tk.END, line)
+        text_widget.see(tk.END)
+
+        try:
+            msg = runner.exenv.queue.get(block=False)
+            print(f"{msg=}")
+        except queue.Empty:
+            pass
+
+        if not runner.proc.poll():
+            self.frame.after(100, self.update_progress, runner)
+        else:
+            for line in runner.proc.stdout.read().splitlines():
+                text_widget.insert(tk.END, line)
+            for line in runner.proc.stderr.read().splitlines():
+                text_widget.insert(tk.END, line)
+            text_widget.see(tk.END)
 
 
 class ServerZone(Zone):

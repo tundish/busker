@@ -23,6 +23,7 @@ from collections import deque
 import concurrent.futures
 import logging
 import pathlib
+import subprocess
 import sys
 import time
 import tomllib
@@ -91,6 +92,7 @@ class VirtualEnv(Runner):
 
 class Installation(Runner):
 
+    @staticmethod
     def pip_command_args(
         interpreter: pathlib.Path,
         distribution: pathlib.Path,
@@ -108,17 +110,20 @@ class Installation(Runner):
         self.distribution = distribution
         self.read_interval = read_interval
         self.proc = None
+        self.exenv = None
 
     def __call__(
         self,
         exenv: ExecutionEnvironment,
         **kwargs
     ):
+        self.exenv = exenv
+
         args = self.pip_command_args(
             interpreter=exenv.interpreter,
             distribution=self.distribution,
         )
-        exenv.queue.put(args)
+        self.exenv.queue.put(args)
         self.proc = subprocess.Popen(
             args,
             bufsize=1,

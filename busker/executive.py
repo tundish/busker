@@ -157,9 +157,7 @@ class Executive(SharedHistory):
             yield rv
 
         if isinstance(runner, Callable):
-            rv = runner(exenv, **kwargs)
-            rv.exenv = env
-            yield rv
+            yield runner(exenv, **kwargs)
 
     def shutdown(self, keys=None):
         for exenv in self.registry.values():
