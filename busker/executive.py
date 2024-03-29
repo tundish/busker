@@ -119,7 +119,20 @@ class Executive(SharedHistory):
         exenv.queue = manager.Queue()
         return exenv
 
-    def register(self, location: pathlib.Path, *args) -> pathlib.Path:
+    def register(self, location: pathlib.Path, queue=None, *args) -> pathlib.Path:
+        cfg = self.venv_cfg(location)
+
+        exenv = ExecutionEnvironment(
+            location=self.location,
+            config=dict(self.venv_data(cfg)),
+            queue=queue,
+        )
+        try:
+            exenv.interpreter = self.venv_exe(location, **exenv.config)
+        except (AttributeError, TypeError):
+            return None
+
+        self.registry[interpreter] = exenv
         return interpreter
 
     def run(
@@ -146,14 +159,14 @@ class Executive(SharedHistory):
             yield rv
 
     def shutdown(self, keys=None):
-        key, exenv = self.registry.popitem()
-        try:
-            exenv.queue.close()
-        except AttributeError:
-            # Windows
-            pass
-        exenv.manager.shutdown()
-        exenv.pool.terminate()
+        for exenv in self.registry.values():
+            try:
+                exenv.queue.close()
+            except AttributeError:
+                # Windows or None
+                pass
+        self.manager.shutdown()
+        self.pool.terminate()
 
 
 class Hello(Runner):
