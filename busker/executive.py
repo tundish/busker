@@ -63,9 +63,19 @@ class Executive(SharedHistory):
         exec_path = pathlib.Path(kwargs.get("executable", ""))
         return location.joinpath(script_path.name, exec_path.name)
 
-    def __init__(self, *args, maxlen: int = 24, **kwargs):
+    def __init__(
+            self, *args,
+            maxlen: int = 24,
+            processes: int = None, maxtasksperchild: int = None,
+            **kwargs
+        ):
         super().__init__(*args, maxlen=maxlen, **kwargs)
-        self.build(sys.executable)
+        exenv = self.build(
+            sys.executable,
+            processes=processes, maxtasksperchild=maxtasksperchild
+        )
+        self.manager = exenv.manager
+        self.pool = exenv.pool
 
     def callback(self, result):
         return
@@ -78,30 +88,27 @@ class Executive(SharedHistory):
 
     def build(
         self,
-        interpreter: str | pathlib.Path, location: pathlib.Path=None, config: dict=None,
-        processes: int = None, maxtasksperchild: int = None
+        interpreter: str | pathlib.Path,
+        processes: int, maxtasksperchild: int,
+        location: pathlib.Path=None,
     ):
         interpreter = pathlib.Path(interpreter)
-        if not interpreter.exists():
-            return
 
-        # self.shutdown()  # Not sure if multiple managers are possible.
+        location = location or interpreter.parent.parent
+        cfg = self.venv_cfg(location)
         exenv = self.registry.setdefault(
             interpreter,
             ExecutionEnvironment(
                 location = location or interpreter.parent.parent,
                 interpreter=interpreter,
-                config=config,
+                config=dict(self.venv_data(cfg))
             )
         )
         if exenv.queue:
             return exenv
 
-        cfg = self.venv_cfg(exenv.location)
-        exenv.config = dict(self.venv_data(cfg))
-
         context = multiprocessing.get_context("spawn")
-        context.set_executable(exenv.interpreter)
+        context.set_executable(interpreter)
 
         pool = context.Pool(processes=processes, maxtasksperchild=maxtasksperchild)
         manager = multiprocessing.managers.SyncManager(ctx=context)
@@ -111,6 +118,9 @@ class Executive(SharedHistory):
         exenv.manager = manager
         exenv.queue = manager.Queue()
         return exenv
+
+    def register(self, location: pathlib.Path, *args) -> pathlib.Path:
+        return interpreter
 
     def run(
         self,
