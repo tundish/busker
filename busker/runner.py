@@ -27,6 +27,7 @@ import sys
 import time
 import tomllib
 import typing
+import uuid
 import venv
 
 
@@ -35,6 +36,9 @@ from busker.types import ExecutionEnvironment
 
 
 class Runner:
+
+    def __init__(self, uid: uuid.UUID = None, **kwargs):
+        self.uid = uid or uuid.uuid4()
 
     @staticmethod
     def walk_files(path: pathlib.Path, callback=None):
@@ -55,6 +59,7 @@ class Runner:
 class VirtualEnv(Runner):
 
     def __init__(self, location: pathlib.Path):
+        super().__init__()
         self.location = location
 
     def build_virtualenv(self, this: Callable, exenv: ExecutionEnvironment, **kwargs):
@@ -99,6 +104,7 @@ class Installation(Runner):
         return rv
 
     def __init__(self, distribution: pathlib.Path, read_interval: int = 0.5):
+        super().__init__()
         self.distribution = distribution
         self.read_interval = read_interval
         self.proc = None

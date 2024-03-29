@@ -178,20 +178,15 @@ class EnvironmentZone(Zone):
     def on_build(self):
         path = pathlib.Path(self.controls.entry[0].get())
         runner = VirtualEnv(path)
-        self.running[runner] = list(self.executive.run(runner, callback=self.on_complete))
+        self.running[runner.uid] = list(self.executive.run(runner, callback=self.on_complete))
         self.registry["Output"].controls.text[0].insert(tk.END, f"Environment build begins.\n")
         self.update_progress(runner)
 
     def on_complete(self, result):
-        print(f"{result=}")
         print(f"{self.running=}")
-
-        pending = self.running[result.runner]
-        jobs = [i.job for i in pending]
-        print(f"{jobs=}")
-        job = next((i for i in pending if i.job.__name__ == result.job.__name__), None)
-        print(f"{job=}")
-        pending.remove(job)
+        print(f"{result.runner=}")
+        pending = self.running[result.runner.uid]
+        pending.pop(0)
         if pending: return
 
         self.registry["Output"].controls.text[0].insert(tk.END, f"Environment build complete.\n")
@@ -200,7 +195,7 @@ class EnvironmentZone(Zone):
             self.activity.clear()
 
     def update_progress(self, runner: Runner):
-        running = self.running[runner]
+        running = self.running[runner.uid]
         for result in running:
             while not result.exenv.queue.empty():
                 self.activity.append(result.exenv.queue.get(block=False))

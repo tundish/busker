@@ -154,7 +154,6 @@ class Executive(SharedHistory):
                 error_callback=error_callback or self.error_callback
             )
             rv.exenv = env
-            rv.job = job
             yield rv
 
         if isinstance(runner, Callable):
