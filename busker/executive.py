@@ -227,13 +227,13 @@ if __name__ == "__main__":
     while not running.ready():
         try:
             rv = running.get(timeout=2)
-            print(f"{rv=}")
+            print(f"{rv.data}", file=sys.stdout)
         except multiprocessing.context.TimeoutError:
-            print("No uodate")
+            print("No uodate", file=sys.stderr)
         finally:
             items = []
             while not running.exenv.queue.empty():
                 items.append(running.exenv.queue.get(block=False))
-            print(f"{items=}")
+            print(f"{items=}", file=sys.stderr)
 
     executive.shutdown(running.exenv)
