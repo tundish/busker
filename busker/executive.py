@@ -141,10 +141,19 @@ class Executive(SharedHistory):
         interpreter: str | pathlib.Path = sys.executable,
         callback=None,
         error_callback=None,
+        queue=None,
         **kwargs
     ):
         interpreter = pathlib.Path(interpreter)
         exenv = self.registry[interpreter]
+        if queue:
+            try:
+                exenv.queue.close()
+            except AttributeError:
+                pass
+            finally:
+                exenv.queue = queue
+
         env = dataclasses.replace(exenv, pool=None, manager=None)
 
         for job in runner.jobs:

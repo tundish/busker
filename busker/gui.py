@@ -21,6 +21,7 @@ from collections import defaultdict
 from collections import deque
 import concurrent.futures
 import enum
+import importlib.metadata
 import logging
 import multiprocessing.context
 import pathlib
@@ -106,6 +107,7 @@ class InteractiveZone(Zone):
             row=1, column=1,  columnspan=2, padx=(10, 10), sticky=tk.E
         )
         # TODO: assist checkbox
+        # TODO: display cues
 
     def on_launch(self):
         host = self.controls.entry[0].get()
@@ -188,7 +190,7 @@ class EnvironmentZone(Zone):
         pending.pop(0)
         if pending: return
 
-        self.interpreter = self.executive.register(self.location, queue=queue.Queue())
+        self.interpreter = self.executive.register(self.location)
         self.registry["Output"].controls.text[0].insert(tk.END, f"Environment build complete.\n")
         for bar in self.controls.progress:
             bar["value"] = 0
@@ -265,7 +267,7 @@ class PackageZone(Zone):
         path = pathlib.Path(self.controls.entry[0].get())
         runner = Installation(path)
 
-        self.running[runner.uid] = list(self.executive.run(runner, interpreter=interpreter))
+        self.running[runner.uid] = list(self.executive.run(runner, interpreter=interpreter, queue=queue.Queue()))
         self.registry["Output"].controls.text[0].insert(tk.END, f"Package installation begins.\n")
         self.update_progress(runner)
 
@@ -278,11 +280,11 @@ class PackageZone(Zone):
 
         try:
             msg = runner.exenv.queue.get(block=False)
-            print(f"{msg=}")
+            text_widget.insert(tk.END, str(msg))
         except queue.Empty:
             pass
 
-        if not runner.proc.poll():
+        if runner.proc.poll() is None:
             self.frame.after(100, self.update_progress, runner)
         else:
             for line in runner.proc.stdout.read().splitlines():
