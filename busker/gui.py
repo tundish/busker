@@ -280,16 +280,18 @@ class PackageZone(Zone):
 
         try:
             msg = runner.exenv.queue.get(block=False)
-            text_widget.insert(tk.END, str(msg))
+            if isinstance(msg, list):
+                msg = [str(i) for i in msg]
+            text_widget.insert(tk.END, f"Runner: {msg}\n")
         except queue.Empty:
             pass
 
         if runner.proc.poll() is None:
             self.frame.after(100, self.update_progress, runner)
         else:
-            for line in runner.proc.stdout.read().splitlines():
+            for line in runner.proc.stdout.read().splitlines(keepends=True):
                 text_widget.insert(tk.END, line)
-            for line in runner.proc.stderr.read().splitlines():
+            for line in runner.proc.stderr.read().splitlines(keepends=True):
                 text_widget.insert(tk.END, line)
             text_widget.see(tk.END)
 
@@ -314,11 +316,11 @@ class ServerZone(Zone):
         yield "entry", self.grid(spin_box, row=0, column=5, padx=(10, 10))
 
         yield "button", self.grid(
-            tk.Button(frame, text="Activate", command=self.on_activate),
+            tk.Button(frame, text="Run", command=self.on_run),
             row=0, column=6, padx=(10, 10), sticky=tk.E
         )
 
-    def on_activate(self):
+    def on_run(self):
         print(self.controls)
 
 
