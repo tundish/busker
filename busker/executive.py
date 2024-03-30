@@ -124,6 +124,10 @@ class Executive(SharedHistory):
         self.manager = exenv.manager
         self.pool = exenv.pool
 
+    @property
+    def active(self) -> ExecutionEnvironment:
+        return next((exenv for exenv in self.registry.values() if exenv.manager), None)
+
     def callback(self, result):
         return
 
@@ -236,4 +240,5 @@ if __name__ == "__main__":
                 items.append(running.exenv.queue.get(block=False))
             print(f"{items=}", file=sys.stderr)
 
+    print(f"{executive.active=}", file=sys.stderr)
     executive.shutdown(running.exenv)
