@@ -89,6 +89,24 @@ class Executive(SharedHistory):
 
         return exenv
 
+    @staticmethod
+    def shutdown(exenv: ExecutionEnvironment):
+        try:
+            exenv.queue.close()
+        except AttributeError:
+            pass
+
+        try:
+            exenv.manager.shutdown()
+            exenv.pool.terminate()
+        except AttributeError:
+            pass
+        finally:
+            exenv.queue = None
+            exenv.manager = None
+            exenv.pool = None
+            return exenv
+
     def __init__(
             self, *args,
             maxlen: int = 24,
@@ -177,21 +195,11 @@ class Executive(SharedHistory):
                 callback=callback or self.callback,
                 error_callback=error_callback or self.error_callback
             )
-            rv.exenv = env
+            rv.exenv = exenv
             yield rv
 
         if isinstance(runner, Callable):
             yield runner(exenv, **kwargs)
-
-    def shutdown(self, keys=None):
-        for exenv in self.registry.values():
-            try:
-                exenv.queue.close()
-            except AttributeError:
-                # Windows or None
-                pass
-        self.manager.shutdown()
-        self.pool.terminate()
 
 
 class Hello(Runner):
@@ -215,18 +223,17 @@ if __name__ == "__main__":
     print(executive.registry, file=sys.stderr)
 
     runner = Hello()
-    running = set(executive.run(runner))
-    while not all(r.ready() for r in running):
-        for result in running:
-            try:
-                rv = result.get(timeout=2)
-                print(f"{rv=}")
-            except multiprocessing.context.TimeoutError:
-                print("No uodate")
-            finally:
-                items = []
-                while not result.exenv.queue.empty():
-                    items.append(result.exenv.queue.get(block=False))
-                print(f"{items=}")
+    running = next(executive.run(runner))
+    while not running.ready():
+        try:
+            rv = running.get(timeout=2)
+            print(f"{rv=}")
+        except multiprocessing.context.TimeoutError:
+            print("No uodate")
+        finally:
+            items = []
+            while not running.exenv.queue.empty():
+                items.append(running.exenv.queue.get(block=False))
+            print(f"{items=}")
 
-    executive.shutdown()
+    executive.shutdown(running.exenv)
