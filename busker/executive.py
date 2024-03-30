@@ -66,7 +66,7 @@ class Executive(SharedHistory):
     @staticmethod
     def activate(
         exenv: ExecutionEnvironment,
-        processes: int, maxtasksperchild: int,
+        processes: int = None, maxtasksperchild: int = None,
         initializer: Callable = None
     ):
         context = multiprocessing.get_context("spawn")
@@ -117,9 +117,8 @@ class Executive(SharedHistory):
         exenv = self.build(sys.executable)
         self.activate(
             exenv,
-            processes=processes,
-            maxtasksperchild=maxtasksperchild,
             initializer=self.initializer,
+            **kwargs
         )
         self.manager = exenv.manager
         self.pool = exenv.pool

@@ -126,20 +126,6 @@ class EnvironmentZone(Zone):
         self.location = None
         self.interpreter = None
 
-    @property
-    def exenv(self):
-        cfg = self.executive.venv_cfg(self.location)
-
-        rv = ExecutionEnvironment(
-            location=self.location,
-            config=dict(self.executive.venv_data(cfg)),
-        )
-        try:
-            rv.interpreter = self.executive.venv_exe(rv.location, **rv.config)
-        except (AttributeError, TypeError):
-            pass
-        return rv
-
     def build(self, frame: ttk.Frame):
         frame.rowconfigure(0, weight=1)
         frame.columnconfigure(0, weight=1)
@@ -181,6 +167,10 @@ class EnvironmentZone(Zone):
     def on_build(self):
         path = pathlib.Path(self.controls.entry[0].get())
         runner = VirtualEnv(path)
+        self.registry["Output"].controls.text[0].insert(
+            tk.END,
+            f"{self.executive.active.interpreter} is active.\n"
+        )
         self.running[runner.uid] = list(self.executive.run(runner, callback=self.on_complete))
         self.registry["Output"].controls.text[0].insert(tk.END, f"Environment build begins.\n")
         self.update_progress(runner)
@@ -195,6 +185,13 @@ class EnvironmentZone(Zone):
         for bar in self.controls.progress:
             bar["value"] = 0
             self.activity.clear()
+
+        self.executive.shutdown(self.executive.active)
+        self.executive.activate(self.executive.registry[self.interpreter])
+        self.registry["Output"].controls.text[0].insert(
+            tk.END,
+            f"{self.executive.active.interpreter} is active.\n"
+        )
 
     def update_progress(self, runner: Runner):
         running = self.running[runner.uid]
