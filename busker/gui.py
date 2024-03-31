@@ -43,6 +43,7 @@ from busker.history import SharedHistory
 from busker.runner import Installation
 from busker.runner import Discovery
 from busker.runner import Runner
+from busker.runner import Server
 from busker.runner import VirtualEnv
 from busker.scraper import Scraper
 from busker.types import ExecutionEnvironment
@@ -291,6 +292,11 @@ class PackageZone(Zone):
 
 class ServerZone(Zone):
 
+    def __init__(self, parent, name="", **kwargs):
+        super().__init__(parent, name=name, **kwargs)
+        self.executive = Executive()
+        self.running = None
+
     def build(self, frame: ttk.Frame):
         frame.rowconfigure(0, weight=1)
         frame.columnconfigure(0, minsize=12)
@@ -330,10 +336,37 @@ class ServerZone(Zone):
 
 
     def on_stop(self):
-        print(self.controls)
+        if self.running:
+            self.running.terminate()
+        self.controls.button[0] = tk.DISABLED
+        self.controls.button[1] = tk.NORMAL
 
     def on_start(self):
-        print(self.controls)
+        self.controls.button[0] = tk.NORMAL
+        self.controls.button[1] = tk.DISABLED
+
+        entry_point = self.controls.entry[0].get()
+        runner = Server(entry_point)
+        self.running = next(self.executive.run(runner, interpreter=self.executive.active.interpreter))
+        self.update_progress(runner)
+
+    def update_progress(self, runner: Runner):
+        line = runner.proc.stdout.readline()
+
+        text_widget = self.registry["Output"].controls.text[0]
+        text_widget.insert(tk.END, line)
+        text_widget.see(tk.END)
+
+        try:
+            msg = runner.exenv.queue.get(block=False)
+            if isinstance(msg, list):
+                msg = [str(i) for i in msg]
+            text_widget.insert(tk.END, f"Runner: {msg}\n")
+        except queue.Empty:
+            pass
+
+        if runner.proc.poll() is None:
+            self.frame.after(100, self.update_progress, runner)
 
 
 class OutputZone(Zone):
