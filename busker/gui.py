@@ -349,13 +349,10 @@ class ServerZone(Zone):
         runner = Server(entry_point)
         self.running = next(self.executive.run(runner, interpreter=self.executive.active.interpreter))
         self.update_progress(runner)
+        # TODO: Populate URL with, eg: http://127.0.0.1:8080
 
     def update_progress(self, runner: Runner):
-        line = runner.proc.stdout.readline()
-
         text_widget = self.registry["Output"].controls.text[0]
-        text_widget.insert(tk.END, line)
-        text_widget.see(tk.END)
 
         try:
             msg = runner.exenv.queue.get(block=False)
@@ -365,8 +362,17 @@ class ServerZone(Zone):
         except queue.Empty:
             pass
 
-        if runner.proc.poll() is None:
+        try:
+            out, err = runner.proc.communicate(timeout=0.1)
+        except subprocess.TimeoutExpired:
             self.frame.after(100, self.update_progress, runner)
+        else:
+            for line in out.splitlines(keepends=True):
+                text_widget.insert(tk.END, line)
+                text_widget.see(tk.END)
+            for line in err.splitlines(keepends=True):
+                text_widget.insert(tk.END, line)
+                text_widget.see(tk.END)
 
 
 class OutputZone(Zone):
