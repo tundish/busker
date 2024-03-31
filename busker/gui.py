@@ -121,7 +121,6 @@ class EnvironmentZone(Zone):
     def __init__(self, parent, name="", **kwargs):
         super().__init__(parent, name=name, **kwargs)
         self.executive = Executive()
-        self.activity = list()
         self.running = defaultdict(list)
         self.location = None
         self.interpreter = None
@@ -144,11 +143,6 @@ class EnvironmentZone(Zone):
         yield "button", self.grid(
             tk.Button(frame, text="Build", command=self.on_build),
             row=0, column=3, columnspan=2, padx=(10, 10), sticky=tk.W + tk.E
-        )
-
-        yield "progress", self.grid(
-            ttk.Progressbar(frame, orient=tk.HORIZONTAL),
-            row=1, column=0, columnspan=4, padx=(10, 10), pady=(10, 10), sticky=tk.W + tk.E
         )
 
     def on_select(self):
@@ -182,9 +176,6 @@ class EnvironmentZone(Zone):
 
         self.interpreter = self.executive.register(self.location)
         self.registry["Output"].controls.text[0].insert(tk.END, f"Environment build complete.\n")
-        for bar in self.controls.progress:
-            bar["value"] = 0
-            self.activity.clear()
 
         self.executive.shutdown(self.executive.active)
         self.executive.activate(self.executive.registry[self.interpreter])
@@ -197,14 +188,10 @@ class EnvironmentZone(Zone):
         running = self.running[runner.uid]
         for result in running:
             while not result.exenv.queue.empty():
-                self.activity.append(result.exenv.queue.get(block=False))
+                count = result.exenv.queue.get(block=False)
                 self.registry["Output"].controls.text[0].insert(
-                    tk.END, f"Objects counted: {self.activity[-1]!s}\n"
+                    tk.END, f"Environment objects counted: {count}\n"
                 )
-
-        limit = 100 if len(self.running) == 1 else 50
-        for bar in self.controls.progress:
-            bar["value"] = min(len(self.activity) * limit / 10, limit)
 
         if not all(r.ready() for r in running):
             self.frame.after(500, self.update_progress, runner)
@@ -235,11 +222,6 @@ class PackageZone(Zone):
         yield "button", self.grid(
             tk.Button(frame, text="Install", command=self.on_install),
             row=0, column=3, columnspan=2, padx=(10, 10), sticky=tk.W + tk.E
-        )
-
-        yield "progress", self.grid(
-            ttk.Progressbar(frame, orient=tk.HORIZONTAL),
-            row=1, column=0, columnspan=4, padx=(10, 10), pady=(10, 10), sticky=tk.W + tk.E
         )
 
     def on_select(self):
