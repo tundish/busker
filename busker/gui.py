@@ -127,7 +127,7 @@ class EnvironmentZone(Zone):
 
     def build(self, frame: ttk.Frame):
         frame.rowconfigure(0, weight=1)
-        frame.columnconfigure(0, weight=1)
+        frame.columnconfigure(0, minsize=12)
         frame.columnconfigure(1, weight=10)
         frame.columnconfigure(2, weight=2)
         frame.columnconfigure(3, weight=2)
@@ -206,7 +206,7 @@ class PackageZone(Zone):
 
     def build(self, frame: ttk.Frame):
         frame.rowconfigure(0, weight=0)
-        frame.columnconfigure(0, weight=1)
+        frame.columnconfigure(0, minsize=12)
         frame.columnconfigure(1, weight=10)
         frame.columnconfigure(2, weight=2)
         frame.columnconfigure(3, weight=2)
