@@ -279,9 +279,13 @@ class PackageZone(Zone):
             text_widget.insert(tk.END, line)
         text_widget.see(tk.END)
 
-        result = next(self.executive.run(Discovery(), interpreter=self.executive.active.interpreter))
-        completion = result.get()
-        print(completion.data)
+        runner = Discovery()
+        proc = next(self.executive.run(runner, interpreter=self.executive.active.interpreter))
+        out, err = proc.communicate()
+        entry_points = runner.filter_endpoints([i.strip() for i in out.splitlines()])
+        entry_widget = self.registry["Server"].controls.entry[0]
+        entry_widget.configure(values=entry_points)
+        entry_widget.current(0)
 
 
 class ServerZone(Zone):
@@ -292,7 +296,7 @@ class ServerZone(Zone):
 
         yield "label", self.grid(ttk.Label(frame, text="Entry point"), row=0, column=0, padx=(10, 10))
         yield "entry", self.grid(
-            ttk.Entry(frame, justify=tk.LEFT, width=24),
+            ttk.Combobox(frame, justify=tk.LEFT),
             row=0, column=1, padx=(10, 10), sticky=tk.W + tk.E
         )
 

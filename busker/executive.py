@@ -198,7 +198,7 @@ class Executive(SharedHistory):
 
         if isinstance(runner, Callable):
             rv = runner(exenv, **kwargs)
-            rv.exenv = exenv
+            runner.exenv = exenv
             yield rv
 
 

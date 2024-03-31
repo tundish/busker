@@ -19,6 +19,7 @@
 
 import unittest
 
+from busker.runner import Discovery
 from busker.runner import Installation
 from busker.types import ExecutionEnvironment
 
@@ -38,3 +39,16 @@ class InstallationTests(unittest.TestCase):
         )
         self.assertTrue(args)
         self.assertTrue(all(isinstance(i, str) for i in args), args)
+
+
+class DiscoveryTests(unittest.TestCase):
+
+    data = [
+        "pip",
+        "pip3",
+        "pip3.10",
+    ]
+
+    def test_filter(self):
+        self.assertFalse(Discovery.filter_endpoints(self.data))
+        self.assertEqual(Discovery.filter_endpoints(self.data + ["busker-cli"]), ["busker-cli"])

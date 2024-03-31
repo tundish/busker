@@ -21,9 +21,9 @@ from collections.abc import Callable
 from collections import defaultdict
 from collections import deque
 import concurrent.futures
-import importlib.metadata
 import logging
 import pathlib
+import re
 import subprocess
 import sys
 import time
@@ -110,20 +110,17 @@ class Installation(Runner):
         self.distribution = distribution
         self.read_interval = read_interval
         self.proc = None
-        self.exenv = None
 
     def __call__(
         self,
         exenv: ExecutionEnvironment,
         **kwargs
     ):
-        self.exenv = exenv
-
         args = self.pip_command_args(
             interpreter=exenv.interpreter,
             distribution=self.distribution,
         )
-        self.exenv.queue.put(args)
+        exenv.queue.put(args)
         self.proc = subprocess.Popen(
             args,
             bufsize=1,
@@ -140,13 +137,37 @@ class Installation(Runner):
 
 class Discovery(Runner):
 
-    def get_entry_points(self, exenv: ExecutionEnvironment, **kwargs):
-        rv = importlib.metadata.entry_points()
-        return Completion(self, exenv, data=rv)
+    @staticmethod
+    def command():
+        return "; ".join([
+            "import importlib.metadata as im",
+            "print(*[i.name for i in im.entry_points(group='console_scripts')], sep='\\n')",
+        ])
 
-    @property
-    def jobs(self) -> list:
-        return [self.get_entry_points]
+    @staticmethod
+    def filter_endpoints(items):
+        excluded = re.compile("pip[0-9.]*$")
+        return [i for i in items if not excluded.match(i)]
+
+    def __call__(
+        self,
+        exenv: ExecutionEnvironment,
+        **kwargs
+    ):
+        args = [exenv.interpreter, "-c", self.command()]
+        exenv.queue.put(args)
+        self.proc = subprocess.Popen(
+            args,
+            bufsize=1,
+            shell=False,
+            encoding="utf8",
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            cwd=exenv.location,
+            env=None,
+        )
+        return self.proc
 
 
 if __name__ == "__main__":
