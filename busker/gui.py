@@ -338,12 +338,12 @@ class ServerZone(Zone):
     def on_stop(self):
         if self.running:
             self.running.terminate()
-        self.controls.button[0] = tk.DISABLED
-        self.controls.button[1] = tk.NORMAL
+        self.controls.button[0]["state"] = tk.DISABLED
+        self.controls.button[1]["state"] = tk.NORMAL
 
     def on_start(self):
-        self.controls.button[0] = tk.NORMAL
-        self.controls.button[1] = tk.DISABLED
+        self.controls.button[0]["state"] = tk.NORMAL
+        self.controls.button[1]["state"] = tk.DISABLED
 
         entry_point = self.controls.entry[0].get()
         runner = Server(entry_point)
