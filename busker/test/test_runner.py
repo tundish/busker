@@ -17,10 +17,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+import pathlib
 import unittest
+import sys
 
 from busker.runner import Discovery
 from busker.runner import Installation
+from busker.runner import Server
 from busker.types import ExecutionEnvironment
 
 
@@ -52,3 +55,18 @@ class DiscoveryTests(unittest.TestCase):
     def test_filter(self):
         self.assertFalse(Discovery.filter_endpoints(self.data))
         self.assertEqual(Discovery.filter_endpoints(self.data + ["busker-cli"]), ["busker-cli"])
+
+
+class ServerTests(unittest.TestCase):
+
+    def test_command(self):
+        if "win" in sys.platform.lower():
+            self.assertEqual(
+                Server.args(pathlib.Path("C:\\Program Files"), "story-server", "127.0.0.1", 8080),
+                ["C:\\Program Files\\story-server", "--host", "127.0.0.1", "--port", "8080"]
+            )
+        else:
+            self.assertEqual(
+                Server.args(pathlib.Path("/usr/local/bin"), "story-server", "127.0.0.1", 8080),
+                ["/usr/local/bin/story-server", "--host", "127.0.0.1", "--port", "8080"]
+            )

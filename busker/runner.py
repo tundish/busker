@@ -138,7 +138,7 @@ class Installation(Runner):
 class Discovery(Runner):
 
     @staticmethod
-    def command():
+    def command() -> str:
         return "; ".join([
             "import importlib.metadata as im",
             "print(*[i.name for i in im.entry_points(group='console_scripts')], sep='\\n')",
@@ -155,6 +155,56 @@ class Discovery(Runner):
         **kwargs
     ):
         args = [exenv.interpreter, "-c", self.command()]
+        exenv.queue.put(args)
+        self.proc = subprocess.Popen(
+            args,
+            bufsize=1,
+            shell=False,
+            encoding="utf8",
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            cwd=exenv.location,
+            env=None,
+        )
+        return self.proc
+
+
+class Server(Runner):
+
+    @staticmethod
+    def args(
+        location: pathlib.Path,
+        entry_point: str,
+        host: str,
+        port: int
+    ) -> list:
+        rv = [
+            str(location.joinpath(entry_point)),
+        ]
+        if host:
+            rv.extend(["--host", host])
+        if port:
+            rv.extend(["--port", str(port)])
+        return rv
+
+    def __init__(
+        self,
+        entry_point: str,
+        host: str = None,
+        port: int = None,
+    ):
+        super().__init__()
+        self.entry_point = entry_point
+        self.host = host
+        self.port = port
+
+    def __call__(
+        self,
+        exenv: ExecutionEnvironment,
+        **kwargs
+    ):
+        args = self.args(exenv.interpreter.parent, self.entry_point, self.host, self.port)
         exenv.queue.put(args)
         self.proc = subprocess.Popen(
             args,
