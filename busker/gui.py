@@ -279,10 +279,13 @@ class ServerZone(Zone):
 
     def build(self, frame: ttk.Frame):
         frame.rowconfigure(0, weight=1)
-        frame.columnconfigure(0, weight=1)
+        frame.columnconfigure(0, minsize=12)
 
-        yield "label", self.grid(ttk.Label(frame, text="Entry point", width=8), row=0, column=0, padx=(10, 10))
-        yield "entry", self.grid(ttk.Entry(frame, justify=tk.LEFT, width=24), row=0, column=1, padx=(10, 10))
+        yield "label", self.grid(ttk.Label(frame, text="Entry point"), row=0, column=0, padx=(10, 10))
+        yield "entry", self.grid(
+            ttk.Entry(frame, justify=tk.LEFT, width=24),
+            row=0, column=1, padx=(10, 10), sticky=tk.W + tk.E
+        )
 
         yield "label", self.grid(ttk.Label(frame, text="Host"), row=0, column=2, padx=(10, 10))
         combo_box = ttk.Combobox(frame, justify=tk.LEFT, width=14, values=[i.value for i in Host])
@@ -295,11 +298,18 @@ class ServerZone(Zone):
         yield "entry", self.grid(spin_box, row=0, column=5, padx=(10, 10))
 
         yield "button", self.grid(
-            tk.Button(frame, text="Run", command=self.on_run),
-            row=0, column=6, padx=(10, 10), sticky=tk.E
+            tk.Button(frame, text="Stop", command=self.on_stop),
+            row=0, column=6, padx=(10, 10), pady=(10, 10), sticky=tk.E
+        )
+        yield "button", self.grid(
+            tk.Button(frame, text="Start", command=self.on_start),
+            row=0, column=7, padx=(10, 10), pady=(10, 10), sticky=tk.E
         )
 
-    def on_run(self):
+    def on_stop(self):
+        print(self.controls)
+
+    def on_start(self):
         print(self.controls)
 
 
@@ -364,14 +374,14 @@ def build(config: dict = {}):
             page.frame.rowconfigure(0, weight=1)
             page.frame.rowconfigure(1, weight=15)
             page.frame.columnconfigure(0, weight=1)
-            page.zones[0].frame.grid(row=0, column=0, padx=(2, 2), pady=(6, 1), sticky=tk.N + tk.E + tk.S + tk.W)
-            page.zones[1].frame.grid(row=1, column=0, padx=(2, 2), pady=(6, 1), sticky=tk.N + tk.E + tk.S + tk.W)
+            page.zones[0].frame.grid(row=0, column=0, padx=(2, 2), pady=(6, 2), sticky=tk.N + tk.E + tk.S + tk.W)
+            page.zones[1].frame.grid(row=1, column=0, padx=(2, 2), pady=(6, 2), sticky=tk.N + tk.E + tk.S + tk.W)
         elif p == 1:
             page.frame.rowconfigure(0, weight=1)
             page.frame.rowconfigure(3, weight=10)
             page.frame.columnconfigure(0, weight=1)
             for z, zone in enumerate(page.zones):
-                zone.frame.grid(row=z, column=0, padx=(2, 2), pady=(6, 1), sticky=tk.N + tk.E + tk.S + tk.W)
+                zone.frame.grid(row=z, column=0, padx=(2, 2), pady=(6, 2), sticky=tk.N + tk.E + tk.S + tk.W)
         else:
             page.frame.columnconfigure(0, weight=1)
 
