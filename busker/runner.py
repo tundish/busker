@@ -21,6 +21,7 @@ from collections.abc import Callable
 from collections import defaultdict
 from collections import deque
 import concurrent.futures
+import importlib.metadata
 import logging
 import pathlib
 import subprocess
@@ -30,7 +31,6 @@ import tomllib
 import typing
 import uuid
 import venv
-
 
 from busker.types import Completion
 from busker.types import ExecutionEnvironment
@@ -136,3 +136,22 @@ class Installation(Runner):
             env=None,
         )
         return self.proc
+
+
+class Discovery(Runner):
+
+    def get_entry_points(self, this: Callable, exenv: ExecutionEnvironment, **kwargs):
+        rv = importlib.metadata.entry_points()
+        return Completion(self, this, exenv, data=rv)
+
+    @property
+    def jobs(self) -> list:
+        return [self.get_entry_points]
+
+
+if __name__ == "__main__":
+    exenv = ExecutionEnvironment(pathlib.Path("."))
+    runner = Discovery()
+    result = runner.get_entry_points(runner.get_entry_points, exenv)
+    scripts = result.data.select(group="console_scripts")
+    print(*scripts, sep="\n")
