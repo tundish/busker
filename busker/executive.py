@@ -120,18 +120,10 @@ class Executive(SharedHistory):
             initializer=self.initializer,
             **kwargs
         )
-        self.manager = exenv.manager
-        self.pool = exenv.pool
 
     @property
     def active(self) -> ExecutionEnvironment:
         return next((exenv for exenv in self.registry.values() if exenv.manager), None)
-
-    def callback(self, result):
-        return
-
-    def error_callback(self, exc: Exception, *args):
-        return
 
     def initializer(self, location: pathlib.Path, interpreter: pathlib.Path, config: dict, *args):
         self.log(f"Initializing execution environment at {location!s}")
@@ -182,37 +174,42 @@ class Executive(SharedHistory):
     ):
         interpreter = pathlib.Path(interpreter)
         exenv = self.registry[interpreter]
-        if queue:
-            try:
-                exenv.queue.close()
-            except AttributeError:
-                pass
-            finally:
-                exenv.queue = queue
+        try:
+            exenv.queue.close()
+        except AttributeError:
+            pass
+
+        try:
+            exenv.queue = exenv.manager.Queue()
+        except AttributeError:
+            pass
+        finally:
+            exenv.queue = queue or exenv.queue
 
         env = dataclasses.replace(exenv, pool=None, manager=None)
-
         for job in runner.jobs:
-            rv = self.pool.apply_async(
-                job, args=(job, env,), kwds=kwargs,
-                callback=callback or self.callback,
-                error_callback=error_callback or self.error_callback
+            rv = exenv.pool.apply_async(
+                job, args=(env,), kwds=kwargs,
+                callback=callback,
+                error_callback=error_callback
             )
             rv.exenv = exenv
             yield rv
 
         if isinstance(runner, Callable):
-            yield runner(exenv, **kwargs)
+            rv = runner(exenv, **kwargs)
+            rv.exenv = exenv
+            yield rv
 
 
 class Hello(Runner):
 
-    def say_hello(self, this: Callable, exenv: ExecutionEnvironment, **kwargs):
+    def say_hello(self, exenv: ExecutionEnvironment, **kwargs):
         for n in range(10):
             print("Hello, world!", file=sys.stderr)
             exenv.queue.put(n)
             time.sleep(1)
-        return Completion(self, this, exenv, n)
+        return Completion(self, exenv, n)
 
     @property
     def jobs(self):

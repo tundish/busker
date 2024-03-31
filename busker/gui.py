@@ -41,6 +41,7 @@ import busker
 from busker.executive import Executive
 from busker.history import SharedHistory
 from busker.runner import Installation
+from busker.runner import Discovery
 from busker.runner import Runner
 from busker.runner import VirtualEnv
 from busker.scraper import Scraper
@@ -268,11 +269,19 @@ class PackageZone(Zone):
         if runner.proc.poll() is None:
             self.frame.after(100, self.update_progress, runner)
         else:
-            for line in runner.proc.stdout.read().splitlines(keepends=True):
-                text_widget.insert(tk.END, line)
-            for line in runner.proc.stderr.read().splitlines(keepends=True):
-                text_widget.insert(tk.END, line)
-            text_widget.see(tk.END)
+            self.install_complete(runner)
+
+    def install_complete(self, runner: Runner):
+        text_widget = self.registry["Output"].controls.text[0]
+        for line in runner.proc.stdout.read().splitlines(keepends=True):
+            text_widget.insert(tk.END, line)
+        for line in runner.proc.stderr.read().splitlines(keepends=True):
+            text_widget.insert(tk.END, line)
+        text_widget.see(tk.END)
+
+        result = next(self.executive.run(Discovery(), interpreter=self.executive.active.interpreter))
+        completion = result.get()
+        print(completion.data)
 
 
 class ServerZone(Zone):

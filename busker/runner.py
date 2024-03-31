@@ -63,7 +63,7 @@ class VirtualEnv(Runner):
         super().__init__()
         self.location = location
 
-    def build_virtualenv(self, this: Callable, exenv: ExecutionEnvironment, **kwargs):
+    def build_virtualenv(self, exenv: ExecutionEnvironment, **kwargs):
         venv.create(
             self.location,
             system_site_packages=True,
@@ -71,9 +71,9 @@ class VirtualEnv(Runner):
             with_pip=True,
             upgrade_deps=True
         )
-        return Completion(self, this, exenv)
+        return Completion(self, exenv)
 
-    def check_virtualenv(self, this: Callable, exenv: ExecutionEnvironment, repeat=100, interval=2, **kwargs):
+    def check_virtualenv(self, exenv: ExecutionEnvironment, repeat=100, interval=2, **kwargs):
         values = []
         while len(values) < repeat:
             files = list(self.walk_files(self.location))
@@ -83,7 +83,7 @@ class VirtualEnv(Runner):
                 break
             else:
                 time.sleep(interval)
-        return Completion(self, this, exenv)
+        return Completion(self, exenv)
 
     @property
     def jobs(self) -> list:
@@ -140,9 +140,9 @@ class Installation(Runner):
 
 class Discovery(Runner):
 
-    def get_entry_points(self, this: Callable, exenv: ExecutionEnvironment, **kwargs):
+    def get_entry_points(self, exenv: ExecutionEnvironment, **kwargs):
         rv = importlib.metadata.entry_points()
-        return Completion(self, this, exenv, data=rv)
+        return Completion(self, exenv, data=rv)
 
     @property
     def jobs(self) -> list:
@@ -152,6 +152,6 @@ class Discovery(Runner):
 if __name__ == "__main__":
     exenv = ExecutionEnvironment(pathlib.Path("."))
     runner = Discovery()
-    result = runner.get_entry_points(runner.get_entry_points, exenv)
+    result = runner.get_entry_points(exenv)
     scripts = result.data.select(group="console_scripts")
     print(*scripts, sep="\n")
