@@ -171,8 +171,10 @@ class Discovery(Runner):
 
 
 if __name__ == "__main__":
-    exenv = ExecutionEnvironment(pathlib.Path("."))
+    import queue
+    exenv = ExecutionEnvironment(pathlib.Path("."), interpreter=sys.executable, queue=queue.Queue())
     runner = Discovery()
-    result = runner.get_entry_points(exenv)
-    scripts = result.data.select(group="console_scripts")
-    print(*scripts, sep="\n")
+    proc = runner(exenv)
+    out, err = proc.communicate()
+    entry_points = runner.filter_endpoints([i.strip() for i in out.splitlines()])
+    print(*entry_points, sep="\n")
