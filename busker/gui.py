@@ -286,6 +286,7 @@ class PackageZone(Zone):
         entry_widget = self.registry["Server"].controls.entry[0]
         entry_widget.configure(values=entry_points)
         entry_widget.current(0)
+        self.registry["Server"].controls.button[1]["state"] = tk.NORMAL
 
 
 class ServerZone(Zone):
@@ -293,6 +294,9 @@ class ServerZone(Zone):
     def build(self, frame: ttk.Frame):
         frame.rowconfigure(0, weight=1)
         frame.columnconfigure(0, minsize=12)
+        frame.columnconfigure(1, weight=1)
+        frame.columnconfigure(6, uniform="button")
+        frame.columnconfigure(7, uniform="button")
 
         yield "label", self.grid(ttk.Label(frame, text="Entry point"), row=0, column=0, padx=(10, 10))
         yield "entry", self.grid(
@@ -310,14 +314,20 @@ class ServerZone(Zone):
         spin_box.set(8080)
         yield "entry", self.grid(spin_box, row=0, column=5, padx=(10, 10))
 
-        yield "button", self.grid(
-            tk.Button(frame, text="Stop", command=self.on_stop),
-            row=0, column=6, padx=(10, 10), pady=(10, 10), sticky=tk.E
-        )
-        yield "button", self.grid(
-            tk.Button(frame, text="Start", command=self.on_start),
-            row=0, column=7, padx=(10, 10), pady=(10, 10), sticky=tk.E
-        )
+        buttons = [
+            self.grid(
+                tk.Button(frame, text="Stop", command=self.on_stop),
+                row=0, column=6, padx=(10, 10), pady=(10, 10), sticky=tk.W + tk.E
+            ),
+            self.grid(
+                tk.Button(frame, text="Start", command=self.on_start),
+                row=0, column=7, padx=(10, 10), pady=(10, 10), sticky=tk.W + tk.E
+            ),
+        ]
+        for button in buttons:
+            button["state"] = tk.DISABLED
+            yield "button", button
+
 
     def on_stop(self):
         print(self.controls)
