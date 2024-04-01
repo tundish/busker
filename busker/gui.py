@@ -91,7 +91,7 @@ class InfoZone(Zone):
 class InteractiveZone(Zone):
 
     def build(self, frame: ttk.Frame):
-        frame.rowconfigure(0, weight=1)
+        frame.rowconfigure(0, weight=25)
         frame.rowconfigure(1, weight=1)
         frame.columnconfigure(0, weight=1)
 
@@ -102,21 +102,20 @@ class InteractiveZone(Zone):
         yield "scroll", self.grid(scroll_bar, row=0, column=2, pady=(10, 10), sticky=tk.N + tk.S)
 
         combo_box = ttk.Combobox(frame, justify=tk.LEFT)
-        yield "entry", self.grid(combo_box, row=1, column=0, padx=(10, 10), sticky=tk.W + tk.E)
-
-        yield "button", self.grid(
-            tk.Button(frame, text="Launch", command=self.on_launch),
-            row=1, column=1,  columnspan=2, padx=(10, 10), sticky=tk.E
+        yield "entry", self.grid(
+            combo_box, row=1, column=0,
+            padx=(10, 10), pady=(2, 6), ipadx=6,
+            sticky=tk.W + tk.N + tk.E + tk.S
         )
-        # TODO: assist checkbox
-        # TODO: display cues
+        combo_box.bind("<Return>", self.on_entry)
 
-    def on_launch(self):
-        host = self.controls.entry[0].get()
-        url = urllib.parse.urljoin(host, "about")
-        self.reader = busker.visitor.Read(url=url)
-        info = self.controls.label[1]
+        yield "toggle", self.grid(ttk.Checkbutton(frame), row=1, column=1, padx=(10, 10), sticky=tk.W + tk.E)
+        yield "label", self.grid(ttk.Label(frame, text="Assist"), row=1, column=2, padx=(10, 10))
 
+    def on_entry(self, evt):
+        value = self.controls.entry[0].get()
+        print(value.strip())
+        self.controls.entry[0].delete(0, tk.END)
 
 class EnvironmentZone(Zone):
 
@@ -419,7 +418,7 @@ def build(config: dict = {}):
 
     pages[0].zones.extend([
         InfoZone(pages[0].frame, name="Info"),
-        InteractiveZone(pages[0].frame, name="Interactive"),
+        InteractiveZone(pages[0].frame, name="Interaction"),
     ])
     pages[1].zones.extend([
         EnvironmentZone(pages[1].frame, name="Environment"),
@@ -434,7 +433,7 @@ def build(config: dict = {}):
         notebook.add(page.frame, text=page.name)
         if p == 0:
             page.frame.rowconfigure(0, weight=1)
-            page.frame.rowconfigure(1, weight=15)
+            page.frame.rowconfigure(1, weight=25)
             page.frame.columnconfigure(0, weight=1)
             page.zones[0].frame.grid(row=0, column=0, padx=(2, 2), pady=(6, 2), sticky=tk.N + tk.E + tk.S + tk.W)
             page.zones[1].frame.grid(row=1, column=0, padx=(2, 2), pady=(6, 2), sticky=tk.N + tk.E + tk.S + tk.W)
