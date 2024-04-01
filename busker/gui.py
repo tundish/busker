@@ -91,7 +91,7 @@ class InfoZone(Zone):
 
         reader = busker.visitor.Read(url=host)
         node = reader.run(self.scraper)
-        writer = busker.visitor.Write(url=host, prior=node, choice = Choice(form=0))
+        writer = busker.visitor.Write(url=host, prior=node, choice=Choice(form=0))
         self.registry["Transcript"].process_node(writer.run(self.scraper))
 
 class InteractiveZone(Zone):
@@ -139,9 +139,19 @@ class InteractiveZone(Zone):
         self.node = node
 
     def on_entry(self, evt):
-        value = self.controls.entry[0].get()
-        print(value.strip())
+        value = self.controls.entry[0].get().strip()
+        writer = busker.visitor.Write(
+            url=self.node.url,
+            prior=self.node,
+            choice=Choice(form=0, input=0, value=value)
+        )
         self.controls.entry[0].delete(0, tk.END)
+        self.controls.text[0].insert(tk.END, "> ", ("prompt"))
+        self.controls.text[0].insert(tk.END, f"{value}\n", ("command"))
+        try:
+            self.process_node(writer.run(self.scraper))
+        except urllib.error.HTTPError:
+            self.controls.text[0].insert(tk.END, "...\n", ("nudge"))
 
 
 class EnvironmentZone(Zone):
