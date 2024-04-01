@@ -64,12 +64,13 @@ class Read(Tactic):
 
         title_match = scraper.find_title(node.text)
         forms = body_match and tuple(scraper.get_forms(body_match[0])) or []
+        blocks = body_match and tuple(scraper.find_blocks(body_match[0])) or []
 
         return node._replace(
             tactic=self.__class__.__name__,
             params=tuple(kwargs.items()),
             title=title_match and title_match.group(),
-
+            blocks=blocks,
             options=tuple(v for f in forms for i in f.inputs for v in i.values),
             actions=forms,
         )
@@ -96,12 +97,13 @@ class Write(Tactic):
             body_match = body_re.search(rv.text)
 
             forms = body_match and tuple(scraper.get_forms(body_match[0]))
+            blocks = body_match and tuple(scraper.find_blocks(body_match[0])) or []
 
             rv = rv._replace(
                 tactic=self.__class__.__name__,
                 params=tuple(kwargs.items()),
                 title = scraper.find_title(rv.text),
-
+                blocks=blocks,
                 options=tuple(v for f in forms for i in f.inputs for v in i.values),
                 actions=forms,
             )

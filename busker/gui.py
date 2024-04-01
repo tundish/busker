@@ -47,11 +47,12 @@ from busker.runner import Server
 from busker.runner import VirtualEnv
 from busker.scraper import Node
 from busker.scraper import Scraper
+from busker.tagger import Tagger
 from busker.types import ExecutionEnvironment
 from busker.types import Host
+import busker.visitor
 from busker.visitor import Choice
 from busker.zone import Zone
-import busker.visitor
 
 
 class InfoZone(Zone):
@@ -127,8 +128,11 @@ class InteractiveZone(Zone):
         yield "label", self.grid(ttk.Label(frame, text="Assist"), row=1, column=2, columnspan=3, padx=(10, 10))
 
     def process_node(self, node: Node):
+        tagger = Tagger(self.controls.text[0])
+        for block in node.blocks:
+            tagger.feed(block)
+
         if self.assist.get():
-            print(f"{node.options=}")
             self.controls.entry[0].configure(values=node.options)
         self.node = node
 
@@ -136,7 +140,6 @@ class InteractiveZone(Zone):
         value = self.controls.entry[0].get()
         print(value.strip())
         self.controls.entry[0].delete(0, tk.END)
-        print(f"{self.node=}")
 
 
 class EnvironmentZone(Zone):

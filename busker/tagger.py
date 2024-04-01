@@ -18,6 +18,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import html.parser
+import tkinter as tk
 
 
 class Tagger(html.parser.HTMLParser):
@@ -27,11 +28,15 @@ class Tagger(html.parser.HTMLParser):
         self.widget = widget
         self.tags = []
 
-    def handle_starttag(self, tag, attrs):
-        print("Encountered a start tag:", tag)
+    def handle_starttag(self, tag: str, attrs: dict):
+        self.tags.append(tag)
 
-    def handle_endtag(self, tag):
-        print("Encountered an end tag :", tag)
+    def handle_endtag(self, tag: str):
+        if self.tags[-1] == tag:
+            self.tags.pop(-1)
 
-    def handle_data(self, data):
-        print("Encountered some data  :", data)
+    def handle_data(self, text:str):
+        text = text.strip()
+        if text:
+            self.widget.insert(tk.END, f"{text}\n", self.tags)
+            self.widget.see(tk.END)

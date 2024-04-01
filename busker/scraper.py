@@ -86,12 +86,17 @@ class Scraper(SharedHistory):
     @staticmethod
     @functools.cache
     def tag_matcher(tag: str):
-        return re.compile(f"<{tag}>(.*?)<\\/{tag}>", re.DOTALL)
+        return re.compile(f"<{tag}.*?>(.*?)<\\/{tag}>", re.DOTALL)
 
     @staticmethod
     def find_forms(body: str):
         root = ET.fromstring(body)
         return root.findall(".//form")
+
+    @staticmethod
+    def find_blocks(body: str):
+        matcher = Scraper.tag_matcher("blockquote")
+        return [i.strip() for i in matcher.findall(body, re.DOTALL)]
 
     @staticmethod
     def find_title(doc: str):
