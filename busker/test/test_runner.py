@@ -53,11 +53,16 @@ class DiscoveryTests(unittest.TestCase):
         "pip3.10",
         "wheel",
     ]
-    # TODO: diff with, eg: rotu-0.15.0.tar.gz
 
     def test_filter(self):
-        self.assertFalse(Discovery.filter_endpoints(self.entry_points))
-        self.assertEqual(Discovery.filter_endpoints(self.entry_points + ["busker-cli"]), ["busker-cli"])
+        self.assertFalse(Discovery.filter_entry_points(self.entry_points))
+        self.assertEqual(Discovery.filter_entry_points(self.entry_points + ["busker-cli"]), ["busker-cli"])
+
+    def test_sorting(self):
+        entry_points = self.entry_points + ["rotu-server"]
+        values = Discovery.sort_entry_points(entry_points, like="rotu-")
+        self.assertEqual(len(values), len(entry_points))
+        self.assertEqual(values[0], entry_points[-1], values)
 
 
 class ServerTests(unittest.TestCase):

@@ -290,12 +290,17 @@ class PackageZone(Zone):
             text_widget.insert(tk.END, line)
         text_widget.see(tk.END)
 
+        package_path = runner.distribution
         runner = Discovery()
         proc = next(self.executive.run(runner, interpreter=self.executive.active.interpreter))
         out, err = proc.communicate()
-        entry_points = runner.filter_endpoints([i.strip() for i in out.splitlines()])
+
+        entry_points = runner.filter_entry_points([i.strip() for i in out.splitlines()])
+        name = package_path.name.removesuffix("".join(package_path.suffixes))
+        values = runner.sort_entry_points(entry_points, like=name)
+
         entry_widget = self.registry["Server"].controls.entry[0]
-        entry_widget.configure(values=entry_points)
+        entry_widget.configure(values=values)
         entry_widget.current(0)
         self.registry["Server"].controls.button[1]["state"] = tk.NORMAL
 
@@ -362,7 +367,7 @@ class ServerZone(Zone):
         self.running = next(self.executive.run(runner, interpreter=self.executive.active.interpreter))
         self.registry["Info"].controls.entry[0].delete(0, tk.END)
         self.registry["Info"].controls.entry[0].insert(0, runner.url)
-        self.registry["Output"].controls.text[0].insert(tk.END, f"Server process running.")
+        self.registry["Output"].controls.text[0].insert(tk.END, f"Server process running.\n")
         self.update_progress(runner)
 
     def update_progress(self, runner: Runner):

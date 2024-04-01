@@ -21,9 +21,11 @@ from collections.abc import Callable
 from collections import defaultdict
 from collections import deque
 import concurrent.futures
+import difflib
 import logging
 import pathlib
 import re
+import string
 import subprocess
 import sys
 import time
@@ -145,9 +147,16 @@ class Discovery(Runner):
         ])
 
     @staticmethod
-    def filter_endpoints(items):
+    def filter_entry_points(items):
         excluded = re.compile("(pip[0-9.]*)|(hypercorn)|(wheel)$")
         return [i for i in items if not excluded.match(i)]
+
+    @staticmethod
+    def sort_entry_points(items, like="cli"):
+        def comparison(text):
+            matcher = difflib.SequenceMatcher(string.punctuation.count, like, text)
+            return matcher.ratio()
+        return sorted(items, key=comparison, reverse=True)
 
     def __call__(
         self,
