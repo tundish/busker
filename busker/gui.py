@@ -124,6 +124,7 @@ class InteractiveZone(Zone):
         print(value.strip())
         self.controls.entry[0].delete(0, tk.END)
 
+
 class EnvironmentZone(Zone):
 
     def __init__(self, parent, name="", **kwargs):
@@ -191,6 +192,7 @@ class EnvironmentZone(Zone):
             tk.END,
             f"{self.executive.active.interpreter} is active.\n"
         )
+        self.registry["Package"].controls.button[1]["state"] = tk.NORMAL
 
     def update_progress(self, runner: Runner):
         running = self.running[runner.uid]
@@ -227,10 +229,12 @@ class PackageZone(Zone):
             row=0, column=2, padx=(10, 10), sticky=tk.W + tk.E
         )
 
-        yield "button", self.grid(
+        install_button = self.grid(
             tk.Button(frame, text="Install", command=self.on_install),
             row=0, column=3, columnspan=2, padx=(10, 10), sticky=tk.W + tk.E
         )
+        install_button["state"] = tk.DISABLED
+        yield "button", install_button
 
     def on_select(self):
         path = pathlib.Path(filedialog.askopenfilename(
@@ -340,7 +344,6 @@ class ServerZone(Zone):
             button["state"] = tk.DISABLED
             yield "button", button
 
-
     def on_stop(self):
         if self.running:
             self.running.terminate()
@@ -352,10 +355,15 @@ class ServerZone(Zone):
         self.controls.button[1]["state"] = tk.DISABLED
 
         entry_point = self.controls.entry[0].get()
-        runner = Server(entry_point)
+        host = self.controls.entry[1].get().strip()
+        port = self.controls.entry[2].get()
+
+        runner = Server(entry_point, host=host, port=port)
         self.running = next(self.executive.run(runner, interpreter=self.executive.active.interpreter))
+        self.registry["Info"].controls.entry[0].delete(0, tk.END)
+        self.registry["Info"].controls.entry[0].insert(0, runner.url)
+        self.registry["Output"].controls.text[0].insert(tk.END, f"Server process running.")
         self.update_progress(runner)
-        # TODO: Populate URL with, eg: http://127.0.0.1:8080
 
     def update_progress(self, runner: Runner):
         text_widget = self.registry["Output"].controls.text[0]

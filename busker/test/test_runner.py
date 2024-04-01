@@ -46,15 +46,18 @@ class InstallationTests(unittest.TestCase):
 
 class DiscoveryTests(unittest.TestCase):
 
-    data = [
+    entry_points = [
+        "hypercorn",
         "pip",
         "pip3",
         "pip3.10",
+        "wheel",
     ]
+    # TODO: diff with, eg: rotu-0.15.0.tar.gz
 
     def test_filter(self):
-        self.assertFalse(Discovery.filter_endpoints(self.data))
-        self.assertEqual(Discovery.filter_endpoints(self.data + ["busker-cli"]), ["busker-cli"])
+        self.assertFalse(Discovery.filter_endpoints(self.entry_points))
+        self.assertEqual(Discovery.filter_endpoints(self.entry_points + ["busker-cli"]), ["busker-cli"])
 
 
 class ServerTests(unittest.TestCase):

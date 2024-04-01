@@ -146,7 +146,7 @@ class Discovery(Runner):
 
     @staticmethod
     def filter_endpoints(items):
-        excluded = re.compile("pip[0-9.]*$")
+        excluded = re.compile("(pip[0-9.]*)|(hypercorn)|(wheel)$")
         return [i for i in items if not excluded.match(i)]
 
     def __call__(
@@ -218,6 +218,10 @@ class Server(Runner):
             env=None,
         )
         return self.proc
+
+    @property
+    def url(self):
+        return f"http://{self.host}:{self.port}"
 
 
 if __name__ == "__main__":
