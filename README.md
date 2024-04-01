@@ -17,18 +17,20 @@ Operation
 * Python 3.11 or later is required.
 * No installation is necessary. Simply run from the command line.
 
-    python3 -m busker.main
+```
+python3 -m busker.main
 
-    usage: busker.main [-h] [--with-automation] [--config CONFIG] [--url URL] [--number NUMBER]
+usage: busker.main [-h] [--with-automation] [--config CONFIG] [--url URL] [--number NUMBER]
 
-    options:
-      -h, --help         show this help message and exit
+options:
+  -h, --help         show this help message and exit
 
-    Display:
-      --with-automation  Show Automation tab in GUI [False].
+Display:
+  --with-automation  Show Automation tab in GUI [False].
 
-    Automation:
-      --config CONFIG    Set a path to a configuration file [/home/user/busker.toml].
-      --url URL          Set url path to begin session.
-      --number NUMBER    Set the number of times to run the plugin.
+Automation:
+  --config CONFIG    Set a path to a configuration file [/home/user/busker.toml].
+  --url URL          Set url path to begin session.
+  --number NUMBER    Set the number of times to run the plugin.
 
+```
