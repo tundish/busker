@@ -90,6 +90,10 @@ class InfoZone(Zone):
 
 class InteractiveZone(Zone):
 
+    def __init__(self, parent, name="", **kwargs):
+        self.assist = tk.BooleanVar(value=False)
+        super().__init__(parent, name=name, **kwargs)
+
     def build(self, frame: ttk.Frame):
         frame.rowconfigure(0, weight=25)
         frame.rowconfigure(1, weight=1)
@@ -109,7 +113,10 @@ class InteractiveZone(Zone):
         )
         combo_box.bind("<Return>", self.on_entry)
 
-        yield "toggle", self.grid(ttk.Checkbutton(frame), row=1, column=1, padx=(10, 10), sticky=tk.W + tk.E)
+        yield "toggle", self.grid(
+            ttk.Checkbutton(frame, variable=self.assist, offvalue=False, onvalue=True),
+            row=1, column=1, padx=(10, 10), sticky=tk.W + tk.E
+        )
         yield "label", self.grid(ttk.Label(frame, text="Assist"), row=1, column=2, padx=(10, 10))
 
     def on_entry(self, evt):
@@ -400,7 +407,7 @@ def build(config: dict = {}):
 
     pages = [
         Structure(
-            name="Playing",
+            name="Interactive",
             frame=tk.Frame(notebook),
             zones = []
         ),
@@ -410,7 +417,7 @@ def build(config: dict = {}):
             zones = []
         ),
         Structure(
-            name="Plugins",
+            name="Automation",
             frame=tk.Frame(notebook),
             zones = []
         ),
@@ -418,7 +425,7 @@ def build(config: dict = {}):
 
     pages[0].zones.extend([
         InfoZone(pages[0].frame, name="Info"),
-        InteractiveZone(pages[0].frame, name="Interaction"),
+        InteractiveZone(pages[0].frame, name="Transcript"),
     ])
     pages[1].zones.extend([
         EnvironmentZone(pages[1].frame, name="Environment"),
