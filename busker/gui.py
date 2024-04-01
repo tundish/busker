@@ -57,7 +57,7 @@ class InfoZone(Zone):
     def __init__(self, parent, name="", **kwargs):
         super().__init__(parent, name=name, **kwargs)
         self.scraper = Scraper()
-        self.reader = None
+        self.session = None
 
     def build(self, frame: ttk.Frame):
         frame.rowconfigure(0, weight=1)
@@ -76,10 +76,10 @@ class InfoZone(Zone):
     def on_connect(self):
         host = self.controls.entry[0].get()
         url = urllib.parse.urljoin(host, "about")
-        self.reader = busker.visitor.Read(url=url)
+        reader = busker.visitor.Read(url=url)
         info = self.controls.label[1]
         try:
-            node = self.reader.run(self.scraper)
+            node = reader.run(self.scraper)
         except (ValueError, urllib.error.URLError) as e:
             info.configure(text="No connection to host")
             self.log(f"{e!s}", level=logging.WARNING)
