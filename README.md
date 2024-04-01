@@ -15,7 +15,7 @@ Operation
 
 * Busker works on Windows and UNIX systems.
 * Python 3.11 or later is required.
-* No installation is necessary. Simply run from the command line:
+* No installation is necessary. Simply run from the command line.
 
     python3 -m busker.main
 
