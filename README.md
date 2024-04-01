@@ -18,7 +18,7 @@ Operation
 * No installation is necessary. Simply run from the command line.
 
 ```
-python3 -m busker.main
+python3 -m busker.main --help
 
 usage: busker.main [-h] [--with-automation] [--config CONFIG] [--url URL] [--number NUMBER]
 
