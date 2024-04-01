@@ -95,15 +95,15 @@ class InteractiveZone(Zone):
         super().__init__(parent, name=name, **kwargs)
 
     def build(self, frame: ttk.Frame):
-        frame.rowconfigure(0, weight=25)
+        frame.rowconfigure(0, weight=30)
         frame.rowconfigure(1, weight=1)
         frame.columnconfigure(0, weight=1)
 
         text_widget = tk.Text(frame, height=6)
         scroll_bar = ttk.Scrollbar(frame, orient=tk.VERTICAL, command=text_widget.yview)
         text_widget.configure(yscrollcommand=scroll_bar.set)
-        yield "text", self.grid(text_widget, row=0, column=0, columnspan=2, padx=(10, 10), sticky=tk.W + tk.N + tk.E + tk.S)
-        yield "scroll", self.grid(scroll_bar, row=0, column=2, pady=(10, 10), sticky=tk.N + tk.S)
+        yield "text", self.grid(text_widget, row=0, column=0, columnspan=3, padx=(10, 10), sticky=tk.W + tk.N + tk.E + tk.S)
+        yield "scroll", self.grid(scroll_bar, row=0, column=3, pady=(10, 10), sticky=tk.N + tk.S)
 
         combo_box = ttk.Combobox(frame, justify=tk.LEFT)
         yield "entry", self.grid(
@@ -117,7 +117,7 @@ class InteractiveZone(Zone):
             ttk.Checkbutton(frame, variable=self.assist, offvalue=False, onvalue=True),
             row=1, column=1, padx=(10, 10), sticky=tk.W + tk.E
         )
-        yield "label", self.grid(ttk.Label(frame, text="Assist"), row=1, column=2, padx=(10, 10))
+        yield "label", self.grid(ttk.Label(frame, text="Assist"), row=1, column=2, columnspan=3, padx=(10, 10))
 
     def on_entry(self, evt):
         value = self.controls.entry[0].get()
@@ -388,7 +388,7 @@ class OutputZone(Zone):
         frame.columnconfigure(0, weight=30)
         frame.columnconfigure(1, weight=1)
 
-        text_widget = tk.Text(frame, height=6)
+        text_widget = tk.Text(frame)
         scroll_bar = ttk.Scrollbar(frame, orient=tk.VERTICAL, command=text_widget.yview)
         text_widget.configure(yscrollcommand=scroll_bar.set)
         yield "text", self.grid(text_widget, row=0, column=0, padx=(10, 10), sticky=tk.W + tk.N + tk.E + tk.S)
