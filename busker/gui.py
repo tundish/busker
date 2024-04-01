@@ -45,9 +45,11 @@ from busker.runner import Discovery
 from busker.runner import Runner
 from busker.runner import Server
 from busker.runner import VirtualEnv
+from busker.scraper import Node
 from busker.scraper import Scraper
 from busker.types import ExecutionEnvironment
 from busker.types import Host
+from busker.visitor import Choice
 from busker.zone import Zone
 import busker.visitor
 
@@ -57,7 +59,6 @@ class InfoZone(Zone):
     def __init__(self, parent, name="", **kwargs):
         super().__init__(parent, name=name, **kwargs)
         self.scraper = Scraper()
-        self.session = None
 
     def build(self, frame: ttk.Frame):
         frame.rowconfigure(0, weight=1)
@@ -84,15 +85,21 @@ class InfoZone(Zone):
             info.configure(text="No connection to host")
             self.log(f"{e!s}", level=logging.WARNING)
             return
+        else:
+            info.configure(text=node.text.strip())
 
-        info.configure(text=node.text.strip())
-
+        reader = busker.visitor.Read(url=host)
+        node = reader.run(self.scraper)
+        writer = busker.visitor.Write(url=host, prior=node, choice = Choice(form=0))
+        self.registry["Transcript"].process_node(writer.run(self.scraper))
 
 class InteractiveZone(Zone):
 
     def __init__(self, parent, name="", **kwargs):
         self.assist = tk.BooleanVar(value=False)
         super().__init__(parent, name=name, **kwargs)
+        self.scraper = Scraper()
+        self.node = None
 
     def build(self, frame: ttk.Frame):
         frame.rowconfigure(0, weight=30)
@@ -119,10 +126,17 @@ class InteractiveZone(Zone):
         )
         yield "label", self.grid(ttk.Label(frame, text="Assist"), row=1, column=2, columnspan=3, padx=(10, 10))
 
+    def process_node(self, node: Node):
+        if self.assist.get():
+            print(f"{node.options=}")
+            self.controls.entry[0].configure(values=node.options)
+        self.node = node
+
     def on_entry(self, evt):
         value = self.controls.entry[0].get()
         print(value.strip())
         self.controls.entry[0].delete(0, tk.END)
+        print(f"{self.node=}")
 
 
 class EnvironmentZone(Zone):
