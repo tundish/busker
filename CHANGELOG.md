@@ -1,6 +1,12 @@
 History
 =======
 
+0.6.0
+-----
+
++ Hosting tab working fully.
++ Basic implementation of Interactive transcript.
+
 0.5.0
 -----
 
