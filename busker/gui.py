@@ -244,7 +244,7 @@ class PackageZone(Zone):
         self.running = defaultdict(list)
 
     def build(self, frame: ttk.Frame):
-        frame.rowconfigure(0, weight=0)
+        frame.rowconfigure(0, weight=1)
         frame.columnconfigure(0, minsize=12)
         frame.columnconfigure(1, weight=10)
         frame.columnconfigure(2, weight=2)
@@ -437,7 +437,7 @@ class OutputZone(Zone):
         yield "scroll", self.grid(scroll_bar, row=0, column=1, pady=(10, 10), sticky=tk.N + tk.S)
 
 
-def build(config: dict = {}):
+def build(config: dict = {}, exclude=set()):
     root = tk.Tk()
     root.title(f"Busker {busker.__version__}")
     root.columnconfigure(0, weight=1)
@@ -479,7 +479,8 @@ def build(config: dict = {}):
 
     for p, page in enumerate(pages):
         page.frame.grid()
-        notebook.add(page.frame, text=page.name)
+        if page.name.lower() not in exclude:
+            notebook.add(page.frame, text=page.name)
         if p == 0:
             page.frame.rowconfigure(0, weight=1)
             page.frame.rowconfigure(1, weight=25)
@@ -487,7 +488,8 @@ def build(config: dict = {}):
             page.zones[0].frame.grid(row=0, column=0, padx=(2, 2), pady=(6, 2), sticky=tk.N + tk.E + tk.S + tk.W)
             page.zones[1].frame.grid(row=1, column=0, padx=(2, 2), pady=(6, 2), sticky=tk.N + tk.E + tk.S + tk.W)
         elif p == 1:
-            page.frame.rowconfigure(0, weight=1)
+            page.frame.rowconfigure(0, weight=0)
+            page.frame.rowconfigure(1, weight=0)
             page.frame.rowconfigure(3, weight=10)
             page.frame.columnconfigure(0, weight=1)
             for z, zone in enumerate(page.zones):

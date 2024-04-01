@@ -53,7 +53,8 @@ def main(args):
         history.log(f"{e!s}", level=logging.ERROR)
         return 2
 
-    root = busker.gui.build(config)
+    exclude = [] if args.with_automation else ["automation"]
+    root = busker.gui.build(config, exclude=exclude)
     root.mainloop()
     return 0
 
@@ -80,25 +81,31 @@ def main(args):
 
 
 def parser(defaults):
-    rv = argparse.ArgumentParser()
+    rv = argparse.ArgumentParser(fromfile_prefix_chars="@")
 
-    setting_options = rv.add_argument_group("Settings")
-    hosting_options = rv.add_argument_group("Hosting")
-    playing_options = rv.add_argument_group("Playing")
-    plugins_options = rv.add_argument_group("Plugins")
+    display_options = rv.add_argument_group("Display")
+    packaging_options = rv.add_argument_group("Packaging")
+    automation_options = rv.add_argument_group("Automation")
 
-    setting_options.add_argument(
+    display_options.add_argument(
+        "--with-automation",
+        action="store_true",
+        default=False,
+        help="Show Automation tab in GUI [False]."
+    )
+
+    automation_options.add_argument(
         "--config",
         type=pathlib.Path,
         default=defaults.config,
         help=f"Set a path to a configuration file [{defaults.config}].",
     )
 
-    plugins_options.add_argument(
+    automation_options.add_argument(
         "--url", default="http://localhost:8080",
         help="Set url path to begin session."
     )
-    plugins_options.add_argument(
+    automation_options.add_argument(
         "--number", type=int, default="64",
         help="Set the number of times to run the plugin."
     )
