@@ -43,6 +43,28 @@ def main(args):
     history = SharedHistory(log_name="busker")
     history.log(f"Busker {busker.__version__}")
 
+    if args.with_automation:
+        witness = Counter()
+
+        n = 0
+        while n < args.number:
+            n += 1
+            history.log(f"Run: {n:03d}")
+            visitor = Visitor(args.url)
+            while visitor.tactics:
+                tactic = visitor.tactics.popleft()
+                node = visitor(tactic)
+                if node:
+                    history.log(f"Page: {node.title}")
+
+            witness[visitor.turns] += 1
+
+        history.log(f"{visitor.turns} done.")
+
+        print(*visitor.toml_lines(visitor.history), sep="\n")
+        print({k: witness[k] for k in sorted(witness.keys())})
+        return 0
+
     try:
         text = args.config.read_text()
         config = tomllib.loads(text)
@@ -56,27 +78,6 @@ def main(args):
     exclude = [] if args.with_automation else ["automation"]
     root = busker.gui.build(config, exclude=exclude)
     root.mainloop()
-    return 0
-
-    witness = Counter()
-
-    n = 0
-    while n < args.number:
-        n += 1
-        history.log(f"Run: {n:03d}")
-        visitor = Visitor(args.url)
-        while visitor.tactics:
-            tactic = visitor.tactics.popleft()
-            node = visitor(tactic)
-            if node:
-                history.log(f"Page: {node.title}")
-
-        witness[visitor.turns] += 1
-
-    history.log(f"{visitor.turns} done.")
-
-    print(*visitor.toml_lines(visitor.history), sep="\n")
-    print({k: witness[k] for k in sorted(witness.keys())})
     return 0
 
 

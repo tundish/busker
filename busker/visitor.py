@@ -63,8 +63,8 @@ class Read(Tactic):
         body_match = body_re.search(node.text)
 
         title_match = scraper.find_title(node.text)
-        forms = body_match and tuple(scraper.get_forms(body_match[0])) or []
-        blocks = body_match and tuple(scraper.find_blocks(body_match[0])) or []
+        forms = body_match and tuple(scraper.get_forms(body_match[0])) or tuple()
+        blocks = body_match and tuple(scraper.find_blocks(body_match[0])) or tuple()
 
         return node._replace(
             tactic=self.__class__.__name__,
@@ -79,7 +79,7 @@ class Read(Tactic):
 
 class Write(Tactic):
     def run(self, scraper: Scraper, **kwargs) -> Node:
-        form = self.prior.actions[self.choice.form]
+        form = {i.name: i for i in self.prior.actions}.get(self.choice.form, next(iter(self.prior.actions)))
         if form and form.method.lower() == "post":
             parts = urllib.parse.urlparse(form.action)
             if not parts.scheme:
@@ -89,15 +89,16 @@ class Write(Tactic):
             if self.choice.input is None:
                 data = dict()
             else:
-                data = {form.inputs[self.choice.input].name: self.choice.value}
+                input_ = {i.name: i for i in form.inputs}.get(self.choice.input, next(iter(form.inputs)))
+                data = {input_.name: self.choice.value}
 
             rv = scraper.post(self.url, data)
 
             body_re = scraper.tag_matcher("body")
             body_match = body_re.search(rv.text)
 
-            forms = body_match and tuple(scraper.get_forms(body_match[0]))
-            blocks = body_match and tuple(scraper.find_blocks(body_match[0])) or []
+            forms = body_match and tuple(scraper.get_forms(body_match[0])) or tuple()
+            blocks = body_match and tuple(scraper.find_blocks(body_match[0])) or tuple()
 
             rv = rv._replace(
                 tactic=self.__class__.__name__,

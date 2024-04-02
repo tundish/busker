@@ -91,7 +91,7 @@ class InfoZone(Zone):
 
         reader = busker.visitor.Read(url=host)
         node = reader.run(self.scraper)
-        writer = busker.visitor.Write(url=host, prior=node, choice=Choice(form=0))
+        writer = busker.visitor.Write(url=host, prior=node, choice=Choice(form="ballad-form-start"))
         self.registry["Transcript"].process_node(writer.run(self.scraper))
 
 class InteractiveZone(Zone):
@@ -143,7 +143,7 @@ class InteractiveZone(Zone):
         writer = busker.visitor.Write(
             url=self.node.url,
             prior=self.node,
-            choice=Choice(form=0, input=0, value=value)
+            choice=Choice(form="ballad-command-form", input="ballad-command-form-input-text", value=value)
         )
         self.controls.entry[0].delete(0, tk.END)
         self.controls.text[0].insert(tk.END, "> ", ("prompt"))
