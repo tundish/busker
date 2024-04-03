@@ -398,6 +398,7 @@ class ServerZone(Zone):
         entry_point = self.controls.entry[0].get()
         host = self.controls.entry[1].get().strip()
         port = self.controls.entry[2].get()
+        self.registry["Output"].controls.text[0].insert(tk.END, f"Starting {entry_point} on {host}:{port}.\n")
 
         runner = Server(entry_point, host=host, port=port)
         self.running = next(self.executive.run(runner, interpreter=self.executive.active.interpreter))

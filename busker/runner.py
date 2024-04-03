@@ -102,7 +102,7 @@ class Installation(Runner):
         update=False,
     ) -> list[str]:
         specification = f"{distribution}" + ("[{0}]".format(",".join(dependencies)) if dependencies else "")
-        rv = [interpreter, "-m", "pip", "install", specification]
+        rv = [interpreter, "-m", "pip", "install", "--upgrade", "--upgrade-strategy", "eager", specification]
         if update:
             rv.insert(4, "--upgrade")
         return rv
