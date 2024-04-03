@@ -94,6 +94,7 @@ class InfoZone(Zone):
         writer = busker.visitor.Write(url=host, prior=node, choice=Choice(form="ballad-form-start"))
         self.registry["Transcript"].process_node(writer.run(self.scraper))
 
+
 class InteractiveZone(Zone):
 
     def __init__(self, parent, name="", **kwargs):
@@ -184,12 +185,17 @@ class EnvironmentZone(Zone):
         )
 
     def on_select(self):
-        path = pathlib.Path(filedialog.askdirectory(
+        choice = filedialog.askdirectory(
             parent=self.frame,
             title="Select virtual environment",
             initialdir=pathlib.Path.cwd(),
             mustexist=True,
-        ))
+        )
+        if not choice:
+            return
+        else:
+            path = pathlib.Path(choice)
+
         if not self.executive.venv_cfg(path) and not path.name.startswith("busker_"):
             path = pathlib.Path(tempfile.mkdtemp(prefix="busker_", suffix="_venv", dir=path))
         self.controls.entry[0].delete(0, tk.END)
@@ -303,6 +309,7 @@ class PackageZone(Zone):
             if isinstance(msg, list):
                 msg = [str(i) for i in msg]
             text_widget.insert(tk.END, f"Runner: {msg}\n")
+            text_widget.see(tk.END)
         except queue.Empty:
             pass
 
@@ -407,20 +414,19 @@ class ServerZone(Zone):
             if isinstance(msg, list):
                 msg = [str(i) for i in msg]
             text_widget.insert(tk.END, f"Runner: {msg}\n")
+            text_widget.see(tk.END)
         except queue.Empty:
             pass
 
-        try:
-            out, err = runner.proc.communicate(timeout=0.1)
-        except subprocess.TimeoutExpired:
+        for line in runner.proc.stdout:
+            text_widget.insert(tk.END, line)
+            text_widget.see(tk.END)
+        for line in runner.proc.stderr:
+            text_widget.insert(tk.END, line)
+            text_widget.see(tk.END)
+
+        if runner.proc.poll() is None:
             self.frame.after(100, self.update_progress, runner)
-        else:
-            for line in out.splitlines(keepends=True):
-                text_widget.insert(tk.END, line)
-                text_widget.see(tk.END)
-            for line in err.splitlines(keepends=True):
-                text_widget.insert(tk.END, line)
-                text_widget.see(tk.END)
 
 
 class OutputZone(Zone):
