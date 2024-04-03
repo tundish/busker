@@ -24,6 +24,7 @@ import enum
 import importlib.metadata
 import logging
 import multiprocessing.context
+import os
 import pathlib
 import queue
 import subprocess
@@ -339,6 +340,7 @@ class PackageZone(Zone):
         entry_widget.configure(values=values)
         entry_widget.current(0)
         self.registry["Server"].controls.button[1]["state"] = tk.NORMAL
+        proc.terminate()
 
 
 class ServerZone(Zone):
@@ -382,29 +384,41 @@ class ServerZone(Zone):
             ),
         ]
         for button in buttons:
-            button["state"] = tk.DISABLED
+            # button["state"] = tk.DISABLED
             yield "button", button
 
     def on_stop(self):
-        if self.running:
-            self.running.terminate()
+        text_widget = self.registry["Output"].controls.text[0]
         self.controls.button[0]["state"] = tk.DISABLED
         self.controls.button[1]["state"] = tk.NORMAL
 
+        if self.running:
+            self.running.terminate()
+            text_widget.insert(tk.END, f"Server process terminated.\n")
+            text_widget.see(tk.END)
+            self.running = None
+
     def on_start(self):
+        text_widget = self.registry["Output"].controls.text[0]
         self.controls.button[0]["state"] = tk.NORMAL
         self.controls.button[1]["state"] = tk.DISABLED
 
         entry_point = self.controls.entry[0].get()
         host = self.controls.entry[1].get().strip()
         port = self.controls.entry[2].get()
-        self.registry["Output"].controls.text[0].insert(tk.END, f"Starting {entry_point} on {host}:{port}.\n")
+        text_widget.insert(tk.END, f"Starting {entry_point} on {host}:{port}.\n")
+        text_widget.see(tk.END)
 
         runner = Server(entry_point, host=host, port=port)
         self.running = next(self.executive.run(runner, interpreter=self.executive.active.interpreter))
+
         self.registry["Info"].controls.entry[0].delete(0, tk.END)
         self.registry["Info"].controls.entry[0].insert(0, runner.url)
-        self.registry["Output"].controls.text[0].insert(tk.END, f"Server process running.\n")
+        text_widget.insert(tk.END, f"Server process running.\n")
+        text_widget.see(tk.END)
+
+        os.set_blocking(self.running.stdout.fileno(), False)
+        os.set_blocking(self.running.stderr.fileno(), False)
         self.update_progress(runner)
 
     def update_progress(self, runner: Runner):
