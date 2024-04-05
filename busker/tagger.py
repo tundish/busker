@@ -34,10 +34,12 @@ class Tagger(html.parser.HTMLParser):
         self.tags = []
 
     def handle_starttag(self, tag: str, attrs: dict):
+        if tag == "div":
+            return
         self.tags.append(tag)
 
     def handle_endtag(self, tag: str):
-        if self.tags[-1] == tag:
+        if self.tags and self.tags[-1] == tag:
             self.tags.pop(-1)
 
     def handle_data(self, text:str):

@@ -18,7 +18,10 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import textwrap
+import tkinter as tk
 import unittest
+
+from busker.tagger import Tagger
 
 
 class TaggerTests(unittest.TestCase):
@@ -42,5 +45,24 @@ class TaggerTests(unittest.TestCase):
         """),
     ]
 
-    def test_single_blockquote(self):
-        print(self.html)
+    def test_tagger_ignores_div(self):
+        widget = tk.Text()
+        tagger = Tagger(widget)
+        tagger.feed(self.html[0])
+        self.assertFalse(tagger.tags)
+
+    def test_tagger_text(self):
+        widget = tk.Text()
+        tagger = Tagger(widget)
+        tagger.feed(self.html[0])
+        text = widget.get(1.0, tk.END)
+        self.assertEqual(len(text.splitlines()), 7)
+
+    def test_tagger_tags(self):
+        widget = Tagger.configure(tk.Text())
+        tagger = Tagger(widget)
+        tagger.feed(self.html[0])
+        self.assertFalse(tagger.tags)
+        text = widget.get(1.0, tk.END)
+        tags = ("blockquote", "cite", "p", "ol", "li")
+        self.assertLessEqual(set(tags), set(widget.tag_names()))
