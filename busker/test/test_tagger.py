@@ -76,4 +76,5 @@ if __name__ == "__main__":
     widget.grid(sticky="nsew")
     tagger = Tagger(widget)
     tagger.feed(TaggerTests.html[0])
+    widget["state"] = tk.DISABLED
     root.mainloop()

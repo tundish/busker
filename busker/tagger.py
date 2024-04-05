@@ -50,7 +50,7 @@ class Tagger(html.parser.HTMLParser):
 
     @staticmethod
     def configure(widget: tk.Text):
-        widget.tag_configure("cite", background="yellow", font="TkFixedFont", relief="raised")
+        widget.tag_configure("cite", background="#BBBBBB", foreground="#FFFFFF", font="TkFixedFont")
         return widget
 
     def __init__(self, widget, convert_charrefs=True):
