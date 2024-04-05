@@ -66,3 +66,14 @@ class TaggerTests(unittest.TestCase):
         text = widget.get(1.0, tk.END)
         tags = ("blockquote", "cite", "p", "ol", "li")
         self.assertLessEqual(set(tags), set(widget.tag_names()))
+
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    root.rowconfigure(0, weight=1)
+    root.columnconfigure(0, weight=1)
+    widget = Tagger.configure(tk.Text(root))
+    widget.grid(sticky="nsew")
+    tagger = Tagger(widget)
+    tagger.feed(TaggerTests.html[0])
+    root.mainloop()

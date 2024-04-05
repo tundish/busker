@@ -22,6 +22,31 @@ import tkinter as tk
 
 
 class Tagger(html.parser.HTMLParser):
+    """
+    Tags support the following configuration options:
+        * background
+        * bgstipple
+        * borderwidth
+        * elide
+        * fgstipple
+        * font
+        * foreground
+        * justify
+        * lmargin1
+        * lmargin2
+        * offset
+        * overstrike
+        * relief
+        * rmargin
+        * spacing1
+        * spacing2
+        * spacing3
+        * tabs
+        * tabstyle
+        * underline
+        * wrap.
+
+    """
 
     @staticmethod
     def configure(widget: tk.Text):
