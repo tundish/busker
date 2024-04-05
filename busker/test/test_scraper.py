@@ -170,6 +170,13 @@ class ScraperTests(unittest.TestCase):
                 else:
                     self.assertEqual(title, "Story", title)
 
+    def test_find_blocks(self):
+        scraper = Scraper()
+        blocks = scraper.find_blocks(self.fixtures.Session)
+        self.assertEqual(len(blocks), 2)
+        self.assertTrue(all(i.startswith("<blockquote") for i in blocks))
+        self.assertTrue(all(i.endswith("blockquote>") for i in blocks))
+
     def test_get_forms_from_session(self):
         scraper = Scraper()
         for n, text in enumerate((self.fixtures.Home, self.fixtures.Session)):
