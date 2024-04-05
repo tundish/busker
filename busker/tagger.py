@@ -58,10 +58,18 @@ class Tagger(html.parser.HTMLParser):
         self.widget = widget
         self.tags = []
 
+    @property
+    def indent(self):
+        return "\t" * (len(self.tags) - 1)
+
     def handle_starttag(self, tag: str, attrs: dict):
         if tag == "div":
             return
+
         self.tags.append(tag)
+        if tag == "li" and attrs:
+            attribs = dict(attrs)
+            self.widget.insert(tk.END, f"{self.indent}{attribs['id']}.", self.tags)
 
     def handle_endtag(self, tag: str):
         if self.tags and self.tags[-1] == tag:
@@ -69,6 +77,10 @@ class Tagger(html.parser.HTMLParser):
 
     def handle_data(self, text:str):
         text = text.strip()
+        indent = self.indent
+        if len(indent) > 1 and self.tags[-2] == "li":
+            indent = indent[0]
         if text:
-            self.widget.insert(tk.END, f"{text}\n", self.tags)
+            print(f"{self.tags=}")
+            self.widget.insert(tk.END, f"{indent}{text}\n", self.tags)
             self.widget.see(tk.END)
