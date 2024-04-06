@@ -45,24 +45,23 @@ class TaggerTests(unittest.TestCase):
         """),
     ]
 
-    def test_tagger_ignores_div(self):
+    def test_tagger_catches_div(self):
         widget = tk.Text()
         tagger = Tagger(widget)
         tagger.feed(self.html[0])
-        self.assertFalse(tagger.tags)
+        self.assertEqual(tagger.tags, ["div"])
 
     def test_tagger_text(self):
         widget = tk.Text()
         tagger = Tagger(widget)
         tagger.feed(self.html[0])
         text = widget.get(1.0, tk.END)
-        self.assertEqual(len(text.splitlines()), 7)
+        self.assertEqual(len(text.splitlines()), 10)
 
     def test_tagger_tags(self):
         widget = Tagger.configure(tk.Text())
         tagger = Tagger(widget)
         tagger.feed(self.html[0])
-        self.assertFalse(tagger.tags)
         text = widget.get(1.0, tk.END)
         tags = ("blockquote", "cite", "p", "ol", "li")
         self.assertLessEqual(set(tags), set(widget.tag_names()))
