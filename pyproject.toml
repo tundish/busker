@@ -33,7 +33,16 @@ busker-cli = "busker.main:run"
 requires = ["hatchling >= 1.22.4"]
 build-backend = "hatchling.build"
 
-[tool.hatch.build]
+[tool.hatch.build.targets.sdist]
+include = [
+"*.md",
+"busker/*",
+]
+exclude = [
+"busker_*",
+]
+
+[tool.hatch.build.targets.wheel]
 include = [
 "*.md",
 "busker/*",
