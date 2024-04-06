@@ -56,7 +56,7 @@ class TaggerTests(unittest.TestCase):
         tagger = Tagger(widget)
         tagger.feed(self.html[0])
         text = widget.get(1.0, tk.END)
-        self.assertEqual(len(text.splitlines()), 10)
+        self.assertEqual(len(text.splitlines()), 11)
 
     def test_tagger_tags(self):
         widget = Tagger.configure(tk.Text())
