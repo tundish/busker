@@ -104,6 +104,7 @@ class InteractiveZone(Zone):
         super().__init__(parent, name=name, **kwargs)
         self.scraper = Scraper()
         self.node = None
+        self.do_display()
 
     def build(self, frame: ttk.Frame):
         frame.rowconfigure(0, weight=30)
@@ -126,7 +127,7 @@ class InteractiveZone(Zone):
         combo_box.bind("<Return>", self.on_entry)
 
         yield "toggle", self.grid(
-            ttk.Checkbutton(frame, variable=self.assist, offvalue=False, onvalue=True, command=self.on_toggle),
+            ttk.Checkbutton(frame, variable=self.assist, offvalue=False, onvalue=True, command=self.do_display),
             row=1, column=1, padx=(10, 10), sticky=tk.W + tk.E
         )
         yield "label", self.grid(ttk.Label(frame, text="Assist"), row=1, column=2, columnspan=3, padx=(10, 10))
@@ -137,13 +138,14 @@ class InteractiveZone(Zone):
         for block in node.blocks:
             tagger.feed(block)
 
-    def on_toggle(self):
+    def do_display(self):
         if self.assist.get():
-            self.controls.text[0].tag_configure("cue", elide=False)
+            Tagger.show(self.controls.text[0], "cue")
             if self.node:
                 self.controls.entry[0].configure(values=self.node.options)
         else:
-            self.controls.text[0].tag_configure("cue", elide=True)
+            Tagger.hide(self.controls.text[0], "cue")
+            self.controls.entry[0].configure(values=[])
 
     def on_entry(self, evt):
         value = self.controls.entry[0].get().strip()
@@ -153,12 +155,14 @@ class InteractiveZone(Zone):
             choice=Choice(form="ballad-command-form", input="ballad-command-form-input-text", value=value)
         )
         self.controls.entry[0].delete(0, tk.END)
-        self.controls.text[0].insert(tk.END, "> ", ("prompt"))
-        self.controls.text[0].insert(tk.END, f"{value}\n", ("command"))
+
+        Tagger.display_command(self.controls.text[0], cmd=value)
         try:
             self.process_node(writer.run(self.scraper))
         except urllib.error.HTTPError:
-            self.controls.text[0].insert(tk.END, "...\n", ("nudge"))
+            Tagger.display_message(self.controls.text[0])
+        finally:
+            self.do_display()
 
 
 class EnvironmentZone(Zone):

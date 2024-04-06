@@ -55,6 +55,9 @@ class Tagger(html.parser.HTMLParser):
         cite_font.config(weight="bold")
 
         widget.tag_configure("blockquote", tabs=("12p", "24p", "12p", tk.NUMERIC, "6p"))
+        widget.tag_configure("prompt", tabs=("12p", "24p"))
+        widget.tag_configure("message", tabs=("12p", "24p"))
+
         widget.tag_configure(
             "cue", spacing1="2p", spacing3="2p",
             foreground="#FCFCFC", background="#1E1E1E",
@@ -63,6 +66,34 @@ class Tagger(html.parser.HTMLParser):
         widget.tag_configure("cite", foreground="#1C1C1C", spacing1="6p", spacing3="6p", font=cite_font)
         widget.tag_configure("p", spacing1="6p", spacing3="6p", font="TkTextFont")
         widget.tag_configure("li", spacing1="3p", spacing3="3p")
+        widget.tag_configure("prompt", spacing1="3p", spacing3="3p")
+        widget.tag_configure("message", spacing1="3p", spacing3="3p")
+        return widget
+
+    @staticmethod
+    def display_command(widget: tk.Text, cmd: str = "", prompt=">"):
+        if prompt:
+            widget.insert(tk.END, f"{prompt}\t", ("prompt"))
+        widget.insert(tk.END, f"{cmd}\n", ("command"))
+        widget.see(tk.END)
+        return widget
+
+    @staticmethod
+    def display_message(widget: tk.Text, msg: str = "..."):
+        widget.insert(tk.END, f"{msg}\n", ("message"))
+        widget.see(tk.END)
+        return widget
+
+    @staticmethod
+    def hide(widget: tk.Text, *args):
+        for arg in args: 
+            widget.tag_configure(arg, elide=True)
+        return widget
+
+    @staticmethod
+    def show(widget: tk.Text, *args):
+        for arg in args:
+            widget.tag_configure(arg, elide=False)
         return widget
 
     def __init__(self, widget, convert_charrefs=True):
@@ -73,7 +104,6 @@ class Tagger(html.parser.HTMLParser):
     @property
     def indent(self):
         return "\t" * (len(self.tags) - self.tags.count("div"))
-        return "\t" * (self.tags.count("blockquote") + self.tags.count("p") + self.tags.count("li"))
 
     def handle_starttag(self, tag: str, attrs: dict):
         self.tags.append(tag)
@@ -95,8 +125,11 @@ class Tagger(html.parser.HTMLParser):
     def handle_data(self, text:str):
         text = text.strip()
         if not text: return
-        print(f"{text=} {len(self.indent)=}")
-        indent = "\t" * (len(self.indent) - self.tags.count("li"))
+
+        if self.tags and self.tags[-1] in ("em", "strong", "code"):
+            indent = ""
+        else:
+            indent = "\t" * (len(self.indent) - self.tags.count("li"))
 
         self.widget.insert(tk.END, f"{indent}{text}\n", self.tags)
         self.widget.see(tk.END)
