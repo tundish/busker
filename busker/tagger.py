@@ -56,9 +56,9 @@ class Tagger(html.parser.HTMLParser):
 
         widget.tag_configure("blockquote", tabs=("12p", "24p", "12p", tk.NUMERIC, "6p"))
         widget.tag_configure(
-            "cue", spacing1="6p", spacing3="6p",
-            foreground="#BCBCBC", background="#0E0E0E",
-            font="TkFixedFont"
+            "cue", spacing1="2p", spacing3="2p",
+            foreground="#FCFCFC", background="#1E1E1E",
+            font=("TkTooltipFont", 8)
         )
         widget.tag_configure("cite", foreground="#1C1C1C", spacing1="6p", spacing3="6p", font=cite_font)
         widget.tag_configure("p", spacing1="6p", spacing3="6p", font="TkTextFont")

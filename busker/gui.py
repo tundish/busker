@@ -125,19 +125,24 @@ class InteractiveZone(Zone):
         combo_box.bind("<Return>", self.on_entry)
 
         yield "toggle", self.grid(
-            ttk.Checkbutton(frame, variable=self.assist, offvalue=False, onvalue=True),
+            ttk.Checkbutton(frame, variable=self.assist, offvalue=False, onvalue=True, command=self.on_toggle),
             row=1, column=1, padx=(10, 10), sticky=tk.W + tk.E
         )
         yield "label", self.grid(ttk.Label(frame, text="Assist"), row=1, column=2, columnspan=3, padx=(10, 10))
 
     def process_node(self, node: Node):
+        self.node = node
         tagger = Tagger(self.controls.text[0])
         for block in node.blocks:
             tagger.feed(block)
 
+    def on_toggle(self):
         if self.assist.get():
-            self.controls.entry[0].configure(values=node.options)
-        self.node = node
+            self.controls.text[0].tag_configure("cue", elide=False)
+            if self.node:
+                self.controls.entry[0].configure(values=self.node.options)
+        else:
+            self.controls.text[0].tag_configure("cue", elide=True)
 
     def on_entry(self, evt):
         value = self.controls.entry[0].get().strip()
