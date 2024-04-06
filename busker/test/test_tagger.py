@@ -68,7 +68,9 @@ class TaggerTests(unittest.TestCase):
 
 
 if __name__ == "__main__":
+    from tkinter import font
     root = tk.Tk()
+    print(font.families(), sep="\n")
     root.rowconfigure(0, weight=1)
     root.columnconfigure(0, weight=1)
     widget = Tagger.configure(tk.Text(root))

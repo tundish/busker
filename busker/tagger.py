@@ -19,6 +19,7 @@
 
 import html.parser
 import tkinter as tk
+from tkinter import font as tkf
 
 
 class Tagger(html.parser.HTMLParser):
@@ -50,14 +51,17 @@ class Tagger(html.parser.HTMLParser):
 
     @staticmethod
     def configure(widget: tk.Text):
+        cite_font = tkf.nametofont("TkFixedFont").copy()
+        cite_font.config(weight="bold")
+
         widget.tag_configure("blockquote", tabs=("12p", "24p", "12p", tk.NUMERIC, "6p"))
         widget.tag_configure(
             "cue", spacing1="6p", spacing3="6p",
-            background="#BCBCBC", foreground="#FFFFFF",
+            foreground="#BCBCBC", background="#0E0E0E",
             font="TkFixedFont"
         )
-        widget.tag_configure("cite", spacing1="6p", spacing3="6p")
-        widget.tag_configure("p", spacing1="6p", spacing3="6p")
+        widget.tag_configure("cite", foreground="#1C1C1C", spacing1="6p", spacing3="6p", font=cite_font)
+        widget.tag_configure("p", spacing1="6p", spacing3="6p", font="TkTextFont")
         widget.tag_configure("li", spacing1="3p", spacing3="3p")
         return widget
 
