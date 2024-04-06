@@ -31,6 +31,7 @@ import subprocess
 import tempfile
 import tkinter as tk
 from tkinter import filedialog
+from tkinter import messagebox
 from tkinter import ttk
 from types import SimpleNamespace as Structure
 import sys
@@ -353,6 +354,7 @@ class ServerZone(Zone):
         super().__init__(parent, name=name, **kwargs)
         self.executive = Executive()
         self.running = None
+        parent._root().protocol('WM_DELETE_WINDOW', self.on_window)
 
     def build(self, frame: ttk.Frame):
         frame.rowconfigure(0, weight=1)
@@ -390,6 +392,13 @@ class ServerZone(Zone):
         for button in buttons:
             # button["state"] = tk.DISABLED
             yield "button", button
+
+    def on_window(self):
+        if not self.running:
+            self.parent._root().destroy()
+        elif messagebox.askokcancel("Quit", "Quitting now will stop the server."):
+            self.on_stop()
+            self.parent._root().destroy()
 
     def on_stop(self):
         text_widget = self.registry["Output"].controls.text[0]
