@@ -50,7 +50,7 @@ class Tagger(html.parser.HTMLParser):
 
     @staticmethod
     def configure(widget: tk.Text):
-        widget.tag_configure("cite", background="#BBBBBB", foreground="#FFFFFF", font="TkFixedFont")
+        widget.tag_configure("cue", background="#BBBBBB", foreground="#FFFFFF", font="TkFixedFont")
         return widget
 
     def __init__(self, widget, convert_charrefs=True):
@@ -68,7 +68,7 @@ class Tagger(html.parser.HTMLParser):
         if tag == "div":
             return
         elif tag == "blockquote":
-            self.widget.insert(tk.END, f"{attribs['cite']}\n", self.tags)
+            self.widget.insert(tk.END, f"{attribs['cite']}\n", self.tags + ["cue"])
         elif tag in ("ol", "ul"):
             self.widget.insert(tk.END, "\n", self.tags)
         elif tag == "li" and attrs:
@@ -80,10 +80,9 @@ class Tagger(html.parser.HTMLParser):
 
     def handle_data(self, text:str):
         text = text.strip()
-        indent = self.indent
-        if len(indent) > 1 and self.tags[-2] == "li":
-            indent = indent[0]
-        if text:
-            print(f"{self.tags=}")
-            self.widget.insert(tk.END, f"{indent}{text}\n", self.tags)
-            self.widget.see(tk.END)
+        if not text: return
+        indent = "\t" * (len(self.indent) - self.tags.count("li"))
+
+        print(f"{self.tags=}")
+        self.widget.insert(tk.END, f"{indent}{text}\n", self.tags)
+        self.widget.see(tk.END)
