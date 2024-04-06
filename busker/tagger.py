@@ -50,7 +50,15 @@ class Tagger(html.parser.HTMLParser):
 
     @staticmethod
     def configure(widget: tk.Text):
-        widget.tag_configure("cue", background="#BBBBBB", foreground="#FFFFFF", font="TkFixedFont")
+        widget.tag_configure("blockquote", tabs=("12p", "24p", "12p", tk.NUMERIC, "6p"))
+        widget.tag_configure(
+            "cue", spacing1="6p", spacing3="6p",
+            background="#BCBCBC", foreground="#FFFFFF",
+            font="TkFixedFont"
+        )
+        widget.tag_configure("cite", spacing1="6p", spacing3="6p")
+        widget.tag_configure("p", spacing1="6p", spacing3="6p")
+        widget.tag_configure("li", spacing1="3p", spacing3="3p")
         return widget
 
     def __init__(self, widget, convert_charrefs=True):
@@ -60,7 +68,8 @@ class Tagger(html.parser.HTMLParser):
 
     @property
     def indent(self):
-        return "\t" * (self.tags.count("p") + self.tags.count("li"))
+        return "\t" * (len(self.tags) - self.tags.count("div"))
+        return "\t" * (self.tags.count("blockquote") + self.tags.count("p") + self.tags.count("li"))
 
     def handle_starttag(self, tag: str, attrs: dict):
         self.tags.append(tag)
@@ -68,9 +77,10 @@ class Tagger(html.parser.HTMLParser):
         if tag == "div":
             return
         elif tag == "blockquote":
-            self.widget.insert(tk.END, f"{attribs['cite']}\n", self.tags + ["cue"])
-        elif tag in ("ol", "ul"):
             self.widget.insert(tk.END, "\n", self.tags)
+            self.widget.insert(tk.END, f"{self.indent}{attribs['cite']}\n", self.tags + ["cue"])
+        elif tag in ("ol", "ul"):
+            pass
         elif tag == "li" and attrs:
             self.widget.insert(tk.END, f"{self.indent}{attribs['id']}.", self.tags)
 
@@ -81,8 +91,8 @@ class Tagger(html.parser.HTMLParser):
     def handle_data(self, text:str):
         text = text.strip()
         if not text: return
+        print(f"{text=} {len(self.indent)=}")
         indent = "\t" * (len(self.indent) - self.tags.count("li"))
 
-        print(f"{self.tags=}")
         self.widget.insert(tk.END, f"{indent}{text}\n", self.tags)
         self.widget.see(tk.END)
