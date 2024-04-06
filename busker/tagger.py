@@ -60,15 +60,18 @@ class Tagger(html.parser.HTMLParser):
 
     @property
     def indent(self):
-        return "\t" * (len(self.tags) - 1)
+        return "\t" * (self.tags.count("p") + self.tags.count("li"))
 
     def handle_starttag(self, tag: str, attrs: dict):
+        self.tags.append(tag)
+        attribs = dict(attrs)
         if tag == "div":
             return
-
-        self.tags.append(tag)
-        if tag == "li" and attrs:
-            attribs = dict(attrs)
+        elif tag == "blockquote":
+            self.widget.insert(tk.END, f"{attribs['cite']}\n", self.tags)
+        elif tag in ("ol", "ul"):
+            self.widget.insert(tk.END, "\n", self.tags)
+        elif tag == "li" and attrs:
             self.widget.insert(tk.END, f"{self.indent}{attribs['id']}.", self.tags)
 
     def handle_endtag(self, tag: str):
