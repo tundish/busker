@@ -30,7 +30,7 @@ class Tactic:
     def registry(cls):
         return cls.__subclasses__()
 
-    def __init__(self, prior=None, url=None, choice: Choice = None):
+    def __init__(self, prior: Node = None, url: str = None, choice: Choice = None):
         self.prior = prior
         self.url = url
         self.choice = choice

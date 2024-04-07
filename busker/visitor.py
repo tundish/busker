@@ -28,6 +28,7 @@ from busker.history import SharedHistory
 from busker.scraper import Node
 from busker.scraper import Scraper
 from busker.tactics import Read
+from busker.tactics import Tactic
 from busker.tactics import Write
 from busker.types import Choice
 
@@ -41,6 +42,13 @@ class Witness(html.parser.HTMLParser):
 
     def untested(self, node: Node):
         return set(self.commands.get(node.hash, [])) - set(self.options.get(node.hash, []))
+
+    def update(self, node: Node, choice: Choice):
+        if choice:
+            self.commands[node.hash].append(choice.value)
+
+        options = [i for i in node.options if i not in self.options[node.hash]]
+        self.options[node.hash].extend(options)
 
 
 class Visitor(SharedHistory):
@@ -65,6 +73,8 @@ class Visitor(SharedHistory):
 
         try:
             node = tactic.run(self.scraper, **kwargs)
+            if not node.actions:
+                return node
         except urllib.error.HTTPError as e:
             value = f'{tactic.choice.value}' if tactic.choice.value is not None else "None"
             self.log(
@@ -74,15 +84,7 @@ class Visitor(SharedHistory):
             self.log(f"Caught error {e}", level=logging.WARNING)
             return
 
-        if tactic.choice:
-            self.witness.commands[node.hash].append(tactic.choice.value)
-
-        options = [i for i in node.options if i not in self.witness.options[node.hash]]
-        self.log(f"New options: {options}", level=logging.DEBUG)
-        self.witness.options[node.hash].extend(options)
-
-        if not node.actions:
-            return node
+        self.witness.update(node, tactic.choice)
 
         choice = Choice(form=random.randrange(len(node.actions)))
         try:
