@@ -65,18 +65,18 @@ class Visitor(SharedHistory):
         return len([i for record in self.witness.commands.values() for i in record])
 
     def choose(self, node: Node) -> Choice:
-        choice = Choice(form=random.randrange(len(node.actions)))
+        rv = Choice(form=random.randrange(len(node.actions)))
         try:
-            choice = choice._replace(input=random.randrange(len(node.actions[choice.form].inputs)))
-            choice = choice._replace(value=random.choice(node.actions[choice.form].inputs[choice.input].values))
+            rv = rv._replace(input=random.randrange(len(node.actions[rv.form].inputs)))
+            rv = rv._replace(value=random.choice(node.actions[rv.form].inputs[rv.input].values))
         except ValueError:
-            # No inputs in form
+            # No inputs in chosen form
             pass
 
         # Back out of dead ends
         if self.witness.commands[node.hash] and not self.witness.untested(node):
-            choice = choice._replace(value=None)
-        return choice
+            rv = rv._replace(value=None)
+        return rv
 
     def __call__(self, tactic, *args, **kwargs):
 
@@ -84,6 +84,8 @@ class Visitor(SharedHistory):
 
         try:
             node = tactic.run(self.scraper, **kwargs)
+            self.witness.update(node, tactic.choice)
+            choice = self.choose(node)
         except urllib.error.HTTPError as e:
             value = f'{tactic.choice.value}' if tactic.choice.value is not None else "None"
             self.log(
@@ -93,12 +95,6 @@ class Visitor(SharedHistory):
             self.log(f"Caught error {e}", level=logging.WARNING)
             return
 
-        self.witness.update(node, tactic.choice)
-
-        if node.actions:
-            choice = self.choose(node)
-        else:
-            return node
         if node.url != self.url or len(self.witness.commands) == 1:
             self.tactics.append(Write(node, choice=choice))
 
