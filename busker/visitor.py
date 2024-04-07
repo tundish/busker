@@ -21,6 +21,7 @@ from collections import defaultdict
 from collections import deque
 import logging
 import random
+import urllib.error
 
 from busker.history import SharedHistory
 from busker.scraper import Scraper
