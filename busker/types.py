@@ -26,6 +26,8 @@ import multiprocessing.pool
 import pathlib
 
 
+Choice = namedtuple("Choice", ["form", "input", "value"], defaults=[None, None])
+
 Completion = namedtuple("Completion", ["runner", "exenv", "data"], defaults=[None])
 
 
