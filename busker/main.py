@@ -44,7 +44,7 @@ def main(args):
     history.log(f"Busker {busker.__version__}")
 
     if args.with_automation:
-        witness = Counter()
+        counter = Counter()
 
         n = 0
         while n < args.number:
@@ -57,12 +57,12 @@ def main(args):
                 if node:
                     history.log(f"Page: {node.title}")
 
-            witness[visitor.turns] += 1
+            counter[visitor.turns] += 1
 
         history.log(f"{visitor.turns} done.")
 
         print(*visitor.toml_lines(visitor.history), sep="\n")
-        print({k: witness[k] for k in sorted(witness.keys())})
+        print({k: counter[k] for k in sorted(counter.keys())})
         return 0
 
     try:
