@@ -17,21 +17,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-from collections import defaultdict
-from collections import deque
-from collections import namedtuple
-import datetime
-import functools
-import itertools
-import logging
-import random
-import re
-import sys
 import urllib.parse
-import urllib.request
-import xml.etree.ElementTree as ET
 
-from busker.history import SharedHistory
 from busker.scraper import Scraper
 from busker.scraper import Node
 from busker.types import Choice

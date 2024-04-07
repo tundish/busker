@@ -19,21 +19,11 @@
 
 from collections import defaultdict
 from collections import deque
-from collections import namedtuple
-import datetime
-import functools
-import itertools
 import logging
 import random
-import re
-import sys
-import urllib.parse
-import urllib.request
-import xml.etree.ElementTree as ET
 
 from busker.history import SharedHistory
 from busker.scraper import Scraper
-from busker.scraper import Node
 from busker.tactics import Read
 from busker.tactics import Write
 from busker.types import Choice
