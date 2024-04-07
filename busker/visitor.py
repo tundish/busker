@@ -19,6 +19,7 @@
 
 from collections import defaultdict
 from collections import deque
+import html.parser
 import logging
 import random
 import urllib.error
@@ -30,19 +31,26 @@ from busker.tactics import Write
 from busker.types import Choice
 
 
+class Summary(html.parser.HTMLParser):
+
+    def __init__(self, convert_charrefs=True):
+        super().__init__(convert_charrefs=convert_charrefs)
+        self.options = defaultdict(deque)
+        self.records = defaultdict(deque)
+
+
 class Visitor(SharedHistory):
 
     def __init__(self, url=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.url = url
         self.scraper = Scraper()
-        self.options = defaultdict(deque)
-        self.records = defaultdict(deque)
+        self.summary = Summary()
         self.tactics = deque([Read(url=self.url)])
 
     @property
     def turns(self):
-        return len([i for record in self.records.values() for i in record])
+        return len([i for record in self.summary.records.values() for i in record])
 
     def __call__(self, tactic, *args, **kwargs):
 
@@ -60,11 +68,11 @@ class Visitor(SharedHistory):
             return
 
         if tactic.choice:
-            self.records[node.hash].append(tactic.choice.value)
+            self.summary.records[node.hash].append(tactic.choice.value)
 
-        options = [i for i in node.options if i not in self.options[node.hash]]
+        options = [i for i in node.options if i not in self.summary.options[node.hash]]
         self.log(f"New options: {options}", level=logging.DEBUG)
-        self.options[node.hash].extend(options)
+        self.summary.options[node.hash].extend(options)
 
         if not node.actions:
             return node
@@ -79,10 +87,10 @@ class Visitor(SharedHistory):
             pass
 
         # Back out of dead ends
-        if self.records[node.hash] and set(self.records[node.hash]) >= set(self.options[node.hash]):
+        if self.summary.records[node.hash] and set(self.summary.records[node.hash]) >= set(self.summary.options[node.hash]):
             choice = choice._replace(value=None)
 
-        if node.url != self.url or len(self.records) == 1:
+        if node.url != self.url or len(self.summary.records) == 1:
             self.tactics.append(Write(node, choice=choice))
 
         return node
