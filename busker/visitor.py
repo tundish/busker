@@ -25,6 +25,7 @@ import random
 import urllib.error
 
 from busker.history import SharedHistory
+from busker.scraper import Node
 from busker.scraper import Scraper
 from busker.tactics import Read
 from busker.tactics import Write
@@ -37,6 +38,9 @@ class Witness(html.parser.HTMLParser):
         super().__init__(convert_charrefs=convert_charrefs)
         self.options = defaultdict(deque)
         self.commands = defaultdict(deque)
+
+    def untested(self, node: Node):
+        return set(self.commands.get(node.hash, [])) - set(self.options.get(node.hash, []))
 
 
 class Visitor(SharedHistory):
@@ -51,6 +55,9 @@ class Visitor(SharedHistory):
     @property
     def turns(self):
         return len([i for record in self.witness.commands.values() for i in record])
+
+    def choose(self, node: Node) -> Choice:
+        return None
 
     def __call__(self, tactic, *args, **kwargs):
 
@@ -87,7 +94,7 @@ class Visitor(SharedHistory):
             pass
 
         # Back out of dead ends
-        if self.witness.commands[node.hash] and set(self.witness.commands[node.hash]) >= set(self.witness.options[node.hash]):
+        if self.witness.commands[node.hash] and not self.witness.untested(node):
             choice = choice._replace(value=None)
 
         if node.url != self.url or len(self.witness.commands) == 1:
