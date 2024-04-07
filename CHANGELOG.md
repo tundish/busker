@@ -1,6 +1,13 @@
 History
 =======
 
+0.7.0
+-----
+
+* Interactive tab fully working.
+* Hosting workflow robust.
+* Tested on Windows (Python 3.12).
+
 0.6.0
 -----
 
