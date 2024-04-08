@@ -65,10 +65,15 @@ class Visitor(SharedHistory):
         return len([i for record in self.witness.commands.values() for i in record])
 
     def choose(self, node: Node) -> Choice:
-        rv = Choice(form=random.randrange(len(node.forms)))
+        forms = {i.name: i for i in node.forms}
+        rv = Choice(form=random.choice(list(forms)))
         try:
-            rv = rv._replace(input=random.randrange(len(node.forms[rv.form].inputs)))
-            rv = rv._replace(value=random.choice(node.forms[rv.form].inputs[rv.input].values))
+            inputs = {i.name: i for i in forms[rv.form].inputs}
+            rv = rv._replace(input=random.choice(list(inputs)))
+            rv = rv._replace(value=random.choice(inputs[rv.input].values))
+        except IndexError:
+            # No values to choose
+            pass
         except ValueError:
             # No inputs in chosen form
             pass
