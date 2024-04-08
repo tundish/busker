@@ -78,18 +78,18 @@ class Visitor(SharedHistory):
             rv = rv._replace(value=None)
         return rv
 
-    def __call__(self, tactic, *args, **kwargs):
+    def __call__(self, action, *args, **kwargs):
 
-        self.log(f"Action: {tactic.__class__.__name__} {tactic.choice}")
+        self.log(f"Action: {action.__class__.__name__} {action.choice}")
 
         try:
-            node = tactic.run(self.scraper, **kwargs)
-            self.witness.update(node, tactic.choice)
+            node = action.run(self.scraper, **kwargs)
+            self.witness.update(node, action.choice)
             choice = self.choose(node)
         except urllib.error.HTTPError as e:
-            value = f'{tactic.choice.value}' if tactic.choice.value is not None else "None"
+            value = f'{action.choice.value}' if action.choice.value is not None else "None"
             self.log(
-                f"Stopped trying {tactic.__class__.__name__} of {value} to {tactic.url}",
+                f"Stopped trying {action.__class__.__name__} of {value} to {action.url}",
                 level=logging.WARNING
             )
             self.log(f"Caught error {e}", level=logging.WARNING)

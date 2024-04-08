@@ -32,7 +32,7 @@ from busker.history import SharedHistory
 Node = namedtuple(
     "Node", [
         "ts", "hash",
-        "tactic", "params",
+        "action", "params",
         "url",
         "title", "links", "blocks", "media",
         "options", "forms",

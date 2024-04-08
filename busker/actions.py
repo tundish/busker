@@ -52,7 +52,7 @@ class Read(Action):
         blocks = body_match and tuple(scraper.find_blocks(body_match[0])) or tuple()
 
         return node._replace(
-            tactic=self.__class__.__name__,
+            action=self.__class__.__name__,
             params=tuple(kwargs.items()),
             title=title_match and title_match.group(),
             blocks=blocks,
@@ -86,7 +86,7 @@ class Write(Action):
             blocks = body_match and tuple(scraper.find_blocks(body_match[0])) or tuple()
 
             rv = rv._replace(
-                tactic=self.__class__.__name__,
+                action=self.__class__.__name__,
                 params=tuple(kwargs.items()),
                 title = scraper.find_title(rv.text),
                 blocks=blocks,
