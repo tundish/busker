@@ -39,13 +39,13 @@ from busker.types import Choice
 class Witness(html.parser.HTMLParser):
 
     def __init__(self, convert_charrefs=True):
-        super().__init__(convert_charrefs=convert_charrefs)
         self.options = defaultdict(deque)
         self.commands = defaultdict(deque)
         self.words = Counter()
         self.animations = Counter()
         self.delays = []
         self.duration = 0
+        super().__init__(convert_charrefs=convert_charrefs)
 
     def handle_starttag(self, tag, attrs):
         attribs = dict(attrs)
@@ -71,6 +71,12 @@ class Witness(html.parser.HTMLParser):
             if (word := i.strip(string.whitespace + string.punctuation).lower())
         ])
 
+    def reset(self):
+        super().reset()
+        for variable in (self.words, self.animations, self.delays):
+            variable.clear()
+        self.duration = 0
+
     def untested(self, node: Node):
         return set(self.commands.get(node.hash, [])) - set(self.options.get(node.hash, []))
 
@@ -82,6 +88,10 @@ class Witness(html.parser.HTMLParser):
         self.options[node.hash].extend(options)
         for block in node.blocks:
             self.feed(block)
+
+        if self.delays:
+            self.duration += max(self.delays)
+        self.delays.clear()
 
 
 class Visitor(SharedHistory):
