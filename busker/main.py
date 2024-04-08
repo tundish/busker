@@ -51,8 +51,8 @@ def main(args):
             n += 1
             history.log(f"Run: {n:03d}")
             visitor = Visitor(args.url)
-            while visitor.tactics:
-                tactic = visitor.tactics.popleft()
+            while visitor.actions:
+                tactic = visitor.actions.popleft()
                 node = visitor(tactic)
                 if node:
                     history.log(f"Page: {node.title}")

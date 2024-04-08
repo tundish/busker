@@ -24,7 +24,7 @@ from busker.scraper import Node
 from busker.types import Choice
 
 
-class Tactic:
+class Action:
 
     @classmethod
     def registry(cls):
@@ -39,7 +39,7 @@ class Tactic:
         return Node(None, None)
 
 
-class Read(Tactic):
+class Read(Action):
     def run(self, scraper: Scraper, **kwargs) -> Node:
         url = self.prior.url if self.prior else self.url
         node = scraper.get(url, **kwargs)
@@ -62,7 +62,7 @@ class Read(Tactic):
         return node
 
 
-class Write(Tactic):
+class Write(Action):
     def run(self, scraper: Scraper, **kwargs) -> Node:
         form = {i.name: i for i in self.prior.forms}.get(self.choice.form, next(iter(self.prior.forms)))
         if form and form.method.lower() == "post":

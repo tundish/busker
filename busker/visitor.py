@@ -27,9 +27,9 @@ import urllib.error
 from busker.history import SharedHistory
 from busker.scraper import Node
 from busker.scraper import Scraper
-from busker.tactics import Read
-from busker.tactics import Tactic
-from busker.tactics import Write
+from busker.actions import Read
+from busker.actions import Action
+from busker.actions import Write
 from busker.types import Choice
 
 
@@ -58,7 +58,7 @@ class Visitor(SharedHistory):
         self.url = url
         self.scraper = Scraper()
         self.witness = Witness()
-        self.tactics = deque([Read(url=self.url)])
+        self.actions = deque([Read(url=self.url)])
 
     @property
     def turns(self):
@@ -80,7 +80,7 @@ class Visitor(SharedHistory):
 
     def __call__(self, tactic, *args, **kwargs):
 
-        self.log(f"Tactic: {tactic.__class__.__name__} {tactic.choice}")
+        self.log(f"Action: {tactic.__class__.__name__} {tactic.choice}")
 
         try:
             node = tactic.run(self.scraper, **kwargs)
@@ -96,6 +96,6 @@ class Visitor(SharedHistory):
             return
 
         if node.url != self.url or len(self.witness.commands) == 1:
-            self.tactics.append(Write(node, choice=choice))
+            self.actions.append(Write(node, choice=choice))
 
         return node
