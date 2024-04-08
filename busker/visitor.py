@@ -87,15 +87,13 @@ class Visitor(SharedHistory):
             self.witness.update(node, action.choice)
             choice = self.choose(node)
         except urllib.error.HTTPError as e:
-            value = f'{action.choice.value}' if action.choice.value is not None else "None"
             self.log(
-                f"Stopped trying {action.__class__.__name__} of {value} to {action.url}",
+                f"Stopped trying {action.__class__.__name__} of {action.choice.value} to {action.url}",
                 level=logging.WARNING
             )
             self.log(f"Caught error {e}", level=logging.WARNING)
             return
 
-        if node.url != self.url or len(self.witness.commands) == 1:
-            self.actions.append(Write(node, choice=choice))
+        self.actions.append(Write(node, choice=choice))
 
         return node
