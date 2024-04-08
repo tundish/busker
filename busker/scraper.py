@@ -35,7 +35,7 @@ Node = namedtuple(
         "tactic", "params",
         "url",
         "title", "links", "blocks", "media",
-        "options", "actions",
+        "options", "forms",
         "text"
     ],
     defaults=[

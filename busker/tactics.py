@@ -57,14 +57,14 @@ class Read(Tactic):
             title=title_match and title_match.group(),
             blocks=blocks,
             options=tuple(v for f in forms for i in f.inputs for v in i.values),
-            actions=forms,
+            forms=forms,
         )
         return node
 
 
 class Write(Tactic):
     def run(self, scraper: Scraper, **kwargs) -> Node:
-        form = {i.name: i for i in self.prior.actions}.get(self.choice.form, next(iter(self.prior.actions)))
+        form = {i.name: i for i in self.prior.forms}.get(self.choice.form, next(iter(self.prior.forms)))
         if form and form.method.lower() == "post":
             parts = urllib.parse.urlparse(form.action)
             if not parts.scheme:
@@ -91,6 +91,6 @@ class Write(Tactic):
                 title = scraper.find_title(rv.text),
                 blocks=blocks,
                 options=tuple(v for f in forms for i in f.inputs for v in i.values),
-                actions=forms,
+                forms=forms,
             )
             return rv

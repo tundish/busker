@@ -65,10 +65,10 @@ class Visitor(SharedHistory):
         return len([i for record in self.witness.commands.values() for i in record])
 
     def choose(self, node: Node) -> Choice:
-        rv = Choice(form=random.randrange(len(node.actions)))
+        rv = Choice(form=random.randrange(len(node.forms)))
         try:
-            rv = rv._replace(input=random.randrange(len(node.actions[rv.form].inputs)))
-            rv = rv._replace(value=random.choice(node.actions[rv.form].inputs[rv.input].values))
+            rv = rv._replace(input=random.randrange(len(node.forms[rv.form].inputs)))
+            rv = rv._replace(value=random.choice(node.forms[rv.form].inputs[rv.input].values))
         except ValueError:
             # No inputs in chosen form
             pass
