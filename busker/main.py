@@ -63,6 +63,7 @@ def main(args):
 
         # print(*visitor.toml_lines(visitor.history), sep="\n")
         print(visitor.witness.words)
+        print(visitor.witness.delays)
         print({k: counter[k] for k in sorted(counter.keys())})
         return 0
 

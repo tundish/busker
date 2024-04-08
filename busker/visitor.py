@@ -20,6 +20,7 @@
 from collections import Counter
 from collections import defaultdict
 from collections import deque
+import html
 import html.parser
 import logging
 import random
@@ -42,9 +43,26 @@ class Witness(html.parser.HTMLParser):
         self.options = defaultdict(deque)
         self.commands = defaultdict(deque)
         self.words = Counter()
+        self.animations = Counter()
+        self.delays = []
+        self.duration = 0
 
     def handle_starttag(self, tag, attrs):
         attribs = dict(attrs)
+        try:
+            styles = {
+                k: v
+                for k, _, v in [
+                    i.partition(":")
+                    for i in html.unescape(attribs["style"]).replace(" ", "").split(";")
+                ] if _
+            }
+            if animation := styles.get("animation-duration"):
+                self.animations[animation] += 1
+            if delay := styles.get("animation-delay"):
+                self.delays.append(float(delay.rstrip("s")))
+        except KeyError:
+            pass
 
     def handle_data(self, data):
         self.words.update([
