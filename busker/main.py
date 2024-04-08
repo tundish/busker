@@ -61,7 +61,8 @@ def main(args):
 
         history.log(f"{visitor.turns} done.")
 
-        print(*visitor.toml_lines(visitor.history), sep="\n")
+        # print(*visitor.toml_lines(visitor.history), sep="\n")
+        print(visitor.witness.words)
         print({k: counter[k] for k in sorted(counter.keys())})
         return 0
 

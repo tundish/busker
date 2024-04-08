@@ -17,11 +17,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+from collections import Counter
 from collections import defaultdict
 from collections import deque
 import html.parser
 import logging
 import random
+import string
 import urllib.error
 
 from busker.history import SharedHistory
@@ -39,6 +41,17 @@ class Witness(html.parser.HTMLParser):
         super().__init__(convert_charrefs=convert_charrefs)
         self.options = defaultdict(deque)
         self.commands = defaultdict(deque)
+        self.words = Counter()
+
+    def handle_starttag(self, tag, attrs):
+        attribs = dict(attrs)
+
+    def handle_data(self, data):
+        self.words.update([
+            word
+            for i in data.split(" ")
+            if (word := i.strip(string.whitespace + string.punctuation).lower())
+        ])
 
     def untested(self, node: Node):
         return set(self.commands.get(node.hash, [])) - set(self.options.get(node.hash, []))
@@ -49,6 +62,8 @@ class Witness(html.parser.HTMLParser):
 
         options = [i for i in node.options if i not in self.options[node.hash]]
         self.options[node.hash].extend(options)
+        for block in node.blocks:
+            self.feed(block)
 
 
 class Visitor(SharedHistory):
