@@ -53,7 +53,7 @@ def main(args):
             visitor = Visitor(args.url)
             while visitor.actions:
                 action = visitor.actions.popleft()
-                node = visitor(action)
+                node = visitor(action, timeout=10)
                 if node:
                     history.log(f"Page: {node.title}")
 

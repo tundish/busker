@@ -128,7 +128,7 @@ class Scraper(SharedHistory):
     def get(self, url=None, **kwargs) -> Node:
         self.log(f"GET {url=}")
         client = LocalClient()
-        with client.open(url) as response:
+        with client.open(url, **kwargs) as response:
             reply = response.read()
 
         return Node(
@@ -142,7 +142,7 @@ class Scraper(SharedHistory):
         params = urllib.parse.urlencode(data).encode("utf8")
         self.log(f"POST {url=} {params=}")
         client = LocalClient()
-        with client.open(url, params) as response:
+        with client.open(url, data=params, **kwargs) as response:
             reply = response.read()
 
         return Node(
