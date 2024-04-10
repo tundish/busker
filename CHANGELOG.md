@@ -1,6 +1,12 @@
 History
 =======
 
+0.8.0
+-----
+
+* Refactored several classes and modules.
+* Better counting by Witness.
+
 0.7.0
 -----
 
