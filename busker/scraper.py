@@ -22,6 +22,7 @@ from collections import namedtuple
 import datetime
 import hashlib
 import functools
+import logging
 import re
 import urllib.request
 import xml.etree.ElementTree as ET
@@ -113,17 +114,21 @@ class Scraper(SharedHistory):
                     values=tuple(filter(
                         None,
                         (i.attrib.get("value")
-                        for i in root.find(".//datalist[@id='{0}']".format(node.attrib.get("list"))))
+                        for i in root.find(".//datalist[@id='{0}']".format(node.attrib.get("list"))) or [])
                     )),
                     label=getattr(root.find(".//label[@for='{0}']".format(node.attrib.get("name"))), "text", "")
                 ))
                 for node in form_node.findall(".//input")
             )
-            yield Form(**dict(
-                {k: v for k, v in form_node.attrib.items() if k in Form._fields},
-                inputs=inputs,
-                button=getattr(form_node.find(".//button[@type='submit']"), "text", None),
-            ))
+            try:
+                yield Form(**dict(
+                    {k: v for k, v in form_node.attrib.items() if k in Form._fields},
+                    inputs=inputs,
+                    button=getattr(form_node.find(".//button[@type='submit']"), "text", None),
+                ))
+            except TypeError:
+                text = "".join(ET.tostring(form_node, encoding="unicode").splitlines(keepends=False))
+                self.log(f"No user inputs, maybe button: '{text}'", level=logging.WARNING)
 
     def get(self, url=None, **kwargs) -> Node:
         self.log(f"GET {url=}")
