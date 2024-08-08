@@ -17,6 +17,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+import enum
 import textwrap
 import tomllib
 import unittest
@@ -28,8 +29,16 @@ class StagerTests(unittest.TestCase):
 
         stage = textwrap.dedent("""
         [[puzzles]]
-        [[puzzles.fruition]]
-        completion = {puzzle_b = "fruition.inception"}
+        name = "Hunt the Gnome"
+        type = "Interaction"
+        states = {Disposition = "operating"}
+
+        [[puzzles.triggers]]
+        completion = {puzzle_b = "inception"}
+
+        [[puzzles.selectors]]
+        path = "busker/demo/scenes/{02d}"
+        params = [1, 2, 3, 24]
 
         [[puzzles.transits]]
         # named transits might be the thing
@@ -39,4 +48,6 @@ class StagerTests(unittest.TestCase):
         """)
 
         data = tomllib.loads(stage)
+        import pprint
+        pprint.pprint(data, indent=2)
         self.fail(data)
