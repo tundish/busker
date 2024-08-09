@@ -51,7 +51,6 @@ class StagerTests(unittest.TestCase):
         "Bag of bait" = "Fruition.inception"
 
         [[puzzles.associations]]
-        # named transits might be the thing
         name = "garden_path"
         type = "Transit"
         states = ["exit.patio", "into.garden", "Traffic.flowing", 3]
