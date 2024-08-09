@@ -28,16 +28,17 @@ class StagerTests(unittest.TestCase):
     def test_synch(self):
 
         strand = textwrap.dedent("""
-        name = "A test strand"
-        [[puzzles]]
         name = "Hunt the Gnome"
-        type = "Interaction"
 
-        [puzzles.state.spot]
-        car_park = ["Car Park"]
+        [[puzzles]]
+        name = "Get a shovel"
+        type = "Exploration"
 
         [puzzles.init]
         Fruition = "inception"
+
+        [puzzles.state.spot]
+        car_park = ["Car Park"]
 
         [puzzles.selector]
         # See fnmatch module for match syntax
@@ -46,8 +47,8 @@ class StagerTests(unittest.TestCase):
             "busker/demo/scenes/24/*.scene.toml",
         ]
 
-        [[puzzles.triggers]]
-        completion = {puzzle_b = "inception"}
+        [puzzles.chain.completion]
+        "Bag of bait" = "Fruition.inception"
 
         [[puzzles.associations]]
         # named transits might be the thing
