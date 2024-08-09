@@ -38,6 +38,8 @@ class StagerTests(unittest.TestCase):
         Fruition = "inception"
 
         [puzzles.state.spot]
+        patio = ["Patio"]
+        garden = ["Garden"]
         car_park = ["Car Park"]
 
         [puzzles.selector]
