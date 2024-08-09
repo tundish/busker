@@ -27,27 +27,36 @@ class StagerTests(unittest.TestCase):
 
     def test_synch(self):
 
-        stage = textwrap.dedent("""
+        strand = textwrap.dedent("""
+        name = "A test strand"
         [[puzzles]]
         name = "Hunt the Gnome"
         type = "Interaction"
-        states = {Disposition = "operating"}
+
+        [puzzles.state.spot]
+        car_park = ["Car Park"]
+
+        [puzzles.init]
+        Fruition = "inception"
+
+        [puzzles.selector]
+        # See fnmatch module for match syntax
+        paths = [
+            "busker/demo/scenes/0[01234]/*.scene.toml",
+            "busker/demo/scenes/24/*.scene.toml",
+        ]
 
         [[puzzles.triggers]]
         completion = {puzzle_b = "inception"}
 
-        [[puzzles.selectors]]
-        path = "busker/demo/scenes/{02d}"
-        params = [1, 2, 3, 24]
-
-        [[puzzles.transits]]
+        [[puzzles.associations]]
         # named transits might be the thing
         name = "garden_path"
         type = "Transit"
         states = ["exit.patio", "into.garden", "Traffic.flowing", 3]
         """)
 
-        data = tomllib.loads(stage)
+        data = tomllib.loads(strand)
         import pprint
         pprint.pprint(data, indent=2)
         self.fail(data)
