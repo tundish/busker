@@ -52,7 +52,7 @@ class StagerTests(unittest.TestCase):
         [puzzles.chain.completion]
         "Bag of bait" = "Fruition.inception"
 
-        [[puzzles.associations]]
+        [[puzzles.triples]]
         name = "garden_path"
         type = "Transit"
         states = ["exit.patio", "into.garden", "Traffic.flowing", 3]
