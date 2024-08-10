@@ -191,17 +191,16 @@ class StagerTests(unittest.TestCase):
     ]
 
     def test_strands(self):
-        data = [tomllib.loads(rule) for rule in self.rules]
-        pprint.pprint(data, indent=4, sort_dicts=False)
+        data = list(Stager.load(*self.rules))
+        stager = Stager(data).prepare()
 
-        strand = Stager(data).prepare()
-        self.assertIsInstance(strand.active, list)
-        self.assertEqual(strand.active, [("rotu", "a"), ("rotu.ext.zombie", "a")])
+        self.assertIsInstance(stager.active, list)
+        self.assertEqual(stager.active, [("rotu", "a"), ("rotu.ext.zombie", "a")])
 
-        events = list(strand.terminate("rotu", "a", "completion"))
+        events = list(stager.terminate("rotu", "a", "completion"))
         self.assertEqual(events, [("rotu", "b", "Fruition.inception")])
 
-        self.assertEqual(strand.active, [("rotu.ext.zombie", "a"), ("rotu", "b"), ("rotu", "e")])
+        self.assertEqual(stager.active, [("rotu.ext.zombie", "a"), ("rotu", "b"), ("rotu", "e")])
 
     def test_spots(self):
 
