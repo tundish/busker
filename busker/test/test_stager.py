@@ -19,12 +19,36 @@
 
 import enum
 import graphlib
+import itertools
+import operator
 import pprint
 import textwrap
 import tomllib
 import unittest
 
 class Strand:
+
+    # TODO: Validation of TOML
+
+    def __init__(self, rules=[]):
+        self.strands = {
+            realm: {strand["label"]: strand for strand in strands}
+            for realm, strands in itertools.groupby(
+                sorted(rules, key=operator.itemgetter("realm")),
+                key=operator.itemgetter("realm")
+            )
+        }
+
+    @staticmethod
+    def active(rules: list):
+        """
+        for key, group in itertools.groupby(
+            sorted(rules, key=operator.itemgetter("realm")),
+            key=operator.itemgetter("realm")
+        ):
+            yield (key, list(group))
+
+        """
 
     @staticmethod
     def sorter(graph=None):
@@ -138,8 +162,12 @@ class StagerTests(unittest.TestCase):
         ]
         data = [tomllib.loads(rule) for rule in rules]
         pprint.pprint(data, indent=4, sort_dicts=False)
-        rv = Strand.sorter()
-        self.fail(rv)
+
+        strand = Strand(data)
+        print(strand.strands)
+        active = Strand.active(data)
+        self.assertIsInstance(active, dict)
+        self.assertEqual([("rotu", "a"), ("rotu.ext.zombie", "a")], list(active.keys()))
 
     def test_synch(self):
 
