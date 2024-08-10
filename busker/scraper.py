@@ -114,7 +114,7 @@ class Scraper(SharedHistory):
                     values=tuple(filter(
                         None,
                         (i.attrib.get("value")
-                        for i in root.find(".//datalist[@id='{0}']".format(node.attrib.get("list"))) or [])
+                        for i in list(root.find(".//datalist[@id='{0}']".format(node.attrib.get("list")))) or [])
                     )),
                     label=getattr(root.find(".//label[@for='{0}']".format(node.attrib.get("name"))), "text", "")
                 ))

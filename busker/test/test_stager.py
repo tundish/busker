@@ -62,8 +62,9 @@ class Stager:
         return [(realm, name) for realm, strand in self.strands.items() for name in strand.get_ready()]
 
     def terminate(self, realm, name, verdict: [str | enum.Enum]) -> Generator[tuple[str, str, str]]:
-        return
-        yield
+        for strand in self.realms[realm].values():
+            yield strand
+
 
 class StagerTests(unittest.TestCase):
 
@@ -180,6 +181,7 @@ class StagerTests(unittest.TestCase):
         self.assertEqual(active, [("rotu", "a"), ("rotu.ext.zombie", "a")])
 
         events = list(strand.terminate("rotu", "a", "completion"))
+        pprint.pprint(events)
 
         self.assertEqual(active, [("rotu", "b"), ("rotu.ext.zombie", "a")])
 

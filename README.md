@@ -17,6 +17,12 @@ Operation
 * Python 3.11 or later is required.
 * No installation is necessary. Simply run from the command line.
 
+> [!TIP]
+> On Windows, you'll need a minimum of Python 3.12.
+> To speed up your Automation scripts, check the file _C:\\Windows\\System32\\drivers\\etc\\hosts_.
+> Make sure that the `localhost` name is resolved to `127.0.0.1`, ie: the default entry should be uncommented.
+
+
 ```
 python3 -m busker.main --help
 
