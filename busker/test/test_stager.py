@@ -19,6 +19,7 @@
 
 import enum
 import graphlib
+import pprint
 import textwrap
 import tomllib
 import unittest
@@ -35,21 +36,116 @@ class StagerTests(unittest.TestCase):
     def test_strand(self):
         rules = [
             textwrap.dedent("""
+            label = "Repo of the Unknown"
+            realm = "rotu"
+
+            [[puzzles]]
+            name = "a"
+
+            [puzzles.chain.completion]
+            "b" = "Fruition.inception"
+
+            [puzzles.chain.withdrawn]
+            "e" = "Fruition.inception"
+
+            [puzzles.chain.defaulted]
+            "e" = "Fruition.inception"
+
+            [puzzles.chain.cancelled]
+            "e" = "Fruition.inception"
+
+            [[puzzles]]
+            name = "b"
+
+            [puzzles.chain.completion]
+            "c" = "Fruition.inception"
+
+            [[puzzles]]
+            name = "c"
+
+            [puzzles.chain.completion]
+            "d" = "Fruition.inception"
+
+            [[puzzles]]
+            name = "d"
+
+            [[puzzles]]
+            name = "e"
+
+            [puzzles.chain.completion]
+            "g" = "Fruition.inception"
+
+            [puzzles.chain.defaulted]
+            "f" = "Fruition.inception"
+
+            [[puzzles]]
+            name = "f"
+
+            [[puzzles]]
+            name = "g"
             """),
             textwrap.dedent("""
+            label = "Rotu content update"
+            realm = "rotu"
+
+            [[puzzles]]
+            name = "c"
+
+            [puzzles.chain.withdrawn]
+            "h" = "Fruition.inception"
+
+            [[puzzles]]
+            name = "h"
+
+            [puzzles.chain.completion]
+            "d" = "Fruition.inception"
+
+            [puzzles.chain.withdrawn]
+            "g" = "Fruition.inception"
+
+            [[puzzles]]
+            name = "d"
+
+            [[puzzles]]
+            name = "g"
+
             """),
             textwrap.dedent("""
-            """),
-            textwrap.dedent("""
+            label = "Rotu with Zombies"
+            realm = "rotu.ext.zombie"
+
+            [[puzzles]]
+            name = "a"
+
+            [puzzles.chain.completion]
+            "c" = "Fruition.inception"
+
+            [puzzles.chain.withdrawn]
+            "b" = "Fruition.inception"
+
+            [[puzzles]]
+            name = "b"
+
+            [[puzzles]]
+            name = "c"
+
+            [puzzles.chain.completion]
+            "d" = "Fruition.inception"
+
+            [[puzzles]]
+            name = "d"
             """),
         ]
+        data = [tomllib.loads(rule) for rule in rules]
+        pprint.pprint(data, indent=4, sort_dicts=False)
         rv = Strand.sorter()
         self.fail(rv)
 
     def test_synch(self):
 
         rule = textwrap.dedent("""
-        name = "Hunt the Gnome"
+        label = "Hunt the Gnome"
+        namespace = "hunt_the_gnome"
 
         [[puzzles]]
         name = "Get a shovel"
@@ -80,6 +176,4 @@ class StagerTests(unittest.TestCase):
         """)
 
         data = tomllib.loads(rule)
-        import pprint
-        pprint.pprint(data, indent=2)
         self.fail(data)
