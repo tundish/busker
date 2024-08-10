@@ -17,6 +17,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+from collections.abc import Generator
 import enum
 import graphlib
 import itertools
@@ -26,9 +27,14 @@ import textwrap
 import tomllib
 import unittest
 
+
 class Stager:
 
-    # TODO: Validation of TOML
+    @staticmethod
+    def load(*rules: tuple[str]):
+        for rule in rules:
+            data = tomllib.loads(rule)
+            yield data
 
     def __init__(self, rules=[]):
         self.realms = {
@@ -55,117 +61,117 @@ class Stager:
     def active(self):
         return [(realm, name) for realm, strand in self.strands.items() for name in strand.get_ready()]
 
-    @staticmethod
-    def sorter(graph=None):
-        return graphlib.TopologicalSorter(graph)
-
+    def terminate(self, realm, name, verdict: [str | enum.Enum]) -> Generator[tuple[str, str, str]]:
+        return
+        yield
 
 class StagerTests(unittest.TestCase):
 
+    rules = [
+        textwrap.dedent("""
+        label = "Repo of the Unknown"
+        realm = "rotu"
+
+        [[puzzles]]
+        name = "a"
+
+        [puzzles.chain.completion]
+        "b" = "Fruition.inception"
+
+        [puzzles.chain.withdrawn]
+        "e" = "Fruition.inception"
+
+        [puzzles.chain.defaulted]
+        "e" = "Fruition.inception"
+
+        [puzzles.chain.cancelled]
+        "e" = "Fruition.inception"
+
+        [[puzzles]]
+        name = "b"
+
+        [puzzles.chain.completion]
+        "c" = "Fruition.inception"
+
+        [[puzzles]]
+        name = "c"
+
+        [puzzles.chain.completion]
+        "d" = "Fruition.inception"
+
+        [[puzzles]]
+        name = "d"
+
+        [[puzzles]]
+        name = "e"
+
+        [puzzles.chain.completion]
+        "g" = "Fruition.inception"
+
+        [puzzles.chain.defaulted]
+        "f" = "Fruition.inception"
+
+        [[puzzles]]
+        name = "f"
+
+        [[puzzles]]
+        name = "g"
+        """),
+        textwrap.dedent("""
+        label = "Rotu content update"
+        realm = "rotu"
+
+        [[puzzles]]
+        name = "c"
+
+        [puzzles.chain.withdrawn]
+        "h" = "Fruition.inception"
+
+        [[puzzles]]
+        name = "h"
+
+        [puzzles.chain.completion]
+        "d" = "Fruition.inception"
+
+        [puzzles.chain.withdrawn]
+        "g" = "Fruition.inception"
+
+        [[puzzles]]
+        name = "d"
+
+        [[puzzles]]
+        name = "g"
+
+        """),
+        textwrap.dedent("""
+        label = "Rotu with Zombies"
+        realm = "rotu.ext.zombie"
+
+        [[puzzles]]
+        name = "a"
+
+        [puzzles.chain.completion]
+        "c" = "Fruition.inception"
+
+        [puzzles.chain.withdrawn]
+        "b" = "Fruition.inception"
+
+        [[puzzles]]
+        name = "b"
+
+        [[puzzles]]
+        name = "c"
+
+        [puzzles.chain.completion]
+        "d" = "Fruition.inception"
+
+        [[puzzles]]
+        name = "d"
+        """),
+    ]
+
     def test_strands(self):
-        rules = [
-            textwrap.dedent("""
-            label = "Repo of the Unknown"
-            realm = "rotu"
-
-            [[puzzles]]
-            name = "a"
-
-            [puzzles.chain.completion]
-            "b" = "Fruition.inception"
-
-            [puzzles.chain.withdrawn]
-            "e" = "Fruition.inception"
-
-            [puzzles.chain.defaulted]
-            "e" = "Fruition.inception"
-
-            [puzzles.chain.cancelled]
-            "e" = "Fruition.inception"
-
-            [[puzzles]]
-            name = "b"
-
-            [puzzles.chain.completion]
-            "c" = "Fruition.inception"
-
-            [[puzzles]]
-            name = "c"
-
-            [puzzles.chain.completion]
-            "d" = "Fruition.inception"
-
-            [[puzzles]]
-            name = "d"
-
-            [[puzzles]]
-            name = "e"
-
-            [puzzles.chain.completion]
-            "g" = "Fruition.inception"
-
-            [puzzles.chain.defaulted]
-            "f" = "Fruition.inception"
-
-            [[puzzles]]
-            name = "f"
-
-            [[puzzles]]
-            name = "g"
-            """),
-            textwrap.dedent("""
-            label = "Rotu content update"
-            realm = "rotu"
-
-            [[puzzles]]
-            name = "c"
-
-            [puzzles.chain.withdrawn]
-            "h" = "Fruition.inception"
-
-            [[puzzles]]
-            name = "h"
-
-            [puzzles.chain.completion]
-            "d" = "Fruition.inception"
-
-            [puzzles.chain.withdrawn]
-            "g" = "Fruition.inception"
-
-            [[puzzles]]
-            name = "d"
-
-            [[puzzles]]
-            name = "g"
-
-            """),
-            textwrap.dedent("""
-            label = "Rotu with Zombies"
-            realm = "rotu.ext.zombie"
-
-            [[puzzles]]
-            name = "a"
-
-            [puzzles.chain.completion]
-            "c" = "Fruition.inception"
-
-            [puzzles.chain.withdrawn]
-            "b" = "Fruition.inception"
-
-            [[puzzles]]
-            name = "b"
-
-            [[puzzles]]
-            name = "c"
-
-            [puzzles.chain.completion]
-            "d" = "Fruition.inception"
-
-            [[puzzles]]
-            name = "d"
-            """),
-        ]
-        data = [tomllib.loads(rule) for rule in rules]
+        data = [tomllib.loads(rule) for rule in self.rules]
         pprint.pprint(data, indent=4, sort_dicts=False)
 
         strand = Stager(data)
@@ -173,7 +179,11 @@ class StagerTests(unittest.TestCase):
         self.assertIsInstance(active, list)
         self.assertEqual(active, [("rotu", "a"), ("rotu.ext.zombie", "a")])
 
-    def test_rule(self):
+        events = list(strand.terminate("rotu", "a", "completion"))
+
+        self.assertEqual(active, [("rotu", "b"), ("rotu.ext.zombie", "a")])
+
+    def test_spots(self):
 
         rule = textwrap.dedent("""
         label = "Hunt the Gnome"
@@ -207,5 +217,6 @@ class StagerTests(unittest.TestCase):
         states = ["exit.patio", "into.garden", "Traffic.flowing", 3]
         """)
 
-        data = tomllib.loads(rule)
-        self.fail(data)
+        data = list(Stager.load(rule))
+        self.assertTrue(data)
+        pprint.pprint(data[0])
