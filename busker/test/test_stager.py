@@ -37,6 +37,8 @@ class Stager:
             yield data
 
     def __init__(self, rules=[]):
+        self._active = []
+
         self.realms = {
             realm: {strand["label"]: strand for strand in strands}
             for realm, strands in itertools.groupby(
@@ -55,11 +57,19 @@ class Stager:
                     for table in puzzle.get("chain", {}).values():
                         for target in table.keys():
                             self.strands[realm].add(target, puzzle["name"])
-            self.strands[realm].prepare()
+
+    def prepare(self):
+        for strand in self.strands.values():
+            strand.prepare()
+
+        self._active = [
+            (realm, name) for realm, strand in self.strands.items() for name in strand.get_ready()
+        ]
+        return self
 
     @property
     def active(self):
-        return [(realm, name) for realm, strand in self.strands.items() for name in strand.get_ready()]
+        return self._active
 
     def terminate(self, realm: str, name: str, verdict: str) -> Generator[tuple[str, str, str]]:
         for strand in self.realms[realm].values():
@@ -69,6 +79,10 @@ class Stager:
                         yield (realm, target, event)
 
         self.strands[realm].done(name)
+        self._active.remove((realm, name))
+        self._active.extend(
+            [(realm, name) for realm, strand in self.strands.items() for name in strand.get_ready()]
+        )
 
 
 class StagerTests(unittest.TestCase):
@@ -180,14 +194,14 @@ class StagerTests(unittest.TestCase):
         data = [tomllib.loads(rule) for rule in self.rules]
         pprint.pprint(data, indent=4, sort_dicts=False)
 
-        strand = Stager(data)
+        strand = Stager(data).prepare()
         self.assertIsInstance(strand.active, list)
         self.assertEqual(strand.active, [("rotu", "a"), ("rotu.ext.zombie", "a")])
 
         events = list(strand.terminate("rotu", "a", "completion"))
         self.assertEqual(events, [("rotu", "b", "Fruition.inception")])
 
-        self.assertEqual(strand.active, [("rotu", "b"), ("rotu.ext.zombie", "a")])
+        self.assertEqual(strand.active, [("rotu.ext.zombie", "a"), ("rotu", "b"), ("rotu", "e")])
 
     def test_spots(self):
 
