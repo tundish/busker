@@ -26,29 +26,34 @@ import textwrap
 import tomllib
 import unittest
 
-class Strand:
+class Stager:
 
     # TODO: Validation of TOML
 
     def __init__(self, rules=[]):
-        self.strands = {
+        self.realms = {
             realm: {strand["label"]: strand for strand in strands}
             for realm, strands in itertools.groupby(
                 sorted(rules, key=operator.itemgetter("realm")),
                 key=operator.itemgetter("realm")
             )
         }
+        self.strands = {
+            realm: graphlib.TopologicalSorter()
+            for realm in self.realms
+        }
 
-    @staticmethod
-    def active(rules: list):
-        """
-        for key, group in itertools.groupby(
-            sorted(rules, key=operator.itemgetter("realm")),
-            key=operator.itemgetter("realm")
-        ):
-            yield (key, list(group))
+        for realm, strands in self.realms.items():
+            for strand in strands.values():
+                for puzzle in strand.get("puzzles", []):
+                    for table in puzzle.get("chain", {}).values():
+                        for target in table.keys():
+                            self.strands[realm].add(target, puzzle["name"])
+            self.strands[realm].prepare()
 
-        """
+    @property
+    def active(self):
+        return [(realm, name) for realm, strand in self.strands.items() for name in strand.get_ready()]
 
     @staticmethod
     def sorter(graph=None):
@@ -57,7 +62,7 @@ class Strand:
 
 class StagerTests(unittest.TestCase):
 
-    def test_strand(self):
+    def test_strands(self):
         rules = [
             textwrap.dedent("""
             label = "Repo of the Unknown"
@@ -163,13 +168,12 @@ class StagerTests(unittest.TestCase):
         data = [tomllib.loads(rule) for rule in rules]
         pprint.pprint(data, indent=4, sort_dicts=False)
 
-        strand = Strand(data)
-        print(strand.strands)
-        active = Strand.active(data)
-        self.assertIsInstance(active, dict)
-        self.assertEqual([("rotu", "a"), ("rotu.ext.zombie", "a")], list(active.keys()))
+        strand = Stager(data)
+        active = strand.active
+        self.assertIsInstance(active, list)
+        self.assertEqual(active, [("rotu", "a"), ("rotu.ext.zombie", "a")])
 
-    def test_synch(self):
+    def test_rule(self):
 
         rule = textwrap.dedent("""
         label = "Hunt the Gnome"
