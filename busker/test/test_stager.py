@@ -18,16 +18,37 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import enum
+import graphlib
 import textwrap
 import tomllib
 import unittest
 
+class Strand:
+
+    @staticmethod
+    def sorter(graph=None):
+        return graphlib.TopologicalSorter(graph)
+
 
 class StagerTests(unittest.TestCase):
 
+    def test_strand(self):
+        rules = [
+            textwrap.dedent("""
+            """),
+            textwrap.dedent("""
+            """),
+            textwrap.dedent("""
+            """),
+            textwrap.dedent("""
+            """),
+        ]
+        rv = Strand.sorter()
+        self.fail(rv)
+
     def test_synch(self):
 
-        strand = textwrap.dedent("""
+        rule = textwrap.dedent("""
         name = "Hunt the Gnome"
 
         [[puzzles]]
@@ -58,7 +79,7 @@ class StagerTests(unittest.TestCase):
         states = ["exit.patio", "into.garden", "Traffic.flowing", 3]
         """)
 
-        data = tomllib.loads(strand)
+        data = tomllib.loads(rule)
         import pprint
         pprint.pprint(data, indent=2)
         self.fail(data)
