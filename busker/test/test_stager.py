@@ -61,9 +61,14 @@ class Stager:
     def active(self):
         return [(realm, name) for realm, strand in self.strands.items() for name in strand.get_ready()]
 
-    def terminate(self, realm, name, verdict: [str | enum.Enum]) -> Generator[tuple[str, str, str]]:
+    def terminate(self, realm: str, name: str, verdict: str) -> Generator[tuple[str, str, str]]:
         for strand in self.realms[realm].values():
-            yield strand
+            for puzzle in strand.get("puzzles", []):
+                if puzzle.get("name") == name:
+                    for target, event in puzzle.get("chain", {}).get(verdict, {}).items():
+                        yield (realm, target, event)
+
+        self.strands[realm].done(name)
 
 
 class StagerTests(unittest.TestCase):
@@ -176,14 +181,13 @@ class StagerTests(unittest.TestCase):
         pprint.pprint(data, indent=4, sort_dicts=False)
 
         strand = Stager(data)
-        active = strand.active
-        self.assertIsInstance(active, list)
-        self.assertEqual(active, [("rotu", "a"), ("rotu.ext.zombie", "a")])
+        self.assertIsInstance(strand.active, list)
+        self.assertEqual(strand.active, [("rotu", "a"), ("rotu.ext.zombie", "a")])
 
         events = list(strand.terminate("rotu", "a", "completion"))
-        pprint.pprint(events)
+        self.assertEqual(events, [("rotu", "b", "Fruition.inception")])
 
-        self.assertEqual(active, [("rotu", "b"), ("rotu.ext.zombie", "a")])
+        self.assertEqual(strand.active, [("rotu", "b"), ("rotu.ext.zombie", "a")])
 
     def test_spots(self):
 
