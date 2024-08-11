@@ -150,6 +150,9 @@ class StagerTests(unittest.TestCase):
             [[puzzles]]
             name = "a"
 
+            [puzzles.init]
+            Fruition = "inception"
+
             """),
         ]
         data = list(Stager.load(*rules))

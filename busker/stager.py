@@ -24,6 +24,7 @@ import graphlib
 import itertools
 import operator
 import tomllib
+import warnings
 
 
 class Stager:
@@ -32,6 +33,10 @@ class Stager:
     def load(*rules: tuple[str]):
         for rule in rules:
             data = tomllib.loads(rule)
+            if not isinstance(data.get("puzzles"), list):
+                warnings.warn("No puzzles detected")
+            elif not any(puzzle.get("init") for puzzle in data["puzzles"]):
+                warnings.warn("At least one puzzle must contain an 'init' table")
             yield data
 
     def __init__(self, rules=[]):
