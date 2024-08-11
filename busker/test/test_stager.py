@@ -20,6 +20,7 @@
 import pprint
 import textwrap
 import unittest
+import warnings
 
 from busker.stager import Stager
 
@@ -130,10 +131,10 @@ class StagerTests(unittest.TestCase):
     ]
 
     def test_strands(self):
-        with self.assertWarns(UserWarning) as context:
+        with self.assertWarns(UserWarning) as witness:
             data = list(Stager.load(*self.rules))
-            self.assertEqual(len(context.warnings), len(self.rules))
-            self.assertTrue(all("init" in str(warning.message) for warning in context.warnings))
+            self.assertEqual(len(witness.warnings), len(self.rules))
+            self.assertTrue(all("init" in str(warning.message) for warning in witness.warnings))
 
         stager = Stager(data).prepare()
 
@@ -198,5 +199,8 @@ class StagerTests(unittest.TestCase):
         states = ["exit.patio", "into.garden", "Traffic.flowing", 3]
         """)
 
-        data = list(Stager.load(rule))
-        self.assertTrue(data)
+        with warnings.catch_warnings(record=True) as witness:
+            warnings.simplefilter("always")
+            data = list(Stager.load(rule))
+            self.assertTrue(data)
+            self.assertFalse(witness)
