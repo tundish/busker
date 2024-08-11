@@ -86,6 +86,8 @@ class Stager:
     def gather_puzzle(self, realm, name) -> dict:
         rv = {}
         items = {}
+        paths = []
+        states = []
         for strand in self.realms.get(realm, {}).values():
             for puzzle in strand.get("puzzles", []):
                 if puzzle.get("name") == name:
@@ -93,8 +95,11 @@ class Stager:
                     rv["type"] = puzzle.get("type", rv.get("type"))
                     rv.setdefault("init", {}).update(puzzle.get("init", {}))
                     items.update({i.get("name"): i for i in puzzle.get("items", []) if i.get("name")})
+                    paths.extend(i for i in puzzle.get("selector", {}).get("paths", []) if i not in paths)
+                    states.extend(i for i in puzzle.get("selector", {}).get("states", []) if i not in states)
 
         rv["items"] = list(items.values())
+        rv["selector"] = dict(paths=paths, states=states)
         return rv
 
     def prepare(self):
