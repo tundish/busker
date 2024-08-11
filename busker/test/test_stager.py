@@ -221,6 +221,11 @@ class StagerTests(unittest.TestCase):
             name = "garden_path"
             type = "Transit"
             states = ["exit.patio", "into.garden", "Traffic.flowing"]
+
+            [[puzzles.items]]
+            name = "side_entry"
+            type = "Transit"
+            states = ["exit.drive", "into.patio", "Traffic.blocked"]
             """),
         ]
         data = list(Stager.load(*rules))
@@ -235,7 +240,7 @@ class StagerTests(unittest.TestCase):
                     dict(
                         name="side_entry",
                         type="Transit",
-                        states=["exit.drive", "into.patio", "Traffic.flowing"],
+                        states=["exit.drive", "into.patio", "Traffic.blocked"],
                     ),
                     dict(
                         name="garden_path",

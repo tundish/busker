@@ -83,13 +83,18 @@ class Stager:
                         rv[key].extend([v for v in values if v not in rv[key]])
         return rv
 
-    def gather_puzzle(self, realm, name):
+    def gather_puzzle(self, realm, name) -> dict:
         rv = {}
+        items = {}
         for strand in self.realms.get(realm, {}).values():
             for puzzle in strand.get("puzzles", []):
                 if puzzle.get("name") == name:
+                    rv["name"] = name
+                    rv["type"] = puzzle.get("type", rv.get("type"))
                     rv.setdefault("init", {}).update(puzzle.get("init", {}))
-                    print(f"{puzzle=}")
+                    items.update({i.get("name"): i for i in puzzle.get("items", []) if i.get("name")})
+
+        rv["items"] = list(items.values())
         return rv
 
     def prepare(self):
