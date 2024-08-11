@@ -18,6 +18,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
+from collections import Counter
 from collections.abc import Generator
 import enum
 import graphlib
@@ -31,15 +32,22 @@ class Stager:
 
     @staticmethod
     def load(*rules: tuple[str]):
-        for rule in rules:
+        witness = Counter()
+        for n, rule in enumerate(rules):
             data = tomllib.loads(rule)
+
             if not isinstance(data.get("puzzles"), list):
-                warnings.warn("No puzzles detected")
-            elif not any(puzzle.get("init") for puzzle in data["puzzles"]):
-                warnings.warn("At least one puzzle must contain an 'init' table")
+                warnings.warn(f"No puzzles detected in rule {n}")
             elif not set(data.keys()).issuperset({"label", "realm"}):
                 warnings.warn("Every strand needs a 'label' and a 'realm'")
+
+            if any(puzzle.get("init") for puzzle in data["puzzles"]):
+                witness["init"] += 1
+
             yield data
+
+        if not witness["init"]:
+            warnings.warn("At least one puzzle must contain an 'init' table")
 
     def __init__(self, rules=[]):
         self._active = []
