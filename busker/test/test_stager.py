@@ -201,6 +201,13 @@ class StagerTests(unittest.TestCase):
             Fruition = "inception"
             int = 1
 
+            [puzzles.selector]
+            paths = [
+                "busker/demo/scenes/01/*.scene.toml",
+                "busker/demo/scenes/02/*.scene.toml",
+            ]
+            states = ["spot.drive", "spot.patio"]
+
             [[puzzles.items]]
             name = "side_entry"
             type = "Transit"
@@ -216,6 +223,13 @@ class StagerTests(unittest.TestCase):
 
             [puzzles.init]
             Fruition = "elaboration"
+
+            [puzzles.selector]
+            paths = [
+                "busker/demo/scenes/01/*.scene.toml",
+                "busker/demo/scenes/03/*.scene.toml",
+            ]
+            states = ["spot.patio", "spot.garden"]
 
             [[puzzles.items]]
             name = "garden_path"
@@ -248,6 +262,14 @@ class StagerTests(unittest.TestCase):
                         states=["exit.patio", "into.garden", "Traffic.flowing"],
                     ),
                 ],
+                selector=dict(
+                    paths=[
+                        "busker/demo/scenes/01/*.scene.toml",
+                        "busker/demo/scenes/02/*.scene.toml",
+                        "busker/demo/scenes/03/*.scene.toml",
+                    ],
+                    states=["spot.drive", "spot.patio", "spot.garden"],
+                )
             ),
             rv
         )
