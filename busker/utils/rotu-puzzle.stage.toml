@@ -41,11 +41,11 @@ type = "Transit"
 states = ["exit.shed_f_int", "into.shed_b_int", "Traffic.flowing"]
 
 [[puzzles.items]]
-type="Transit"
+type ="Transit"
 states = ["exit.car_park", "into.van_f_ext", "Traffic.flowing"]
 
 [[puzzles.items]]
-type="Transit"
+type ="Transit"
 states = ["exit.van_f_int", "into.van_b_int", "Traffic.blocked"]
 
 [[puzzles.items]]

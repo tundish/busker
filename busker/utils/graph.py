@@ -90,7 +90,7 @@ class Model:
         self.text = text
         self.data = data
         self.args = args
-        self.table_finder = re.compile("\[\s*([\.\w]+)\s*\]")
+        self.table_finder = re.compile("\\[\\s*([\\.\\w]+)\\s*\\]")
 
     @property
     def graphs(self):
@@ -299,14 +299,16 @@ class Model:
 
 
 def main(args):
-    parser = TOMLParser()
-    paths = parser.read(args.input)
-    if not paths:
+    for path in args.input:
+        text = path.read_text()
+        data = next(Stager.load(text), None)
+        print(f"{data=}")
+        print("Processed", pathlib.Path(path).resolve(), file=sys.stderr)
+    return 0
+
+    if not args.input:
         print("No files processed.")
         return 2
-
-    for path in paths:
-        print("Processed", pathlib.Path(path).resolve(), file=sys.stderr)
 
     name = pathlib.Path(paths[0]).stem
 
