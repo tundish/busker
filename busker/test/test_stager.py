@@ -142,6 +142,22 @@ class StagerTests(unittest.TestCase):
         self.assertEqual(stager.active, [("rotu.ext.zombie", "a"), ("rotu", "b"), ("rotu", "e")])
 
     def test_spots(self):
+        rules = [
+            textwrap.dedent("""
+            label = "Repo of the Unknown"
+            realm = "rotu"
+
+            [[puzzles]]
+            name = "a"
+
+            """),
+        ]
+        data = list(Stager.load(*rules))
+        stager = Stager(data).prepare()
+        pprint.pprint(stager.realms)
+        self.fail(rules)
+
+    def test_load(self):
 
         rule = textwrap.dedent("""
         label = "Hunt the Gnome"
@@ -177,4 +193,3 @@ class StagerTests(unittest.TestCase):
 
         data = list(Stager.load(rule))
         self.assertTrue(data)
-        pprint.pprint(data[0])
