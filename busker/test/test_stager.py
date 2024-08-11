@@ -130,7 +130,11 @@ class StagerTests(unittest.TestCase):
     ]
 
     def test_strands(self):
-        data = list(Stager.load(*self.rules))
+        with self.assertWarns(UserWarning) as context:
+            data = list(Stager.load(*self.rules))
+            self.assertEqual(len(context.warnings), len(self.rules))
+            self.assertTrue(all("init" in str(warning.message) for warning in context.warnings))
+
         stager = Stager(data).prepare()
 
         self.assertIsInstance(stager.active, list)
