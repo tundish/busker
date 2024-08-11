@@ -1,6 +1,11 @@
 History
 =======
 
+0.9.0
+-----
+
+* Added stager module.
+
 0.8.0
 -----
 
