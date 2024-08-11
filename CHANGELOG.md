@@ -1,6 +1,11 @@
 History
 =======
 
+0.10.0
+------
+
+* Improvements to `Stager.gather_puzzle`.
+
 0.9.0
 -----
 
