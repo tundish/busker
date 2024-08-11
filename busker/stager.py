@@ -83,6 +83,10 @@ class Stager:
                         rv[key].extend([v for v in values if v not in rv[key]])
         return rv
 
+    def gather_puzzle(self, realm, name):
+        #TODO ChainMap
+        raise NotImplementedError
+
     def prepare(self):
         for strand in self.strands.values():
             strand.prepare()
