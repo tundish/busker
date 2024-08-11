@@ -84,8 +84,13 @@ class Stager:
         return rv
 
     def gather_puzzle(self, realm, name):
-        #TODO ChainMap
-        raise NotImplementedError
+        rv = {}
+        for strand in self.realms.get(realm, {}).values():
+            for puzzle in strand.get("puzzles", []):
+                if puzzle.get("name") == name:
+                    rv.setdefault("init", {}).update(puzzle.get("init", {}))
+                    print(f"{puzzle=}")
+        return rv
 
     def prepare(self):
         for strand in self.strands.values():

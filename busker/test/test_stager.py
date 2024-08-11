@@ -146,7 +146,7 @@ class StagerTests(unittest.TestCase):
 
         self.assertEqual(stager.active, [("rotu.ext.zombie", "a"), ("rotu", "b"), ("rotu", "e")])
 
-    def test_spots(self):
+    def test_gather_state(self):
         rules = [
             textwrap.dedent("""
             label = "Repo of the Unknown part 1"
@@ -187,6 +187,66 @@ class StagerTests(unittest.TestCase):
             rv
         )
 
+    def test_gather_puzzle(self):
+        rules = [
+            textwrap.dedent("""
+            label = "Repo of the Unknown part 1"
+            realm = "rotu"
+
+            [[puzzles]]
+            name = "a"
+            type = "Interaction"
+
+            [puzzles.init]
+            Fruition = "inception"
+            int = 1
+
+            [[puzzles.items]]
+            name = "side_entry"
+            type = "Transit"
+            states = ["exit.drive", "into.patio", "Traffic.flowing"]
+            """),
+            textwrap.dedent("""
+            label = "Repo of the Unknown part 1 update"
+            realm = "rotu"
+
+            [[puzzles]]
+            name = "a"
+            type = "Exploration"
+
+            [puzzles.init]
+            Fruition = "elaboration"
+
+            [[puzzles.items]]
+            name = "garden_path"
+            type = "Transit"
+            states = ["exit.patio", "into.garden", "Traffic.flowing"]
+            """),
+        ]
+        data = list(Stager.load(*rules))
+        stager = Stager(data).prepare()
+        rv = stager.gather_puzzle("rotu", "a")
+        self.assertEqual(
+            dict(
+                name="a",
+                type="Exploration",
+                init={"Fruition": "elaboration", "int": 1},
+                items=[
+                    dict(
+                        name="side_entry",
+                        type="Transit",
+                        states=["exit.drive", "into.patio", "Traffic.flowing"],
+                    ),
+                    dict(
+                        name="garden_path",
+                        type="Transit",
+                        states=["exit.patio", "into.garden", "Traffic.flowing"],
+                    ),
+                ],
+            ),
+            rv
+        )
+
     def test_load(self):
 
         rule = textwrap.dedent("""
@@ -215,7 +275,7 @@ class StagerTests(unittest.TestCase):
         [puzzles.chain.completion]
         "Bag of bait" = "Fruition.inception"
 
-        [[puzzles.triples]]
+        [[puzzles.items]]
         name = "garden_path"
         type = "Transit"
         states = ["exit.patio", "into.garden", "Traffic.flowing", 3]
