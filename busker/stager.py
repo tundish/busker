@@ -37,6 +37,8 @@ class Stager:
                 warnings.warn("No puzzles detected")
             elif not any(puzzle.get("init") for puzzle in data["puzzles"]):
                 warnings.warn("At least one puzzle must contain an 'init' table")
+            elif not set(data.keys()).issuperset({"label", "realm"}):
+                warnings.warn("Every strand needs a 'label' and a 'realm'")
             yield data
 
     def __init__(self, rules=[]):

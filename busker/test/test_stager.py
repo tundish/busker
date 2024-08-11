@@ -169,7 +169,7 @@ class StagerTests(unittest.TestCase):
 
         rule = textwrap.dedent("""
         label = "Hunt the Gnome"
-        namespace = "hunt_the_gnome"
+        realm = "hunt_the_gnome"
 
         [[puzzles]]
         name = "Get a shovel"
@@ -203,4 +203,4 @@ class StagerTests(unittest.TestCase):
             warnings.simplefilter("always")
             data = list(Stager.load(rule))
             self.assertTrue(data)
-            self.assertFalse(witness)
+            self.assertFalse(witness, [w.message for w in witness])
