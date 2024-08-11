@@ -149,7 +149,7 @@ class StagerTests(unittest.TestCase):
     def test_spots(self):
         rules = [
             textwrap.dedent("""
-            label = "Repo of the Unknown"
+            label = "Repo of the Unknown part 1"
             realm = "rotu"
 
             [[puzzles]]
@@ -158,12 +158,34 @@ class StagerTests(unittest.TestCase):
             [puzzles.init]
             Fruition = "inception"
 
+            [puzzles.state.spot]
+            drive = ["Drive"]
+            patio = ["Patio"]
+            """),
+            textwrap.dedent("""
+            label = "Repo of the Unknown part 2"
+            realm = "rotu"
+
+            [[puzzles]]
+            name = "b"
+
+            [puzzles.state.spot]
+            drive = ["Drive", "Driveway"]
+            garden = "Garden"
+
             """),
         ]
         data = list(Stager.load(*rules))
         stager = Stager(data).prepare()
-        pprint.pprint(stager.realms)
-        self.fail(rules)
+        rv = stager.gather_state()
+        self.assertEqual(
+            dict(
+                drive=["Drive", "Driveway"],
+                garden=["Garden"],
+                patio=["Patio"],
+            ),
+            rv
+        )
 
     def test_load(self):
 

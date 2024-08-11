@@ -19,6 +19,7 @@
 
 
 from collections import Counter
+from collections import defaultdict
 from collections.abc import Generator
 import enum
 import graphlib
@@ -71,6 +72,17 @@ class Stager:
                         for target in table.keys():
                             self.strands[realm].add(target, puzzle["name"])
 
+    def gather_state(self, state="spot") -> dict[str, list]:
+        rv = defaultdict(list)
+        for realm, strands in self.realms.items():
+            for strand in strands.values():
+                for puzzle in strand.get("puzzles", []):
+                    table = puzzle.get("state", {}).get(state, {})
+                    for key, values in table.items():
+                        values = [values] if not isinstance(values, list) else values
+                        rv[key].extend([v for v in values if v not in rv[key]])
+        return rv
+
     def prepare(self):
         for strand in self.strands.values():
             strand.prepare()
@@ -88,8 +100,10 @@ class Stager:
         for strand in self.realms[realm].values():
             for puzzle in strand.get("puzzles", []):
                 if puzzle.get("name") == name:
-                    for target, event in puzzle.get("chain", {}).get(verdict, {}).items():
-                        yield (realm, target, event)
+                    for target, events in puzzle.get("chain", {}).get(verdict, {}).items():
+                        events = [events] if not isinstance(events, list) else events
+                        for event in events:
+                            yield (realm, target, event)
 
         self.strands[realm].done(name)
         self._active.remove((realm, name))
