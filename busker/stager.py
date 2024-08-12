@@ -32,7 +32,7 @@ import warnings
 class Stager:
 
     @staticmethod
-    def load(*rules: tuple[str]):
+    def load(*rules: tuple[str]) -> Generator[dict]:
         witness = Counter()
         for n, rule in enumerate(rules):
             data = tomllib.loads(rule)

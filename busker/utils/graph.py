@@ -298,12 +298,26 @@ class Model:
         yield "}"
 
 
-def main(args):
-    for path in args.input:
+def load_rules(*paths: tuple[pathlib.Path]):
+    for path in paths:
         text = path.read_text()
-        data = next(Stager.load(text), None)
-        print(f"{data=}")
         print("Processed", pathlib.Path(path).resolve(), file=sys.stderr)
+        yield from Stager.load(text)
+
+
+def main(args):
+    data = list(load_rules(*args.input))
+    stager = Stager(rules=data)
+    realms = {
+        realm: list(sorter.static_order()) or [
+            puzzle.get("name")
+            for strand in stager.realms[realm].values()
+            for puzzle in strand.get("puzzles", [])
+            if puzzle.get("name")
+        ]
+        for realm, sorter in stager.strands.items()
+    }
+    print(f"{realms=}")
     return 0
 
     if not args.input:
