@@ -77,7 +77,6 @@ class TestNode(unittest.TestCase):
         model = Model.loads(text)
         self.assertEqual(0, model.nodes["A"].rank)
         self.assertEqual(2, model.nodes["A.B.C"].rank)
-        print(model.children("A"))
 
     def test_arc_labels(self):
         text = """

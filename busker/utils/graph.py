@@ -317,7 +317,12 @@ def main(args):
         ]
         for realm, sorter in stager.strands.items()
     }
-    print(f"{realms=}")
+    puzzles = {
+        (realm, name): stager.gather_puzzle(realm, name)
+        for realm, names in realms.items()
+        for name in names
+    }
+    print(f"{puzzles=}")
     return 0
 
     if not args.input:

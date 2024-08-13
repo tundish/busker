@@ -245,7 +245,7 @@ class StagerTests(unittest.TestCase):
         data = list(Stager.load(*rules))
         stager = Stager(data).prepare()
         rv = stager.gather_puzzle("rotu", "a")
-        self.maxDiff = 1000
+        self.maxDiff = None
         self.assertEqual(
             dict(
                 name="a",

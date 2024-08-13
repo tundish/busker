@@ -88,13 +88,13 @@ class Stager:
         items = {}
         paths = []
         states = []
-        for strand in self.realms.get(realm, {}).values():
-            for puzzle in strand.get("puzzles", []):
+        for s, strand in enumerate(self.realms.get(realm, {}).values()):
+            for p, puzzle in enumerate(strand.get("puzzles", [])):
                 if puzzle.get("name") == name:
                     rv["name"] = name
                     rv["type"] = puzzle.get("type", rv.get("type"))
                     rv.setdefault("init", {}).update(puzzle.get("init", {}))
-                    items.update({i.get("name"): i for i in puzzle.get("items", []) if i.get("name")})
+                    items.update({i.get("name", (s, p, n)): i for n, i in enumerate(puzzle.get("items", []))})
                     paths.extend(i for i in puzzle.get("selector", {}).get("paths", []) if i not in paths)
                     states.extend(i for i in puzzle.get("selector", {}).get("states", []) if i not in states)
 
