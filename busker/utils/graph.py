@@ -38,6 +38,7 @@ import dataclasses
 import fileinput
 import functools
 import pathlib
+import pprint
 import re
 import sys
 import tomllib
@@ -322,7 +323,7 @@ def main(args):
         for realm, names in realms.items()
         for name in names
     }
-    print(f"{puzzles=}")
+    pprint.pprint(puzzles)
     return 0
 
     if not args.input:

@@ -94,7 +94,7 @@ class Stager:
                     rv["name"] = name
                     rv["type"] = puzzle.get("type", rv.get("type"))
                     rv.setdefault("init", {}).update(puzzle.get("init", {}))
-                    items.update({i.get("name", (s, p, n)): i for n, i in enumerate(puzzle.get("items", []))})
+                    items.update({i.get("name", (s, p, n)): dict(i, id=(s, p, n)) for n, i in enumerate(puzzle.get("items", []))})
                     paths.extend(i for i in puzzle.get("selector", {}).get("paths", []) if i not in paths)
                     states.extend(i for i in puzzle.get("selector", {}).get("states", []) if i not in states)
 
