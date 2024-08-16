@@ -7,6 +7,15 @@ name = "a"
 [puzzles.state.spot]
 kitchen = ["Kitchen"]
 
+[puzzles.selector]
+paths = [
+    "rotu/assets/scenes/01/*.scene.toml",
+]
+states = ["spot.kitchen"]
+
+[puzzles.init]
+Fruition = "inception"
+
 [puzzles.chain.completion]
 "b" = "Fruition.inception"
 
@@ -25,6 +34,12 @@ name = "b"
 [puzzles.state.spot]
 hall = ["Hall", "Hallway"]
 
+[puzzles.selector]
+paths = [
+    "rotu/assets/scenes/01/*.scene.toml",
+]
+states = ["spot.kitchen", "spot.hall"]
+
 [puzzles.chain.completion]
 "c" = "Fruition.inception"
 
@@ -34,17 +49,35 @@ name = "c"
 [puzzles.state.spot]
 lounge = ["Lounge", "Sitting Room"]
 
+[puzzles.selector]
+paths = [
+    "rotu/assets/scenes/01/*.scene.toml",
+]
+states = ["spot.kitchen", "spot.hall", "spot.lounge"]
+
 [puzzles.chain.completion]
 "d" = "Fruition.inception"
 
 [[puzzles]]
 name = "d"
 
+[puzzles.selector]
+paths = [
+    "rotu/assets/scenes/01/*.scene.toml",
+]
+states = ["spot.kitchen", "spot.hall", "spot.lounge"]
+
 [[puzzles]]
 name = "e"
 
 [puzzles.state.spot]
 garage = ["garage"]
+
+[puzzles.selector]
+paths = [
+    "rotu/assets/scenes/01/*.scene.toml",
+]
+states = ["spot.garage"]
 
 [puzzles.chain.completion]
 "g" = "Fruition.inception"
@@ -55,8 +88,20 @@ garage = ["garage"]
 [[puzzles]]
 name = "f"
 
+[puzzles.selector]
+paths = [
+    "rotu/assets/scenes/01/*.scene.toml",
+]
+states = ["spot.garage"]
+
 [[puzzles]]
 name = "g"
+
+[puzzles.selector]
+paths = [
+    "rotu/assets/scenes/01/*.scene.toml",
+]
+states = ["spot.garage"]
 
 label = "Rotu content update"
 realm = "rotu"
