@@ -40,6 +40,10 @@ paths = [
 ]
 states = ["spot.kitchen", "spot.hall"]
 
+[[puzzles.items]]
+type = "Transit"
+states = ["exit.kitchen", "into.hall", "Traffic.flowing"]
+
 [puzzles.chain.completion]
 "c" = "Fruition.inception"
 
@@ -54,6 +58,10 @@ paths = [
     "rotu/assets/scenes/01/*.scene.toml",
 ]
 states = ["spot.kitchen", "spot.hall", "spot.lounge"]
+
+[[puzzles.items]]
+type = "Transit"
+states = ["exit.hall", "into.lounge", "Traffic.flowing"]
 
 [puzzles.chain.completion]
 "d" = "Fruition.inception"
@@ -78,6 +86,11 @@ paths = [
     "rotu/assets/scenes/01/*.scene.toml",
 ]
 states = ["spot.garage"]
+
+[[puzzles.items]]
+name = "Kitchen Door"
+type = "Transit"
+states = ["exit.kitchen", "into.garage", "Traffic.flowing"]
 
 [puzzles.chain.completion]
 "g" = "Fruition.inception"
@@ -115,6 +128,13 @@ name = "c"
 [[puzzles]]
 name = "h"
 
+[puzzles.selector]
+paths = [
+    "rotu/assets/scenes/01/*.scene.toml",
+    "rotu/assets/scenes/02/*.scene.toml",
+]
+states = ["spot.garage", "spot.kitchen", "spot.cloaks", "spot.study"]
+
 [puzzles.state.spot]
 cloaks = ["Cloakroom", "Toilet"]
 study = ["Study"]
@@ -142,6 +162,12 @@ drive = ["Drive", "Driveway"]
 garden = ["Garden"]
 patio = ["Patio"]
 
+[puzzles.selector]
+paths = [
+    "rwz/scenes/01/*.scene.toml",
+]
+states = ["spot.garage", "spot.kitchen", "spot.drive", "spot.garden", "spot.patio"]
+
 [puzzles.chain.completion]
 "c" = "Fruition.inception"
 
@@ -151,14 +177,32 @@ patio = ["Patio"]
 [[puzzles]]
 name = "b"
 
+[puzzles.selector]
+paths = [
+    "rwz/scenes/01/*.scene.toml",
+]
+states = ["spot.garage", "spot.kitchen", "spot.drive", "spot.garden", "spot.patio"]
+
 [[puzzles]]
 name = "c"
+
+[puzzles.selector]
+paths = [
+    "rwz/scenes/01/*.scene.toml",
+]
+states = ["spot.garage", "spot.kitchen", "spot.drive", "spot.garden", "spot.patio"]
 
 [puzzles.chain.completion]
 "d" = "Fruition.inception"
 
 [[puzzles]]
 name = "d"
+
+[puzzles.selector]
+paths = [
+    "rwz/scenes/01/*.scene.toml",
+]
+states = ["spot.garage", "spot.kitchen", "spot.drive", "spot.garden", "spot.patio"]
 
 
 #########
