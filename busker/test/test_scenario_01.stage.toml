@@ -1,0 +1,221 @@
+label = "Repo of the Unknown"
+realm = "rotu"
+
+[[puzzles]]
+name = "a"
+
+[puzzles.state.spot]
+kitchen = ["Kitchen"]
+
+[puzzles.chain.completion]
+"b" = "Fruition.inception"
+
+[puzzles.chain.withdrawn]
+"e" = "Fruition.inception"
+
+[puzzles.chain.defaulted]
+"e" = "Fruition.inception"
+
+[puzzles.chain.cancelled]
+"e" = "Fruition.inception"
+
+[[puzzles]]
+name = "b"
+
+[puzzles.state.spot]
+hall = ["Hall", "Hallway"]
+
+[puzzles.chain.completion]
+"c" = "Fruition.inception"
+
+[[puzzles]]
+name = "c"
+
+[puzzles.state.spot]
+lounge = ["Lounge", "Sitting Room"]
+
+[puzzles.chain.completion]
+"d" = "Fruition.inception"
+
+[[puzzles]]
+name = "d"
+
+[[puzzles]]
+name = "e"
+
+[puzzles.state.spot]
+garage = ["garage"]
+
+[puzzles.chain.completion]
+"g" = "Fruition.inception"
+
+[puzzles.chain.defaulted]
+"f" = "Fruition.inception"
+
+[[puzzles]]
+name = "f"
+
+[[puzzles]]
+name = "g"
+
+label = "Rotu content update"
+realm = "rotu"
+
+[[puzzles]]
+name = "c"
+
+[puzzles.chain.withdrawn]
+"h" = "Fruition.inception"
+
+[[puzzles]]
+name = "h"
+
+[puzzles.state.spot]
+cloaks = ["Cloakroom", "Toilet"]
+study = ["Study"]
+
+[puzzles.chain.completion]
+"d" = "Fruition.inception"
+
+[puzzles.chain.withdrawn]
+"g" = "Fruition.inception"
+
+[[puzzles]]
+name = "d"
+
+[[puzzles]]
+name = "g"
+
+label = "Rotu with Zombies"
+realm = "rotu.ext.zombie"
+
+[[puzzles]]
+name = "a"
+
+[puzzles.state.spot]
+drive = ["Drive", "Driveway"]
+garden = ["Garden"]
+patio = ["Patio"]
+
+[puzzles.chain.completion]
+"c" = "Fruition.inception"
+
+[puzzles.chain.withdrawn]
+"b" = "Fruition.inception"
+
+[[puzzles]]
+name = "b"
+
+[[puzzles]]
+name = "c"
+
+[puzzles.chain.completion]
+"d" = "Fruition.inception"
+
+[[puzzles]]
+name = "d"
+
+
+#########
+label = "Repo of the Unknown part 1"
+realm = "rotu"
+
+[[puzzles]]
+name = "a"
+
+[puzzles.init]
+Fruition = "inception"
+
+[puzzles.state.spot]
+drive = ["Drive"]
+patio = ["Patio"]
+
+label = "Repo of the Unknown part 2"
+realm = "rotu"
+
+[[puzzles]]
+name = "b"
+
+[puzzles.state.spot]
+drive = ["Drive", "Driveway"]
+garden = "Garden"
+
+label = "Repo of the Unknown part 1"
+realm = "rotu"
+
+[[puzzles]]
+name = "a"
+type = "Interaction"
+
+[puzzles.init]
+Fruition = "inception"
+int = 1
+
+[puzzles.selector]
+paths = [
+    "busker/demo/scenes/01/*.scene.toml",
+    "busker/demo/scenes/02/*.scene.toml",
+]
+states = ["spot.drive", "spot.patio"]
+
+[[puzzles.items]]
+name = "side_entry"
+type = "Transit"
+states = ["exit.drive", "into.patio", "Traffic.flowing"]
+
+label = "Repo of the Unknown part 1 update"
+realm = "rotu"
+
+[[puzzles]]
+name = "a"
+type = "Exploration"
+
+[puzzles.init]
+Fruition = "elaboration"
+
+[puzzles.selector]
+paths = [
+    "busker/demo/scenes/01/*.scene.toml",
+    "busker/demo/scenes/03/*.scene.toml",
+]
+states = ["spot.patio", "spot.garden"]
+
+[[puzzles.items]]
+name = "garden_path"
+type = "Transit"
+states = ["exit.patio", "into.garden", "Traffic.flowing"]
+
+[[puzzles.items]]
+name = "side_entry"
+type = "Transit"
+states = ["exit.drive", "into.patio", "Traffic.blocked"]
+
+label = "Hunt the Gnome"
+realm = "hunt_the_gnome"
+
+[[puzzles]]
+name = "Get a shovel"
+type = "Exploration"
+
+[puzzles.init]
+Fruition = "inception"
+
+[puzzles.state.spot]
+patio = ["Patio"]
+garden = ["Garden"]
+car_park = ["Car Park"]
+
+[puzzles.selector]
+# See fnmatch module for match syntax
+paths = [
+    "busker/demo/scenes/0[01234]/*.scene.toml",
+    "busker/demo/scenes/24/*.scene.toml",
+]
+
+[puzzles.chain.completion]
+"Bag of bait" = "Fruition.inception"
+
+[[puzzles.items]]
+name = "garden_path"
+type = "Transit"
+states = ["exit.patio", "into.garden", "Traffic.flowing", 3]
