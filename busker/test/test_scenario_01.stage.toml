@@ -139,6 +139,16 @@ states = ["spot.garage", "spot.kitchen", "spot.cloaks", "spot.study"]
 cloaks = ["Cloakroom", "Toilet"]
 study = ["Study"]
 
+[[puzzles.items]]
+name = "Toilet Door"
+type = "Transit"
+states = ["exit.hall", "into.cloaks", "Traffic.flowing"]
+
+[[puzzles.items]]
+name = "Study Door"
+type = "Transit"
+states = ["exit.hall", "into.study", "Traffic.flowing"]
+
 [puzzles.chain.completion]
 "d" = "Fruition.inception"
 
@@ -157,6 +167,10 @@ realm = "rotu.ext.zombie"
 [[puzzles]]
 name = "a"
 
+[puzzles.init]
+Fruition = "inception"
+int = 1
+
 [puzzles.state.spot]
 drive = ["Drive", "Driveway"]
 garden = ["Garden"]
@@ -167,6 +181,21 @@ paths = [
     "rwz/scenes/01/*.scene.toml",
 ]
 states = ["spot.garage", "spot.kitchen", "spot.drive", "spot.garden", "spot.patio"]
+
+[[puzzles.items]]
+name = "Front Door"
+type = "Transit"
+states = ["exit.hall", "into.drive", "Traffic.flowing", 1]
+
+[[puzzles.items]]
+name = "Back Door"
+type = "Transit"
+states = ["exit.garage", "into.patio", "Traffic.flowing", 1]
+
+[[puzzles.items]]
+name = "Garden path"
+type = "Transit"
+states = ["exit.patio", "into.garden", "Traffic.flowing", 5]
 
 [puzzles.chain.completion]
 "c" = "Fruition.inception"
