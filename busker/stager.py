@@ -50,6 +50,10 @@ class Stager:
         if not witness["init"]:
             warnings.warn("At least one puzzle must contain an 'init' table")
 
+    @staticmethod
+    def layout(item: dict, key=None) -> dict:
+        return dict(id=key, compass="_")
+
     def __init__(self, rules=[]):
         self._active = []
 
@@ -94,7 +98,11 @@ class Stager:
                     rv["name"] = name
                     rv["type"] = puzzle.get("type", rv.get("type"))
                     rv.setdefault("init", {}).update(puzzle.get("init", {}))
-                    items.update({i.get("name", (s, p, n)): dict(i, id=(s, p, n)) for n, i in enumerate(puzzle.get("items", []))})
+                    # TODO: Separate layout fn
+                    items.update({
+                        i.get("name", (s, p, n)): dict(i, layout=self.layout(i, key=(s, p, n)))
+                        for n, i in enumerate(puzzle.get("items", []))
+                    })
                     paths.extend(i for i in puzzle.get("selector", {}).get("paths", []) if i not in paths)
                     states.extend(i for i in puzzle.get("selector", {}).get("states", []) if i not in states)
 
