@@ -1,0 +1,44 @@
+label = "Rotu content update"
+realm = "rotu"
+
+[[puzzles]]
+name = "c"
+
+[puzzles.chain.withdrawn]
+"h" = "Fruition.inception"
+
+[[puzzles]]
+name = "h"
+
+[puzzles.selector]
+paths = [
+    "rotu/assets/scenes/01/*.scene.toml",
+    "rotu/assets/scenes/02/*.scene.toml",
+]
+states = ["spot.garage", "spot.kitchen", "spot.cloaks", "spot.study"]
+
+[puzzles.state.spot]
+cloaks = ["Cloakroom", "Toilet"]
+study = ["Study"]
+
+[[puzzles.items]]
+name = "Toilet Door"
+type = "Transit"
+states = ["exit.hall", "into.cloaks", "Traffic.flowing", "Compass.NE"]
+
+[[puzzles.items]]
+name = "Study Door"
+type = "Transit"
+states = ["exit.hall", "into.study", "Traffic.flowing", "Compass.W"]
+
+[puzzles.chain.completion]
+"d" = "Fruition.inception"
+
+[puzzles.chain.withdrawn]
+"g" = "Fruition.inception"
+
+[[puzzles]]
+name = "d"
+
+[[puzzles]]
+name = "g"
