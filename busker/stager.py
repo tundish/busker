@@ -98,7 +98,7 @@ class Stager:
                     rv["name"] = name
                     rv["type"] = puzzle.get("type", rv.get("type"))
                     rv.setdefault("init", {}).update(puzzle.get("init", {}))
-                    # TODO: Separate layout fn
+
                     items.update({
                         i.get("name", (s, p, n)): dict(i, layout=self.layout(i, key=(s, p, n)))
                         for n, i in enumerate(puzzle.get("items", []))
