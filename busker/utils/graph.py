@@ -21,7 +21,7 @@
 
 
 """
-This utility translates a graph defined in a CFN file to an equivalent .dot
+This utility translates puzzles from stage files into an equivalent .dot graph
 
 Usage:
 
@@ -102,7 +102,6 @@ def puzzle_graph(realm, puzzle: dict, indent="") -> Generator[str]:
                     yield f'{indents[2]}"{exit_id}" -- "{into_id}" [tailport="{exit_port}" headport="{into_port}"]'
                 else:
                     yield f'{indents[2]}"{exit_id}" -- "{into_id}"'
-            print(f"{states=}", file=sys.stderr)
 
     yield f"{indents[1]}}}"
 
