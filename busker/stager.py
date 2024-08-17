@@ -116,6 +116,7 @@ class Stager:
                     rv["type"] = puzzle.get("type", rv.get("type"))
                     rv["state"] = puzzle.get("state", {}).copy()
                     rv.setdefault("init", {}).update(puzzle.get("init", {}))
+                    rv["chain"] = puzzle.get("chain", {}).copy()
 
                     items.update({
                         i.get("name", (s, p, n)): dict(i, layout=self.layout(i, key=(s, p, n)))
@@ -124,8 +125,8 @@ class Stager:
                     paths.extend(i for i in puzzle.get("selector", {}).get("paths", []) if i not in paths)
                     states.extend(i for i in puzzle.get("selector", {}).get("states", []) if i not in states)
 
-        rv["items"] = list(items.values())
         rv["selector"] = dict(paths=paths, states=states)
+        rv["items"] = list(items.values())
         return rv
 
     def prepare(self):
