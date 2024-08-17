@@ -25,7 +25,7 @@ This utility translates a graph defined in a CFN file to an equivalent .dot
 
 Usage:
 
-    python -m utils.graph --label-graph "Story strands" --digraph \
+    python -m utils.graph --label "Story strands" \
         scenes/*/*.stage.toml > stage_graph.dot
 
     dot -Tsvg stage_graph.dot > stage_graph.svg
@@ -41,40 +41,33 @@ import sys
 from busker.stager import Stager
 
 
+def back_bearing(value: str):
+    return {
+        "n": "s",
+        "ne": "sw",
+        "e": "w",
+        "se": "nw",
+        "s": "n",
+        "sw": "ne",
+        "w": "e",
+        "nw": "se",
+    }.get(value, "")
+
+
 def load_rules(*paths: tuple[pathlib.Path]):
     for path in paths:
         text = path.read_text()
         print("Processed", pathlib.Path(path).resolve(), file=sys.stderr)
         yield from Stager.load(text)
 
-"""
-graph strand_0 {
-subgraph realm_00 {
-    subgraph cluster_puzzle_000 {
-    node [shape = doubleoctagon];
-    spot01[label="drive"]
-    spot02[label="patio"]
-    spot01:se -- spot02:nw;
-    }
-}
-
-subgraph realm2_00 {
-
-    subgraph cluster_puzzle_001 {
-    node [shape = doubleoctagon];
-    spot03[label="garden"]
-    spot02:e -- spot03:w;
-    }
-}
-}
-"""
 
 def puzzle_graph(realm, puzzle: dict, indent="") -> Generator[str]:
     indents = [indent * n for n in range(4)]
     puzzle_id = f"cluster_{realm}_{puzzle['name']}"
     yield f'{indents[1]}subgraph "{puzzle_id}" {{'
     yield f"{indents[2]}node [shape = doubleoctagon];"
-    yield f"{indents[2]}label=\"{puzzle['name']}\""
+    yield f"{indents[2]}label=\"{puzzle['name']}\";"
+    yield f'{indents[2]}cluster="true";'
 
     declared_states = set()
     for state in puzzle.get("selector", {}).get("states", []):
@@ -103,14 +96,19 @@ def puzzle_graph(realm, puzzle: dict, indent="") -> Generator[str]:
             if set(states).issuperset({"exit", "into"}):
                 exit_id = f"{puzzle_id}_spot.{states['exit']}"
                 into_id = f"{puzzle_id}_spot.{states['into']}"
-                yield f'{indents[2]}"{exit_id}" -- "{into_id}"'
+                if item.get("layout", {}).get("compass", ""):
+                    exit_port = item["layout"]["compass"]
+                    into_port = back_bearing(exit_port)
+                    yield f'{indents[2]}"{exit_id}" -- "{into_id}" [tailport="{exit_port}" headport="{into_port}"]'
+                else:
+                    yield f'{indents[2]}"{exit_id}" -- "{into_id}"'
             print(f"{states=}", file=sys.stderr)
 
     yield f"{indents[1]}}}"
 
     for state, transition in puzzle.get("chain", {}).items():
         for target, event in transition.items():
-            yield  f'{indents[1]}"{puzzle_id}" -- "cluster_{realm}_{target}"'
+            yield  f'{indents[1]}"{puzzle_id}" -- "cluster_{realm}_{target}" [label="{state}"]'
     yield ""
 
 
@@ -124,6 +122,15 @@ def main(args):
     label = f'"{args.label}"' if args.label else ""
     lines = [
         f"graph {label} {{",
+        f'{indent}layout = "fdp";',
+        f'{indent}splines = "true";',
+        f'{indent}packmode = "graph";',
+        f'{indent}edge [labelfloat = true];',
+        # f'{indent}dim = "10"',
+        # f'{indent}sep = "4"',
+        # f'{indent}esep = "12"',
+        # f'{indent}overlap = "scale"',
+        # f'{indent}clusterrank = "local"',
         ""
     ]
     for (realm, puzzle_name), puzzle in snapshot.items():

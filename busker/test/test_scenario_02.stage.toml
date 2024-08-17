@@ -22,14 +22,14 @@ cloaks = ["Cloakroom", "Toilet"]
 study = ["Study"]
 
 [[puzzles.items]]
-name = "Toilet Door"
-type = "Transit"
-states = ["exit.hall", "into.cloaks", "Traffic.flowing", "Compass.NE"]
-
-[[puzzles.items]]
 name = "Study Door"
 type = "Transit"
 states = ["exit.hall", "into.study", "Traffic.flowing", "Compass.W"]
+
+[[puzzles.items]]
+name = "Toilet Door"
+type = "Transit"
+states = ["exit.hall", "into.cloaks", "Traffic.flowing", "Compass.NE"]
 
 [puzzles.chain.completion]
 "d" = "Fruition.inception"
