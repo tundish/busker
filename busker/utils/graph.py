@@ -71,14 +71,21 @@ subgraph realm2_00 {
 
 def puzzle_graph(realm, puzzle: dict, indent="") -> Generator[str]:
     indents = [indent * n for n in range(4)]
-    puzzle_id = f"\"cluster_{realm}_{puzzle['name']}\""
+    puzzle_id = f"cluster_{realm}_{puzzle['name']}"
+    yield f'{indents[1]}subgraph "{puzzle_id}" {{'
+    yield f"{indents[2]}node [shape = doubleoctagon];"
+    yield f"{indents[2]}label=\"{puzzle['name']}\""
+
+    for state in puzzle.get("selector", {}).get("states", []):
+        state_value = state.split(".")[-1]
+        yield f'{indents[2]}"{puzzle_id}_{state}"[label="{state_value}"]'
+
+    yield f"{indents[1]}}}"
+
     for state, transition in puzzle.get("chain", {}).items():
         for target, event in transition.items():
-            yield  f"{indents[1]}{puzzle_id} -- \"cluster_{realm}_{target}\""
-
-    yield f"{indents[2]}subgraph \"cluster_{realm}_{puzzle['name']}\" {{"
-    yield f"{indents[3]}label=\"{puzzle['name']}\""
-    yield f"{indents[2]}}}"
+            yield  f'{indents[1]}"{puzzle_id}" -- "cluster_{realm}_{target}"'
+    yield ""
 
 
 def main(args):
@@ -87,11 +94,15 @@ def main(args):
     snapshot = stager.snapshot
     pprint.pprint(snapshot, sort_dicts=False, stream=sys.stderr)
 
+    indent = " " * 4
     label = f'"{args.label}"' if args.label else ""
-    lines = [f"graph {label} {{"]
+    lines = [
+        f"graph {label} {{",
+        ""
+    ]
     for (realm, puzzle_name), puzzle in snapshot.items():
         realm = realm.replace(" ", "")
-        lines.extend(list(puzzle_graph(realm, puzzle, indent=" " * 4)))
+        lines.extend(list(puzzle_graph(realm, puzzle, indent=indent)))
 
     lines.append("}")
     if not args.input:
