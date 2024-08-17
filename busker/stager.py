@@ -76,6 +76,23 @@ class Stager:
                         for target in table.keys():
                             self.strands[realm].add(target, puzzle["name"])
 
+    @property
+    def snapshot(self) -> dict[tuple[str, str], dict]:
+        realms = {
+            realm: list(sorter.static_order()) or [
+                puzzle.get("name")
+                for strand in self.realms[realm].values()
+                for puzzle in strand.get("puzzles", [])
+                if puzzle.get("name")
+            ]
+            for realm, sorter in self.strands.items()
+        }
+        return {
+            (realm, name): self.gather_puzzle(realm, name)
+            for realm, names in realms.items()
+            for name in names
+        }
+
     def gather_state(self, state="spot") -> dict[str, list]:
         rv = defaultdict(list)
         for realm, strands in self.realms.items():

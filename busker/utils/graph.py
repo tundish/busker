@@ -77,21 +77,8 @@ subgraph realm2_00 {
 def main(args):
     data = list(load_rules(*args.input))
     stager = Stager(rules=data)
-    realms = {
-        realm: list(sorter.static_order()) or [
-            puzzle.get("name")
-            for strand in stager.realms[realm].values()
-            for puzzle in strand.get("puzzles", [])
-            if puzzle.get("name")
-        ]
-        for realm, sorter in stager.strands.items()
-    }
-    puzzles = {
-        (realm, name): stager.gather_puzzle(realm, name)
-        for realm, names in realms.items()
-        for name in names
-    }
-    pprint.pprint(puzzles)
+    snapshot = stager.snapshot
+    pprint.pprint(snapshot, stream=sys.stderr)
 
     if not args.input:
         print("No files processed.")
