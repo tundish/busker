@@ -70,8 +70,15 @@ subgraph realm2_00 {
 """
 
 def puzzle_graph(realm, puzzle: dict, indent="") -> Generator[str]:
-    yield f"{indent}subgraph \"cluster_{realm}_{puzzle['name']}\" {{"
-    yield f"{indent}}}"
+    indents = [indent * n for n in range(4)]
+    puzzle_id = f"\"{realm}_{puzzle['name']}\""
+    for state, transition in puzzle.get("chain", {}).items():
+        for target, event in transition.items():
+            yield  f"{indents[1]}{puzzle_id} -- \"{realm}_{target}\""
+
+    yield f"{indents[2]}subgraph \"cluster_{realm}_{puzzle['name']}\" {{"
+    yield f"{indents[3]}label=\"{puzzle['name']}\""
+    yield f"{indents[2]}}}"
 
 
 def main(args):
