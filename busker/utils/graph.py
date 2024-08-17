@@ -33,15 +33,10 @@ Usage:
 """
 
 import argparse
-from collections import namedtuple
-import dataclasses
-import fileinput
-import functools
+from collections.abc import Generator
 import pathlib
 import pprint
-import re
 import sys
-import tomllib
 
 from busker.stager import Stager
 
@@ -74,17 +69,28 @@ subgraph realm2_00 {
 }
 """
 
+def puzzle_graph(realm, puzzle: dict, indent="") -> Generator[str]:
+    yield f"{indent}subgraph \"cluster_{realm}_{puzzle['name']}\" {{"
+    yield f"{indent}}}"
+
+
 def main(args):
     data = list(load_rules(*args.input))
     stager = Stager(rules=data)
     snapshot = stager.snapshot
     pprint.pprint(snapshot, sort_dicts=False, stream=sys.stderr)
 
+    label = f'"{args.label}"' if args.label else ""
+    lines = [f"graph {label} {{"]
+    for (realm, puzzle_name), puzzle in snapshot.items():
+        realm = realm.replace(" ", "")
+        lines.extend(list(puzzle_graph(realm, puzzle, indent=" " * 4)))
+
+    lines.append("}")
     if not args.input:
         print("No files processed.")
         return 2
 
-    lines = list()
     print(*lines, sep="\n", file=sys.stdout)
     print("Generated", len(lines), "lines of output.", file=sys.stderr)
 
@@ -92,7 +98,7 @@ def main(args):
 def parser():
     rv = argparse.ArgumentParser(__doc__)
     rv.add_argument(
-        "--label-graph", default=None,
+        "--label", default="",
         help="Set a label for the graph."
     )
     rv.add_argument(
