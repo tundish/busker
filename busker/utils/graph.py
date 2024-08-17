@@ -78,7 +78,7 @@ def main(args):
     data = list(load_rules(*args.input))
     stager = Stager(rules=data)
     snapshot = stager.snapshot
-    pprint.pprint(snapshot, stream=sys.stderr)
+    pprint.pprint(snapshot, sort_dicts=False, stream=sys.stderr)
 
     if not args.input:
         print("No files processed.")

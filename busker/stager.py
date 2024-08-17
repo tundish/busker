@@ -114,6 +114,7 @@ class Stager:
                 if puzzle.get("name") == name:
                     rv["name"] = name
                     rv["type"] = puzzle.get("type", rv.get("type"))
+                    rv["state"] = puzzle.get("state", {}).copy()
                     rv.setdefault("init", {}).update(puzzle.get("init", {}))
 
                     items.update({
