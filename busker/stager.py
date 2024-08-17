@@ -52,7 +52,13 @@ class Stager:
 
     @staticmethod
     def layout(item: dict, key=None) -> dict:
-        return dict(id=key, compass="_")
+        compass = next(
+            (parts[-1] for i in item.get("states", [])
+             if (parts := i.lower().split("."))[0] == "compass"
+            ),
+            "_"
+        )
+        return dict(id=key, compass=compass)
 
     def __init__(self, rules=[]):
         self._active = []
