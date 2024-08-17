@@ -76,9 +76,35 @@ def puzzle_graph(realm, puzzle: dict, indent="") -> Generator[str]:
     yield f"{indents[2]}node [shape = doubleoctagon];"
     yield f"{indents[2]}label=\"{puzzle['name']}\""
 
+    declared_states = set()
     for state in puzzle.get("selector", {}).get("states", []):
         state_value = state.split(".")[-1]
+        declared_states.add(state_value)
         yield f'{indents[2]}"{puzzle_id}_{state}"[label="{state_value}"]'
+
+    for item in puzzle.get("items", []):
+        if item.get("type", "").lower() == "transit":
+            states = {
+                state[0]: state[2]
+                for i in item.get("states", [])
+                if isinstance(i, str)
+                and (state := i.lower().partition("."))[1]
+            }
+            values = set(filter(
+                None,
+                (
+                 state for key in ("exit", "home", "into", "spot")
+                 if (state := states.get(key)) not in declared_states
+                )
+            ))
+            for value in values:
+                yield f'{indents[2]}"{puzzle_id}_spot.{value}"[label="{value}"]'
+
+            if set(states).issuperset({"exit", "into"}):
+                exit_id = f"{puzzle_id}_spot.{states['exit']}"
+                into_id = f"{puzzle_id}_spot.{states['into']}"
+                yield f'{indents[2]}"{exit_id}" -- "{into_id}"'
+            print(f"{states=}", file=sys.stderr)
 
     yield f"{indents[1]}}}"
 
