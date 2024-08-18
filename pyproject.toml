@@ -2,7 +2,7 @@
  
 [project]
 name = "busker"
-version = "0.10.0"
+version = "0.11.0"
 description = "A utility for testing Balladeer projects."
 readme = "README.md"
 requires-python = ">=3.11"
@@ -26,7 +26,8 @@ test = [
 ]
 
 [project.scripts]
-busker-cli = "busker.main:run"
+busker-gui = "busker.main:run"
+busker-stagegraph = "busker.utils.graph:run"
 
 [build-system]
 # requires = ["hatchling == 1.21.1"]

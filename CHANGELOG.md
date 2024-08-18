@@ -1,6 +1,11 @@
 History
 =======
 
+0.11.0
+------
+
+* Completed dev and test of stage graph utility.
+
 0.10.0
 ------
 
