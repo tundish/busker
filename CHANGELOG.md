@@ -1,6 +1,11 @@
 History
 =======
 
+0.12.0 rc
+---------
+
+* Fix Stager.active property when there is no puzzle chain.
+
 0.11.0
 ------
 

@@ -145,7 +145,13 @@ class Stager:
 
         self._active = [
             (realm, name) for realm, strand in self.strands.items() for name in strand.get_ready()
-        ]
+        ] or list({
+            (realm, puzzle["name"])
+            for realm, strands in self.realms.items()
+            for strand in strands.values()
+            for puzzle in strand.get("puzzles", [])
+        })
+
         return self
 
     @property

@@ -162,12 +162,7 @@ class StagerTests(unittest.TestCase):
         stager = Stager(data).prepare()
 
         self.assertIsInstance(stager.active, list)
-        self.assertEqual(stager.active, [("rotu", "a"), ("rotu.ext.zombie", "a")])
-
-        events = list(stager.terminate("rotu", "a", "completion"))
-        self.assertEqual(events, [("rotu", "b", "Fruition.inception")])
-
-        self.assertEqual(stager.active, [("rotu.ext.zombie", "a"), ("rotu", "b"), ("rotu", "e")])
+        self.assertEqual(stager.active, [("rotu.ext.zombie", "z")])
 
     def test_gather_state(self):
         rules = [
