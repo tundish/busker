@@ -128,11 +128,34 @@ class StagerTests(unittest.TestCase):
         [[puzzles]]
         name = "d"
         """),
+        textwrap.dedent("""
+        label = "Under development"
+        realm = "rotu.ext.zombie"
+
+        [[puzzles]]
+        name = "z"
+        """),
     ]
 
     def test_strands(self):
         with self.assertWarns(UserWarning) as witness:
             data = list(Stager.load(*self.rules))
+            self.assertTrue(witness.warnings)
+            self.assertTrue(all("init" in str(warning.message) for warning in witness.warnings))
+
+        stager = Stager(data).prepare()
+
+        self.assertIsInstance(stager.active, list)
+        self.assertEqual(stager.active, [("rotu", "a"), ("rotu.ext.zombie", "a")])
+
+        events = list(stager.terminate("rotu", "a", "completion"))
+        self.assertEqual(events, [("rotu", "b", "Fruition.inception")])
+
+        self.assertEqual(stager.active, [("rotu.ext.zombie", "a"), ("rotu", "b"), ("rotu", "e")])
+
+    def test_strand_single(self):
+        with self.assertWarns(UserWarning) as witness:
+            data = list(Stager.load(self.rules[3]))
             self.assertTrue(witness.warnings)
             self.assertTrue(all("init" in str(warning.message) for warning in witness.warnings))
 
@@ -246,21 +269,26 @@ class StagerTests(unittest.TestCase):
         stager = Stager(data).prepare()
         rv = stager.gather_puzzle("rotu", "a")
         self.maxDiff = None
+
         self.assertEqual(
             dict(
                 name="a",
                 type="Exploration",
+                state=dict(),
                 init={"Fruition": "elaboration", "int": 1},
+                chain=dict(),
                 items=[
                     dict(
                         name="side_entry",
                         type="Transit",
                         states=["exit.drive", "into.patio", "Traffic.blocked"],
+                        layout=dict(id=(1, 0, 1), compass="_"),
                     ),
                     dict(
                         name="garden_path",
                         type="Transit",
                         states=["exit.patio", "into.garden", "Traffic.flowing"],
+                        layout=dict(id=(1, 0, 0), compass="_"),
                     ),
                 ],
                 selector=dict(
@@ -272,6 +300,7 @@ class StagerTests(unittest.TestCase):
                     states=["spot.drive", "spot.patio", "spot.garden"],
                 )
             ),
+            rv,
             rv
         )
 

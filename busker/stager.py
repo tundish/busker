@@ -35,7 +35,11 @@ class Stager:
     def load(*rules: tuple[str]) -> Generator[dict]:
         witness = Counter()
         for n, rule in enumerate(rules):
-            data = tomllib.loads(rule)
+            try:
+                data = tomllib.loads(rule)
+            except tomllib.TOMLDecodeError as e:
+                warnings.warn("Invalid stage file: {e!s}")
+                yield {}
 
             if not isinstance(data.get("puzzles"), list):
                 warnings.warn(f"No puzzles detected in rule {n}")
