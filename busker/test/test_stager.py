@@ -37,6 +37,7 @@ class StagerTests(unittest.TestCase):
 
         [puzzles.chain.completion]
         "b" = "Fruition.inception"
+        "e" = "Fruition.inception"
 
         [puzzles.chain.withdrawn]
         "e" = "Fruition.inception"
@@ -66,6 +67,7 @@ class StagerTests(unittest.TestCase):
         name = "e"
 
         [puzzles.chain.completion]
+        "f" = "Fruition.inception"
         "g" = "Fruition.inception"
 
         [puzzles.chain.defaulted]
@@ -85,6 +87,9 @@ class StagerTests(unittest.TestCase):
         name = "c"
 
         [puzzles.chain.withdrawn]
+        "h" = "Fruition.inception"
+
+        [puzzles.chain.completion]
         "h" = "Fruition.inception"
 
         [[puzzles]]
@@ -153,7 +158,7 @@ class StagerTests(unittest.TestCase):
         self.assertEqual(stager.active, [("rotu", "a"), ("rotu.ext.zombie", "a")])
 
         events = list(stager.terminate("rotu", "a", "completion"))
-        self.assertEqual(events, [("rotu", "b", "Fruition.inception")])
+        self.assertEqual(events, [("rotu", "b", "Fruition.inception"), ("rotu", "e", "Fruition.inception")])
 
         self.assertEqual(stager.active, [("rotu.ext.zombie", "a"), ("rotu", "b"), ("rotu", "e")])
 
