@@ -1,10 +1,12 @@
 History
 =======
 
-0.12.0 rc
----------
+0.12.0
+------
 
 * Fix Stager.active property when there is no puzzle chain.
+* Add Stager.puzzles property.
+* Update test data to assist rotu development.
 
 0.11.0
 ------
