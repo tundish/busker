@@ -144,6 +144,10 @@ class StagerTests(unittest.TestCase):
             self.assertTrue(all("init" in str(warning.message) for warning in witness.warnings))
 
         stager = Stager(data).prepare()
+        self.assertEqual(
+            set(stager.puzzles),
+            {("rotu", p) for p in "abcdefgh"} | {("rotu.ext.zombie", p) for p in "abcdz"}
+        )
 
         self.assertIsInstance(stager.active, list)
         self.assertEqual(stager.active, [("rotu", "a"), ("rotu.ext.zombie", "a")])
