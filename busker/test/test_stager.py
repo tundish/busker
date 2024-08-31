@@ -265,7 +265,7 @@ class StagerTests(unittest.TestCase):
 
             [[puzzles.items]]
             name = "side_entry"
-            type = "Transit"
+            types = ["Transit", "Gate"]
             states = ["exit.drive", "into.patio", "Traffic.blocked"]
             """),
         ]
@@ -284,7 +284,7 @@ class StagerTests(unittest.TestCase):
                 items=[
                     dict(
                         name="side_entry",
-                        type="Transit",
+                        types=["Transit", "Gate"],
                         states=["exit.drive", "into.patio", "Traffic.blocked"],
                         layout=dict(id=(1, 0, 1), compass="_"),
                     ),
