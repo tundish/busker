@@ -30,7 +30,7 @@ class StagerTests(unittest.TestCase):
     rules = [
         textwrap.dedent("""
         label = "Repo of the Unknown"
-        realm = "rotu"
+        realm = "busker"
 
         [[puzzles]]
         name = "a"
@@ -81,7 +81,7 @@ class StagerTests(unittest.TestCase):
         """),
         textwrap.dedent("""
         label = "Rotu content update"
-        realm = "rotu"
+        realm = "busker"
 
         [[puzzles]]
         name = "c"
@@ -110,7 +110,7 @@ class StagerTests(unittest.TestCase):
         """),
         textwrap.dedent("""
         label = "Rotu with Zombies"
-        realm = "rotu.ext.zombie"
+        realm = "busker.ext.zombie"
 
         [[puzzles]]
         name = "a"
@@ -135,7 +135,7 @@ class StagerTests(unittest.TestCase):
         """),
         textwrap.dedent("""
         label = "Under development"
-        realm = "rotu.ext.zombie"
+        realm = "busker.ext.zombie"
 
         [[puzzles]]
         name = "z"
@@ -151,16 +151,16 @@ class StagerTests(unittest.TestCase):
         stager = Stager(data).prepare()
         self.assertEqual(
             set(stager.puzzles),
-            {("rotu", p) for p in "abcdefgh"} | {("rotu.ext.zombie", p) for p in "abcdz"}
+            {("busker", p) for p in "abcdefgh"} | {("busker.ext.zombie", p) for p in "abcdz"}
         )
 
         self.assertIsInstance(stager.active, list)
-        self.assertEqual(stager.active, [("rotu", "a"), ("rotu.ext.zombie", "a")])
+        self.assertEqual(stager.active, [("busker", "a"), ("busker.ext.zombie", "a")])
 
-        events = list(stager.terminate("rotu", "a", "completion"))
-        self.assertEqual(events, [("rotu", "b", "Fruition.inception"), ("rotu", "e", "Fruition.inception")])
+        events = list(stager.terminate("busker", "a", "completion"))
+        self.assertEqual(events, [("busker", "b", "Fruition.inception"), ("busker", "e", "Fruition.inception")])
 
-        self.assertEqual(stager.active, [("rotu.ext.zombie", "a"), ("rotu", "b"), ("rotu", "e")])
+        self.assertEqual(stager.active, [("busker.ext.zombie", "a"), ("busker", "b"), ("busker", "e")])
 
     def test_strand_single(self):
         with self.assertWarns(UserWarning) as witness:
@@ -171,13 +171,13 @@ class StagerTests(unittest.TestCase):
         stager = Stager(data).prepare()
 
         self.assertIsInstance(stager.active, list)
-        self.assertEqual(stager.active, [("rotu.ext.zombie", "z")])
+        self.assertEqual(stager.active, [("busker.ext.zombie", "z")])
 
     def test_gather_state(self):
         rules = [
             textwrap.dedent("""
             label = "Repo of the Unknown part 1"
-            realm = "rotu"
+            realm = "busker"
 
             [[puzzles]]
             name = "a"
@@ -191,7 +191,7 @@ class StagerTests(unittest.TestCase):
             """),
             textwrap.dedent("""
             label = "Repo of the Unknown part 2"
-            realm = "rotu"
+            realm = "busker"
 
             [[puzzles]]
             name = "b"
@@ -218,7 +218,7 @@ class StagerTests(unittest.TestCase):
         rules = [
             textwrap.dedent("""
             label = "Repo of the Unknown part 1"
-            realm = "rotu"
+            realm = "busker"
 
             [[puzzles]]
             name = "a"
@@ -242,7 +242,7 @@ class StagerTests(unittest.TestCase):
             """),
             textwrap.dedent("""
             label = "Repo of the Unknown part 1 update"
-            realm = "rotu"
+            realm = "busker"
 
             [[puzzles]]
             name = "a"
@@ -271,7 +271,7 @@ class StagerTests(unittest.TestCase):
         ]
         data = list(Stager.load(*rules))
         stager = Stager(data).prepare()
-        rv = stager.gather_puzzle("rotu", "a")
+        rv = stager.gather_puzzle("busker", "a")
         self.maxDiff = None
 
         self.assertEqual(
