@@ -1,5 +1,5 @@
 label = "Rotu with Zombies"
-realm = "rotu.ext.zombie"
+realm = "busker.ext.zombie"
 
 [[puzzles]]
 name = "a"
