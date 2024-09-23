@@ -1,10 +1,11 @@
 History
 =======
 
-0.14.0rc
---------
+0.14.0
+------
 
-* Introduce Events.
+* Utilize Events across puzzle chain.
+* `Stager.terminate` generates Events from table array.
 
 0.13.0
 ------
