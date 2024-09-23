@@ -21,6 +21,7 @@
 from collections import Counter
 from collections import defaultdict
 from collections.abc import Generator
+import copy
 import enum
 import graphlib
 import itertools
@@ -176,7 +177,14 @@ class Stager:
             for puzzle in strand.get("puzzles", []):
                 if puzzle.get("name") == name:
                     for event in puzzle.get("events", []):
-                        yield Event(realm, name, None, None, None, "")
+                        yield Event(
+                            realm,
+                            context=name,
+                            trigger=event.get("trigger"),
+                            target=t.copy() if not isinstance(t := event.get("target", []), str) else t,
+                            payload=copy.deepcopy(event.get("payload", {})),
+                            message=event.get("message", "")
+                        )
                     for target, events in puzzle.get("chain", {}).get(verdict.split(".")[-1], {}).items():
                         events = [events] if not isinstance(events, list) else events
                         for event in events:
