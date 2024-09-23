@@ -28,6 +28,7 @@ import operator
 import tomllib
 import warnings
 
+from busker.types import Event
 
 class Stager:
 

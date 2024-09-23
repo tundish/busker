@@ -48,6 +48,24 @@ class StagerTests(unittest.TestCase):
         [puzzles.chain.cancelled]
         "e" = "Fruition.inception"
 
+        [puzzles.state.spot]
+        kitchen = ["Kitchen"]
+        hall = ["Hall", "Hallway"]
+
+        [[puzzles.items]]
+        name = "Umbrella"
+        type = "Artifact"
+        states = ["spot.hall"]
+
+        [[puzzles.items]]
+        names = ["Ketchup", "Tomato Sauce"]
+        types = ["Condiment", "Artifact"]
+        states = ["spot.kitchen"]
+
+        [[puzzles.events]]
+        state = "Fruition.completion"
+        types = ["Condiment", "Artifact"]
+
         [[puzzles]]
         name = "b"
 
@@ -147,6 +165,13 @@ class StagerTests(unittest.TestCase):
             data = list(Stager.load(*self.rules))
             self.assertTrue(witness.warnings)
             self.assertTrue(all("init" in str(warning.message) for warning in witness.warnings))
+            print(f"{data=}")
+
+        self.assertIsInstance(data[0]["puzzles"][0], dict)
+
+        events = data[0]["puzzles"][0].get("events")
+        self.assertIsInstance(events, list)
+        self.assertEqual(len(events), 1)
 
         stager = Stager(data).prepare()
         self.assertEqual(
@@ -336,10 +361,14 @@ class StagerTests(unittest.TestCase):
         [puzzles.chain.completion]
         "Bag of bait" = "Fruition.inception"
 
+        [puzzles.event.completion]
+        garden_path = ["Traffic.blocked"]
+
         [[puzzles.items]]
         name = "garden_path"
-        type = "Transit"
+        types = ["Transit"]
         states = ["exit.patio", "into.garden", "Traffic.flowing", 3]
+
         """)
 
         with warnings.catch_warnings(record=True) as witness:
