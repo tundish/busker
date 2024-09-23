@@ -1,6 +1,11 @@
 History
 =======
 
+0.14.0rc
+--------
+
+* Introduce Events.
+
 0.13.0
 ------
 
