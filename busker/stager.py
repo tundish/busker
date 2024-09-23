@@ -171,10 +171,13 @@ class Stager:
         return self._active
 
     def terminate(self, realm: str, name: str, verdict: str) -> Generator[Event]:
+        verdict = f"Fruition.{verdict}" if "." not in verdict else verdict
         for strand in self.realms[realm].values():
             for puzzle in strand.get("puzzles", []):
                 if puzzle.get("name") == name:
-                    for target, events in puzzle.get("chain", {}).get(verdict, {}).items():
+                    for event in puzzle.get("events", []):
+                        yield Event(realm, name, None, None, None, "")
+                    for target, events in puzzle.get("chain", {}).get(verdict.split(".")[-1], {}).items():
                         events = [events] if not isinstance(events, list) else events
                         for event in events:
                             yield Event(realm, name, verdict, target, event, "")

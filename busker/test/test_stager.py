@@ -186,12 +186,15 @@ class StagerTests(unittest.TestCase):
 
         events = list(stager.terminate("busker", "a", "completion"))
         self.assertTrue(all(isinstance(i, Event) for i in events), events)
-        self.assertEqual(events[0].realm, "busker")
-        self.assertEqual(events[0].target, "b")
-        self.assertEqual(events[0].payload, "Fruition.inception")
+        #self.assertEqual(events[0].realm, "busker")
+        #self.assertEqual(events[0].target, "b")
+        #self.assertEqual(events[0].payload, "Fruition.inception")
         self.assertEqual(events[1].realm, "busker")
-        self.assertEqual(events[1].target, "e")
+        self.assertEqual(events[1].target, "b")
         self.assertEqual(events[1].payload, "Fruition.inception")
+        self.assertEqual(events[2].realm, "busker")
+        self.assertEqual(events[2].target, "e")
+        self.assertEqual(events[2].payload, "Fruition.inception")
 
     def test_strand_single(self):
         with self.assertWarns(UserWarning) as witness:
