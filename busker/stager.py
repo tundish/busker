@@ -30,6 +30,7 @@ import warnings
 
 from busker.types import Event
 
+
 class Stager:
 
     @staticmethod
@@ -169,14 +170,14 @@ class Stager:
     def active(self):
         return self._active
 
-    def terminate(self, realm: str, name: str, verdict: str) -> Generator[tuple[str, str, str]]:
+    def terminate(self, realm: str, name: str, verdict: str) -> Generator[Event]:
         for strand in self.realms[realm].values():
             for puzzle in strand.get("puzzles", []):
                 if puzzle.get("name") == name:
                     for target, events in puzzle.get("chain", {}).get(verdict, {}).items():
                         events = [events] if not isinstance(events, list) else events
                         for event in events:
-                            yield (realm, target, event)
+                            yield Event(realm, name, verdict, target, event, "")
 
         self.strands[realm].done(name)
         self._active.remove((realm, name))

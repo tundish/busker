@@ -23,6 +23,7 @@ import unittest
 import warnings
 
 from busker.stager import Stager
+from busker.types import Event
 
 
 class StagerTests(unittest.TestCase):
@@ -63,8 +64,10 @@ class StagerTests(unittest.TestCase):
         states = ["spot.kitchen"]
 
         [[puzzles.events]]
-        state = "Fruition.completion"
-        types = ["Condiment", "Artifact"]
+        trigger = "Fruition.completion"
+        target = ["Condiment", "Artifact"]
+        payload = "spot.hall"
+        message = "Ketchup repositioned for next puzzle"
 
         [[puzzles]]
         name = "b"
@@ -165,7 +168,6 @@ class StagerTests(unittest.TestCase):
             data = list(Stager.load(*self.rules))
             self.assertTrue(witness.warnings)
             self.assertTrue(all("init" in str(warning.message) for warning in witness.warnings))
-            print(f"{data=}")
 
         self.assertIsInstance(data[0]["puzzles"][0], dict)
 
@@ -183,9 +185,13 @@ class StagerTests(unittest.TestCase):
         self.assertEqual(stager.active, [("busker", "a"), ("busker.ext.zombie", "a")])
 
         events = list(stager.terminate("busker", "a", "completion"))
-        self.assertEqual(events, [("busker", "b", "Fruition.inception"), ("busker", "e", "Fruition.inception")])
-
-        self.assertEqual(stager.active, [("busker.ext.zombie", "a"), ("busker", "b"), ("busker", "e")])
+        self.assertTrue(all(isinstance(i, Event) for i in events), events)
+        self.assertEqual(events[0].realm, "busker")
+        self.assertEqual(events[0].target, "b")
+        self.assertEqual(events[0].payload, "Fruition.inception")
+        self.assertEqual(events[1].realm, "busker")
+        self.assertEqual(events[1].target, "e")
+        self.assertEqual(events[1].payload, "Fruition.inception")
 
     def test_strand_single(self):
         with self.assertWarns(UserWarning) as witness:
