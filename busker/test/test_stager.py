@@ -35,7 +35,6 @@ class StagerTests(unittest.TestCase):
 
         [[puzzles]]
         name = "a"
-        type = "Resident"
 
         [puzzles.selector]
         paths = []
