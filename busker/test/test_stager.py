@@ -35,6 +35,13 @@ class StagerTests(unittest.TestCase):
 
         [[puzzles]]
         name = "a"
+        type = "Resident"
+
+        [puzzles.selector]
+        paths = [
+            "busker/demo/scenes/01/*.scene.toml",
+            "busker/demo/scenes/02/*.scene.toml",
+        ]
 
         [puzzles.chain.completion]
         "b" = "Fruition.inception"
