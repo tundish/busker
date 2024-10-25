@@ -206,7 +206,7 @@ class Hello(Runner):
 
     def say_hello(self, exenv: ExecutionEnvironment, **kwargs):
         for n in range(10):
-            print("Hello, world!", file=sys.stderr)
+            print("Hello", ", ".join(["again"] * n), file=sys.stderr)
             exenv.queue.put(n)
             time.sleep(1)
         return Completion(self, exenv, n)
@@ -227,9 +227,9 @@ if __name__ == "__main__":
     while not running.ready():
         try:
             rv = running.get(timeout=2)
-            print(f"{rv.data}", file=sys.stdout)
+            print(f"Result: {rv.data}", file=sys.stdout)
         except multiprocessing.context.TimeoutError:
-            print("No uodate", file=sys.stderr)
+            print("No result yet.", file=sys.stderr)
         finally:
             items = []
             while not running.exenv.queue.empty():
