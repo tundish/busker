@@ -143,6 +143,7 @@ def main(args):
 
     print(*lines, sep="\n", file=sys.stdout)
     print("Generated", len(lines), "lines of output.", file=sys.stderr)
+    return 0
 
 
 def parser():
