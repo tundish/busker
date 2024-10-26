@@ -34,6 +34,7 @@ import pprint
 import string
 import sys
 
+from busker.stager import Stager
 from busker.proofer import Proofer
 from busker.utils.graph import load_rules
 
@@ -49,11 +50,9 @@ def main(args):
     print(f"{scene_paths=}", file=sys.stderr)
     print(f"{stage_paths=}", file=sys.stderr)
 
-    for scene_path in scene_paths:
-        formatter = string.Formatter()
-        text = scene_path.read_text()
-        for n, line in enumerate(text.splitlines()):
-            print(line)
+    proofer = Proofer()
+    for script in proofer.read_scenes(scene_paths):
+        print(script)
 
     data = list(load_rules(*stage_paths))
     stager = Stager(rules=data)

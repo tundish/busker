@@ -35,6 +35,7 @@ class Proofer:
     @classmethod
     def read_scenes(cls, paths: list[pathlib.Path], **kwargs):
         for path in paths:
+            errors = {}
             try:
                 text = path.read_text()
             except FileNotFoundError:
@@ -42,12 +43,11 @@ class Proofer:
 
             try:
                 tables = tomllib.loads(text, **kwargs)
-                errors = {}
             except tomllib.TOMLDecodeError as e:
                 tables = {}
                 line = int(next((i for i in str(e).split() if i.isdigit()), "1"))
-                errors = {line: e}
-            yield cls.Script(path, text, tables, errors)
+                errors[line] = e
+            yield cls.Script(path.resolve(), text, tables, errors)
 
     def __init__(self, stager: Stager = None):
         self.stager = stager
