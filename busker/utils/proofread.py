@@ -16,8 +16,6 @@
 
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-#! /usr/bin/env python
-# encoding: utf-8
 
 
 """
@@ -30,13 +28,13 @@ Usage:
 """
 
 import argparse
-from collections.abc import Generator
+from collections import namedtuple
 import pathlib
 import pprint
 import string
 import sys
 
-from busker.stager import Stager
+from busker.proofer import Proofer
 from busker.utils.graph import load_rules
 
 
