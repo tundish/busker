@@ -25,7 +25,7 @@ This utility checks scenes for mistakes.
 
 Usage:
 
-    python -m utils.snoop scenes/*/*.stage.toml
+    python -m utils.snoop scenes/*
 
 """
 
@@ -40,7 +40,16 @@ from busker.utils.graph import load_rules
 
 
 def main(args):
-    data = list(load_rules(*args.input))
+    """
+    ".scene.toml": Scene,
+    ".stage.toml": Staging,
+    """
+    assert all(i.is_dir() for i in args.input)
+    scene_paths = [path for i in args.input for path in i.glob("*.scene.toml")]
+    stage_paths = [path for i in args.input for path in i.glob("*.stage.toml")]
+    print(f"{scene_paths=}", file=sys.stderr)
+    print(f"{stage_paths=}", file=sys.stderr)
+    data = list(load_rules(*stage_paths))
     stager = Stager(rules=data)
     snapshot = stager.snapshot
     pprint.pprint(snapshot, sort_dicts=False, stream=sys.stderr)
@@ -51,7 +60,7 @@ def parser():
     rv = argparse.ArgumentParser(__doc__)
     rv.add_argument(
         "input", nargs="+", type=pathlib.Path,
-        help="Set input file."
+        help="Specify input directories."
     )
     return rv
 
