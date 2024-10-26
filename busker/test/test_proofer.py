@@ -17,8 +17,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+import os
 import pathlib
 import tempfile
+import textwrap
 import tomllib
 import unittest
 
@@ -43,3 +45,24 @@ class ProoferTests(unittest.TestCase):
         self.assertTrue(scripts)
         self.assertIn(1, scripts[0].errors)
         self.assertIsInstance(scripts[0].errors[1], tomllib.TOMLDecodeError)
+
+    def test_parse_field_name(self):
+        text = textwrap.dedent("""
+        [ALICE]
+        name = "Alice"
+
+        [[_]]
+        s='''
+        <ALICE>Hey, {BORIS.name}!
+        '''
+        """)
+        proofer = Proofer()
+        fd, name = tempfile.mkstemp(suffix=".scene.toml", text=True)
+        path = pathlib.Path(name)
+        try:
+            path.write_text(text)
+            script = list(proofer.read_scenes([path]))
+            self.fail(f"{script=}")
+        finally:
+            os.close(fd)
+            path.unlink()

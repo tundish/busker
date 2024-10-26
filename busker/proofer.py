@@ -45,7 +45,7 @@ class Proofer:
                 tables = tomllib.loads(text, **kwargs)
             except tomllib.TOMLDecodeError as e:
                 tables = {}
-                line = int(next((i for i in str(e).split() if i.isdigit()), "1"))
+                line = int(next((i for i in str(e).replace(",", " ").split() if i.isdigit()), "0"))
                 errors[line] = e
             yield cls.Script(path.resolve(), text, tables, errors)
 
