@@ -17,6 +17,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+import pathlib
 import tempfile
 import unittest
 
@@ -25,6 +26,9 @@ from busker.proofer import Proofer
 
 class ProoferTests(unittest.TestCase):
 
-    def test_read_scenes(self):
+    def test_read_scenes_not_found(self):
         proofer = Proofer()
-        self.fail(proofer)
+        with tempfile.TemporaryDirectory() as parent:
+            path = pathlib.Path(parent).joinpath("null.scene.toml")
+            scripts = list(proofer.read_scenes([path]))
+        self.assertFalse(scripts)

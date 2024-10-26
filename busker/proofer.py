@@ -37,4 +37,9 @@ class Proofer:
 
     def read_scenes(self, paths: list[pathlib.Path]):
         for path in paths:
-            text = path.read_text()
+            try:
+                text = path.read_text()
+            except FileNotFoundError:
+                continue
+            else:
+                yield
