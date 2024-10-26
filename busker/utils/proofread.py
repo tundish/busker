@@ -52,7 +52,10 @@ def main(args):
 
     proofer = Proofer()
     for script in proofer.read_scenes(scene_paths):
-        print(script)
+        for line in script.text.splitlines():
+            for result in proofer.formatter.parse(line):
+                if result[1]:
+                    print(f"{result=}")
 
     data = list(load_rules(*stage_paths))
     stager = Stager(rules=data)
