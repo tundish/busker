@@ -19,6 +19,7 @@
 
 import pathlib
 import tempfile
+import tomllib
 import unittest
 
 from busker.proofer import Proofer
@@ -32,3 +33,13 @@ class ProoferTests(unittest.TestCase):
             path = pathlib.Path(parent).joinpath("null.scene.toml")
             scripts = list(proofer.read_scenes([path]))
         self.assertFalse(scripts)
+
+    def test_read_scenes_invalid(self):
+        proofer = Proofer()
+        with tempfile.TemporaryDirectory() as parent:
+            path = pathlib.Path(parent).joinpath("invalid.scene.toml")
+            path.write_text("]")
+            scripts = list(proofer.read_scenes([path]))
+        self.assertTrue(scripts)
+        self.assertIn(1, scripts[0].errors)
+        self.assertIsInstance(scripts[0].errors[1], tomllib.TOMLDecodeError)

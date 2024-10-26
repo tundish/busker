@@ -22,6 +22,7 @@
 from collections import namedtuple
 import pathlib
 import string
+import tomllib
 
 from busker.stager import Stager
 from busker.utils.graph import load_rules
@@ -29,17 +30,25 @@ from busker.utils.graph import load_rules
 
 class Proofer:
 
-    Script = namedtuple("Script", ["path", "text", "tables"], defaults=["", dict()])
+    Script = namedtuple("Script", ["path", "text", "tables", "errors"], defaults=["", dict(), list()])
 
-    def __init__(self, stager: Stager = None):
-        self.stager = stager
-        self.formatter = string.Formatter()
-
-    def read_scenes(self, paths: list[pathlib.Path]):
+    @classmethod
+    def read_scenes(cls, paths: list[pathlib.Path], **kwargs):
         for path in paths:
             try:
                 text = path.read_text()
             except FileNotFoundError:
                 continue
-            else:
-                yield
+
+            try:
+                tables = tomllib.loads(text, **kwargs)
+                errors = {}
+            except tomllib.TOMLDecodeError as e:
+                tables = {}
+                line = int(next((i for i in str(e).split() if i.isdigit()), "1"))
+                errors = {line: e}
+            yield cls.Script(path, text, tables, errors)
+
+    def __init__(self, stager: Stager = None):
+        self.stager = stager
+        self.formatter = string.Formatter()
