@@ -37,9 +37,8 @@ class Stager:
 
     @staticmethod
     def load(*rules: tuple[str]) -> Generator[dict]:
-        proofer = Proofer()
-        scripts = (proofer.read_toml(rule) for rule in rules)
-        for script in proofer.check_stage(*scripts):
+        scripts = (Proofer.read_toml(rule) for rule in rules)
+        for script in Proofer.check_stage(*scripts):
             for error in script.errors.values():
                 warnings.warn(str(error))
 

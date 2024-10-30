@@ -50,10 +50,8 @@ class Proofer:
 
         return cls.read_toml(text, **kwargs)._replace(path=path.resolve())
 
-    def __init__(self):
-        self.formatter = string.Formatter()
-
-    def check_stage(self, *scripts: tuple[Script], **kwargs):
+    @staticmethod
+    def check_stage(*scripts: tuple[Script], **kwargs):
         witness = Counter()
         for script in scripts:
             if not isinstance(script.tables.get("puzzles"), list):
@@ -71,9 +69,11 @@ class Proofer:
 
             yield script
 
-    def check_scene(self, script: Script):
+    @staticmethod
+    def check_scene(script: Script):
+        formatter = string.Formatter()
         for n, line in enumerate(script.text.splitlines()):
-            for result in self.formatter.parse(line):
+            for result in formatter.parse(line):
                 reference = result[1]
                 try:
                     path = reference.split(".")

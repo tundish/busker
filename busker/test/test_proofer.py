@@ -30,10 +30,9 @@ from busker.proofer import Proofer
 class ProoferTests(unittest.TestCase):
 
     def test_read_scene_not_found(self):
-        proofer = Proofer()
         with tempfile.TemporaryDirectory() as parent:
             path = pathlib.Path(parent).joinpath("null.scene.toml")
-            script = proofer.read_script(path)
+            script = Proofer.read_script(path)
         self.assertIsInstance(script, Proofer.Script)
         self.assertEqual(script.path, path)
         self.assertFalse(script.text)
@@ -41,11 +40,10 @@ class ProoferTests(unittest.TestCase):
         self.assertTrue(script.errors)
 
     def test_read_scene_invalid(self):
-        proofer = Proofer()
         with tempfile.TemporaryDirectory() as parent:
             path = pathlib.Path(parent).joinpath("invalid.scene.toml")
             path.write_text("]")
-            script = proofer.read_script(path)
+            script = Proofer.read_script(path)
         self.assertTrue(script)
         self.assertIn(1, script.errors)
         self.assertIsInstance(script.errors[1], tomllib.TOMLDecodeError)
@@ -60,13 +58,12 @@ class ProoferTests(unittest.TestCase):
         <ALICE>Hey, {BORIS.name}!
         '''
         """).strip()
-        proofer = Proofer()
         fd, name = tempfile.mkstemp(suffix=".scene.toml", text=True)
         path = pathlib.Path(name)
         try:
             path.write_text(text)
-            script = proofer.read_script(path)
-            script = proofer.check_scene(script)
+            script = Proofer.read_script(path)
+            script = Proofer.check_scene(script)
             self.assertTrue(script.errors, script)
             self.assertIn(6, script.errors)
             self.assertIn("BORIS", script.errors[6])
