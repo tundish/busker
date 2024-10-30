@@ -29,22 +29,22 @@ from busker.proofer import Proofer
 
 class ProoferTests(unittest.TestCase):
 
-    def test_read_scenes_not_found(self):
+    def test_read_scene_not_found(self):
         proofer = Proofer()
         with tempfile.TemporaryDirectory() as parent:
             path = pathlib.Path(parent).joinpath("null.scene.toml")
-            scripts = list(proofer.read_scenes([path]))
-        self.assertFalse(scripts)
+            script = proofer.read_scene(path)
+        self.assertIsNone(script)
 
-    def test_read_scenes_invalid(self):
+    def test_read_scene_invalid(self):
         proofer = Proofer()
         with tempfile.TemporaryDirectory() as parent:
             path = pathlib.Path(parent).joinpath("invalid.scene.toml")
             path.write_text("]")
-            scripts = list(proofer.read_scenes([path]))
-        self.assertTrue(scripts)
-        self.assertIn(1, scripts[0].errors)
-        self.assertIsInstance(scripts[0].errors[1], tomllib.TOMLDecodeError)
+            script = proofer.read_scene(path)
+        self.assertTrue(script)
+        self.assertIn(1, script.errors)
+        self.assertIsInstance(script.errors[1], tomllib.TOMLDecodeError)
 
     def test_parse_field_name(self):
         text = textwrap.dedent("""
@@ -61,7 +61,7 @@ class ProoferTests(unittest.TestCase):
         path = pathlib.Path(name)
         try:
             path.write_text(text)
-            script = list(proofer.read_scenes([path]))
+            script = proofer.read_scene(path)
             self.fail(f"{script=}")
         finally:
             os.close(fd)
