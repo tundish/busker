@@ -59,7 +59,7 @@ class Proofer:
             if not isinstance(script.tables.get("puzzles"), list):
                 script.errors[0] = "No puzzles detected"
             else:
-                for n, key in enumerate("label", "realm"):
+                for n, key in enumerate(("label", "realm")):
                     if key not in script.tables:
                         script.errors[n] = f"Puzzle strand is missing attribute '{key}'"
 

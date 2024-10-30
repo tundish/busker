@@ -37,27 +37,13 @@ class Stager:
 
     @staticmethod
     def load(*rules: tuple[str]) -> Generator[dict]:
-        witness = Counter()
-        for n, rule in enumerate(rules):
-            script = Proofer.read_toml(rule)
-            try:
-                data = tomllib.loads(rule)
-            except tomllib.TOMLDecodeError as e:
-                warnings.warn("Invalid stage file: {e!s}")
-                yield {}
+        proofer = Proofer()
+        scripts = (proofer.read_toml(rule) for rule in rules)
+        for script in proofer.check_stage(*scripts):
+            for error in script.errors.values():
+                warnings.warn(str(error))
 
-            if not isinstance(data.get("puzzles"), list):
-                warnings.warn(f"No puzzles detected in rule {n}")
-            elif not set(data.keys()).issuperset({"label", "realm"}):
-                warnings.warn("Every strand needs a 'label' and a 'realm'")
-
-            if any(puzzle.get("init") for puzzle in data["puzzles"]):
-                witness["init"] += 1
-
-            yield data
-
-        if not witness["init"]:
-            warnings.warn("At least one puzzle must contain an 'init' table")
+            yield script.tables
 
     @staticmethod
     def layout(item: dict, key=None) -> dict:
