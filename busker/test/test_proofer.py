@@ -34,7 +34,11 @@ class ProoferTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as parent:
             path = pathlib.Path(parent).joinpath("null.scene.toml")
             script = proofer.read_scene(path)
-        self.assertIsNone(script)
+        self.assertIsInstance(script, Proofer.Script)
+        self.assertEqual(script.path, path)
+        self.assertFalse(script.text)
+        self.assertIsNone(script.tables)
+        self.assertTrue(script.errors)
 
     def test_read_scene_invalid(self):
         proofer = Proofer()

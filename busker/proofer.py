@@ -24,39 +24,34 @@ import pathlib
 import string
 import tomllib
 
-from busker.stager import Stager
 from busker.utils.graph import load_rules
 
 
 class Proofer:
 
-    Script = namedtuple("Script", ["path", "text", "tables", "errors"], defaults=["", dict(), list()])
-
-    @staticmethod
-    def read_toml(text: str, **kwargs):
-        try:
-            return tomllib.loads(text, **kwargs)
-        except tomllib.TOMLDecodeError as e:
-            return {}
+    Script = namedtuple("Script", ["path", "text", "tables", "errors"], defaults=["", None, None])
 
     @classmethod
-    def read_scene(cls, path: pathlib.Path, **kwargs):
-        errors = {}
-        try:
-            text = path.read_text()
-        except FileNotFoundError:
-            return None
-
+    def read_toml(cls, text: str, errors: dict = None, **kwargs) -> Script:
+        errors = errors or {}
+        tables = {}
         try:
             tables = tomllib.loads(text, **kwargs)
         except tomllib.TOMLDecodeError as e:
-            tables = {}
             line = int(next((i for i in str(e).replace(",", " ").split() if i.isdigit()), "0"))
             errors[line] = e
-        return cls.Script(path.resolve(), text, tables, errors)
+        return cls.Script(None, text, tables, errors)
 
-    def __init__(self, stager: Stager = None):
-        self.stager = stager
+    @classmethod
+    def read_scene(cls, path: pathlib.Path, **kwargs):
+        try:
+            text = path.read_text()
+        except FileNotFoundError as e:
+            return cls.Script(path.resolve(), errors={0: e})
+
+        return cls.read_toml(text, **kwargs)._replace(path=path.resolve())
+
+    def __init__(self):
         self.formatter = string.Formatter()
 
     def check(self, script: Script):
