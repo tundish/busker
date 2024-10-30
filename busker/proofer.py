@@ -32,23 +32,36 @@ class Proofer:
 
     Script = namedtuple("Script", ["path", "text", "tables", "errors"], defaults=["", dict(), list()])
 
-    @classmethod
-    def read_scenes(cls, paths: list[pathlib.Path], **kwargs):
-        for path in paths:
-            errors = {}
-            try:
-                text = path.read_text()
-            except FileNotFoundError:
-                continue
+    @staticmethod
+    def read_toml(text: str, **kwargs):
+        try:
+            return tomllib.loads(text, **kwargs)
+        except tomllib.TOMLDecodeError as e:
+            return {}
 
-            try:
-                tables = tomllib.loads(text, **kwargs)
-            except tomllib.TOMLDecodeError as e:
-                tables = {}
-                line = int(next((i for i in str(e).replace(",", " ").split() if i.isdigit()), "0"))
-                errors[line] = e
-            yield cls.Script(path.resolve(), text, tables, errors)
+    @classmethod
+    def read_scene(cls, path: pathlib.Path, **kwargs):
+        errors = {}
+        try:
+            text = path.read_text()
+        except FileNotFoundError:
+            return None
+
+        try:
+            tables = tomllib.loads(text, **kwargs)
+        except tomllib.TOMLDecodeError as e:
+            tables = {}
+            line = int(next((i for i in str(e).replace(",", " ").split() if i.isdigit()), "0"))
+            errors[line] = e
+        return cls.Script(path.resolve(), text, tables, errors)
 
     def __init__(self, stager: Stager = None):
         self.stager = stager
         self.formatter = string.Formatter()
+
+    def check(self, script: Script):
+        for line in script.text.splitlines():
+            for result in self.formatter.parse(line):
+                if result[1]:
+                    print(f"{result=}")
+        return script

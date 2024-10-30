@@ -23,7 +23,7 @@ This utility checks scenes for mistakes.
 
 Usage:
 
-    python -m utils.snoop scenes/*
+    python -m utils.proofread scenes/*
 
 """
 
@@ -51,11 +51,11 @@ def main(args):
     print(f"{stage_paths=}", file=sys.stderr)
 
     proofer = Proofer()
-    for script in proofer.read_scenes(scene_paths):
-        for line in script.text.splitlines():
-            for result in proofer.formatter.parse(line):
-                if result[1]:
-                    print(f"{result=}")
+    for path in scene_paths:
+        script = proofer.read_scene(path)
+        if not script:
+            continue
+        script = proofer.check(script)
 
     data = list(load_rules(*stage_paths))
     stager = Stager(rules=data)
