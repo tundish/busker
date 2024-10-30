@@ -33,7 +33,7 @@ class ProoferTests(unittest.TestCase):
         proofer = Proofer()
         with tempfile.TemporaryDirectory() as parent:
             path = pathlib.Path(parent).joinpath("null.scene.toml")
-            script = proofer.read_scene(path)
+            script = proofer.read_script(path)
         self.assertIsInstance(script, Proofer.Script)
         self.assertEqual(script.path, path)
         self.assertFalse(script.text)
@@ -45,7 +45,7 @@ class ProoferTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as parent:
             path = pathlib.Path(parent).joinpath("invalid.scene.toml")
             path.write_text("]")
-            script = proofer.read_scene(path)
+            script = proofer.read_script(path)
         self.assertTrue(script)
         self.assertIn(1, script.errors)
         self.assertIsInstance(script.errors[1], tomllib.TOMLDecodeError)
@@ -65,7 +65,7 @@ class ProoferTests(unittest.TestCase):
         path = pathlib.Path(name)
         try:
             path.write_text(text)
-            script = proofer.read_scene(path)
+            script = proofer.read_script(path)
             self.fail(f"{script=}")
         finally:
             os.close(fd)

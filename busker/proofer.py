@@ -19,12 +19,11 @@
 #! /usr/bin/env python
 # encoding: utf-8
 
+from collections import Counter
 from collections import namedtuple
 import pathlib
 import string
 import tomllib
-
-from busker.utils.graph import load_rules
 
 
 class Proofer:
@@ -43,7 +42,7 @@ class Proofer:
         return cls.Script(None, text, tables, errors)
 
     @classmethod
-    def read_scene(cls, path: pathlib.Path, **kwargs):
+    def read_script(cls, path: pathlib.Path, **kwargs):
         try:
             text = path.read_text()
         except FileNotFoundError as e:
@@ -53,6 +52,24 @@ class Proofer:
 
     def __init__(self):
         self.formatter = string.Formatter()
+
+    def check_stage(self, *scripts: tuple[Script], **kwargs):
+        witness = Counter()
+        for script in scripts:
+            if not isinstance(script.tables.get("puzzles"), list):
+                script.errors[0] = "No puzzles detected"
+            else:
+                for n, key in enumerate("label", "realm"):
+                    if key not in script.tables:
+                        script.errors[n] = f"Puzzle strand is missing attribute '{key}'"
+
+            if any(puzzle.get("init") for puzzle in script.tables.get("puzzles", [])):
+                witness["init"] += 1
+
+            if script is scripts[-1] and not witness["init"]:
+                script.errors[0] = "At least one puzzle must contain an 'init' table"
+
+            yield script
 
     def check(self, script: Script):
         for line in script.text.splitlines():

@@ -29,6 +29,7 @@ import operator
 import tomllib
 import warnings
 
+from busker.proofer import Proofer
 from busker.types import Event
 
 
@@ -38,6 +39,7 @@ class Stager:
     def load(*rules: tuple[str]) -> Generator[dict]:
         witness = Counter()
         for n, rule in enumerate(rules):
+            script = Proofer.read_toml(rule)
             try:
                 data = tomllib.loads(rule)
             except tomllib.TOMLDecodeError as e:
