@@ -59,14 +59,17 @@ class ProoferTests(unittest.TestCase):
         s='''
         <ALICE>Hey, {BORIS.name}!
         '''
-        """)
+        """).strip()
         proofer = Proofer()
         fd, name = tempfile.mkstemp(suffix=".scene.toml", text=True)
         path = pathlib.Path(name)
         try:
             path.write_text(text)
             script = proofer.read_script(path)
-            self.fail(f"{script=}")
+            script = proofer.check_scene(script)
+            self.assertTrue(script.errors, script)
+            self.assertIn(6, script.errors)
+            self.assertIn("BORIS", script.errors[6])
         finally:
             os.close(fd)
             path.unlink()

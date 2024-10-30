@@ -71,9 +71,16 @@ class Proofer:
 
             yield script
 
-    def check(self, script: Script):
-        for line in script.text.splitlines():
+    def check_scene(self, script: Script):
+        for n, line in enumerate(script.text.splitlines()):
             for result in self.formatter.parse(line):
-                if result[1]:
-                    print(f"{result=}")
+                reference = result[1]
+                try:
+                    path = reference.split(".")
+                    role = path[0]
+                except (AttributeError, IndexError):
+                    continue
+
+                if role not in script.tables:
+                    script.errors[n + 1] = f"Role '{role}' referenced but not declared"
         return script
