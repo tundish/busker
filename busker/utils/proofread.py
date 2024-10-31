@@ -23,7 +23,7 @@ This utility checks scenes for mistakes.
 
 Usage:
 
-    python -m utils.proofread script/*
+    python -m utils.proofread project/scripts
 
 """
 
@@ -40,21 +40,19 @@ from busker.utils.graph import load_rules
 
 
 def main(args):
-    """
-    ".scene.toml": Scene,
-    ".stage.toml": Staging,
-    """
-    assert all(i.is_dir() for i in args.input)
-    stage_scripts = [Proofer.read_script(path) for i in args.input for path in i.glob("*.stage.toml")]
+    directories = [i for i in args.input if i.is_dir()]
+    for path in args.input:
+        if path not in directories:
+            print(f"Skipping {path!s} (not a directory)")
+
+    stage_scripts = [Proofer.read_script(path) for i in directories for path in i.glob("*.stage.toml")]
 
     for script in Proofer.check_stage(*stage_scripts):
         print(f"{script.path!s}\t{script.errors=}", file=sys.stderr)
 
-    scene_paths = [path for i in args.input for path in i.glob("*.scene.toml")]
+    scene_paths = [path for i in directories for path in i.glob("*.scene.toml")]
     for path in scene_paths:
         script = Proofer.read_script(path)
-        if not script:
-            continue
         script = Proofer.check_scene(script)
         print(f"{script.path!s}\t{script.errors=}", file=sys.stderr)
 
