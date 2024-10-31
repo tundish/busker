@@ -40,21 +40,27 @@ from busker.utils.graph import load_rules
 
 
 def main(args):
-    directories = [i for i in args.input if i.is_dir()]
-    for path in args.input:
-        if path not in directories:
-            print(f"Skipping {path!s} (not a directory)")
 
-    stage_scripts = [Proofer.read_script(path) for i in directories for path in i.glob("*.stage.toml")]
+    stage_scripts = [
+        Proofer.read_script(path) for i in args.input for path in i.glob("*.stage.toml") if i.is_dir()
+    ]
+    stage_scripts += [Proofer.read_script(path) for path in args.input if path.suffixes == [".stage", ".toml"]]
 
     for script in Proofer.check_stage(*stage_scripts):
-        print(f"{script.path!s}\t{script.errors=}", file=sys.stderr)
+        for line, error in reversed(script.errors.items()):
+            print(f"{script.path!s}\t{line:03d}\t{errors}", file=sys.stdout)
+        if not script.errors:
+            print(f"{script.path!s} checked; no errors.", file=sys.stderr)
 
-    scene_paths = [path for i in directories for path in i.glob("*.scene.toml")]
+    scene_paths = [path for i in args.input for path in i.glob("*.scene.toml") if i.is_dir()]
+    scene_paths += [path for path in args.input if path.suffixes == [".scene", ".toml"]]
     for path in scene_paths:
         script = Proofer.read_script(path)
         script = Proofer.check_scene(script)
-        print(f"{script.path!s}\t{script.errors=}", file=sys.stderr)
+        for line, error in reversed(script.errors.items()):
+            print(f"{script.path!s}\t{line:03d}\t{errors}", file=sys.stdout)
+        if not script.errors:
+            print(f"{script.path!s} checked; no errors.", file=sys.stderr)
 
     return 0
 
