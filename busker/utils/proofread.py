@@ -69,7 +69,7 @@ def parser():
     rv = argparse.ArgumentParser(__doc__)
     rv.add_argument(
         "input", nargs="+", type=pathlib.Path,
-        help="Specify input directories."
+        help="Specify input directories or files."
     )
     return rv
 
