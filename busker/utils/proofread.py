@@ -23,7 +23,7 @@ This utility checks scenes for mistakes.
 
 Usage:
 
-    python -m utils.proofread scenes/*
+    python -m utils.proofread script/*
 
 """
 
@@ -45,22 +45,19 @@ def main(args):
     ".stage.toml": Staging,
     """
     assert all(i.is_dir() for i in args.input)
-    scene_paths = [path for i in args.input for path in i.glob("*.scene.toml")]
-    stage_paths = [path for i in args.input for path in i.glob("*.stage.toml")]
-    print(f"{scene_paths=}", file=sys.stderr)
-    print(f"{stage_paths=}", file=sys.stderr)
+    stage_scripts = [Proofer.read_script(path) for i in args.input for path in i.glob("*.stage.toml")]
 
-    proofer = Proofer()
+    for script in Proofer.check_stage(*stage_scripts):
+        print(f"{script.path!s}\t{script.errors=}", file=sys.stderr)
+
+    scene_paths = [path for i in args.input for path in i.glob("*.scene.toml")]
     for path in scene_paths:
-        script = proofer.read_scene(path)
+        script = Proofer.read_script(path)
         if not script:
             continue
-        script = proofer.check(script)
+        script = Proofer.check_scene(script)
+        print(f"{script.path!s}\t{script.errors=}", file=sys.stderr)
 
-    data = list(load_rules(*stage_paths))
-    stager = Stager(rules=data)
-    snapshot = stager.snapshot
-    pprint.pprint(snapshot, sort_dicts=False, stream=sys.stderr)
     return 0
 
 
