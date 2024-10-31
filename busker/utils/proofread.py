@@ -48,7 +48,7 @@ def main(args):
 
     for script in Proofer.check_stage(*stage_scripts):
         for line, error in reversed(script.errors.items()):
-            print(f"{script.path!s}\t{line:03d}\t{errors}", file=sys.stdout)
+            print(f"{script.path!s}\t{line:03d}\t{error}", file=sys.stdout)
         if not script.errors:
             print(f"{script.path!s} checked; no errors.", file=sys.stderr)
 
@@ -58,7 +58,7 @@ def main(args):
         script = Proofer.read_script(path)
         script = Proofer.check_scene(script)
         for line, error in reversed(script.errors.items()):
-            print(f"{script.path!s}\t{line:03d}\t{errors}", file=sys.stdout)
+            print(f"{script.path!s}\t{line:03d}\t{error}", file=sys.stdout)
         if not script.errors:
             print(f"{script.path!s} checked; no errors.", file=sys.stderr)
 
