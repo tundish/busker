@@ -34,7 +34,6 @@ import pprint
 import string
 import sys
 
-from busker.stager import Stager
 from busker.proofer import Proofer
 from busker.utils.graph import load_rules
 
