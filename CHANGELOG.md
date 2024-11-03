@@ -1,6 +1,11 @@
 History
 =======
 
+0.15.0rc
+--------
+
+* Introduced proofer module.
+
 0.14.0
 ------
 

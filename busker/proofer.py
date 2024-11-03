@@ -90,7 +90,7 @@ class Proofer:
         for n, line in enumerate(script.text.splitlines()):
             cue = cls.cue_matcher.match(line)
             try:
-                if cue["role"] not in script.tables:
+                if cue["role"] and cue["role"] not in script.tables:
                     script.errors[n + 1] = f"Cue for '{cue['role']}' but no role declared"
             except TypeError:
                 pass
