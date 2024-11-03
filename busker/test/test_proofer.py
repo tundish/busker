@@ -94,6 +94,27 @@ class ProoferTests(unittest.TestCase):
             os.close(fd)
             path.unlink()
 
+    def test_parse_role_name_empty(self):
+        text = textwrap.dedent("""
+        [ALICE]
+        name = "Alice"
+
+        [[_]]
+        s='''
+        <>Hey, {ALICE.name}!
+        '''
+        """).strip()
+        fd, name = tempfile.mkstemp(suffix=".scene.toml", text=True)
+        path = pathlib.Path(name)
+        try:
+            path.write_text(text)
+            script = Proofer.read_script(path)
+            script = Proofer.check_scene(script)
+            self.assertFalse(script.errors, script)
+        finally:
+            os.close(fd)
+            path.unlink()
+
     def test_parse_role_directive(self):
         text = textwrap.dedent("""
         [ALICE]

@@ -22,6 +22,7 @@
 from collections import Counter
 from collections import namedtuple
 import pathlib
+import re
 import string
 import tomllib
 
@@ -29,6 +30,20 @@ import tomllib
 class Proofer:
 
     Script = namedtuple("Script", ["path", "text", "tables", "errors"], defaults=["", None, None])
+
+    #  Copied from speechmark.py
+    cue_matcher = re.compile(
+        """
+    ^<                              # Opening bracket
+    (?P<role>[^\.:\\?# >]*)         # Role
+    (?P<directives>[^\:\\?# >]*)    # Directives
+    (?P<mode>[^\\?# >]*)            # Mode
+    (?P<parameters>[^# >]*)         # Parameters
+    (?P<fragments>[^ >]*)           # Fragments
+    >                               # Closing bracket
+    """,
+        re.VERBOSE,
+    )
 
     @classmethod
     def read_toml(cls, text: str, errors: dict = None, **kwargs) -> Script:
@@ -69,10 +84,17 @@ class Proofer:
 
             yield script
 
-    @staticmethod
-    def check_scene(script: Script):
+    @classmethod
+    def check_scene(cls, script: Script):
         formatter = string.Formatter()
         for n, line in enumerate(script.text.splitlines()):
+            cue = cls.cue_matcher.match(line)
+            try:
+                if cue["role"] not in script.tables:
+                    script.errors[n + 1] = f"Cue for '{cue['role']}' but no role declared"
+            except TypeError:
+                pass
+
             for result in formatter.parse(line):
                 reference = result[1]
                 try:
