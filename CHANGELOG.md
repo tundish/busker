@@ -6,6 +6,7 @@ History
 
 * Introduced proofer module.
 * Add attributes `sketch`, `aspect`, `revert` to gathered puzzles.
+* Allow a staged puzzle to chain an event to itself.
 
 0.14.0
 ------
