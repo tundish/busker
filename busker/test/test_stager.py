@@ -266,6 +266,8 @@ class StagerTests(unittest.TestCase):
             [[puzzles]]
             name = "a"
             type = "Interaction"
+            sketch = "Hunt the Ketchup{aspect}"
+            aspect = " is in progress"
 
             [puzzles.init]
             Fruition = "inception"
@@ -290,6 +292,7 @@ class StagerTests(unittest.TestCase):
             [[puzzles]]
             name = "a"
             type = "Exploration"
+            revert = " was abandoned"
 
             [puzzles.init]
             Fruition = "elaboration"
@@ -321,6 +324,9 @@ class StagerTests(unittest.TestCase):
             dict(
                 name="a",
                 type="Exploration",
+                sketch="Hunt the Ketchup{aspect}",
+                aspect=" is in progress",
+                revert=" was abandoned",
                 state=dict(),
                 init={"Fruition": "elaboration", "int": 1},
                 chain=dict(),

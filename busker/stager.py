@@ -124,6 +124,9 @@ class Stager:
                 if puzzle.get("name") == name:
                     rv["name"] = name
                     rv["type"] = puzzle.get("type", rv.get("type"))
+                    rv["sketch"] = puzzle.get("sketch", "") or rv.get("sketch", "")
+                    rv["aspect"] = puzzle.get("aspect", "") or rv.get("aspect", "")
+                    rv["revert"] = puzzle.get("revert", "") or rv.get("revert", "")
                     rv["state"] = puzzle.get("state", {}).copy()
                     rv.setdefault("init", {}).update(puzzle.get("init", {}))
                     rv["chain"] = puzzle.get("chain", {}).copy()
