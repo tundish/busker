@@ -74,7 +74,8 @@ class Stager:
                 for puzzle in strand.get("puzzles", []):
                     for table in puzzle.get("chain", {}).values():
                         for target in table.keys():
-                            self.strands[realm].add(target, puzzle["name"])
+                            if target != puzzle["name"]:
+                                self.strands[realm].add(target, puzzle["name"])
 
     @property
     def puzzles(self):
@@ -144,7 +145,10 @@ class Stager:
 
     def prepare(self):
         for strand in self.strands.values():
-            strand.prepare()
+            try:
+                strand.prepare()
+            except graphlib.CycleError:
+                pass
 
         self._active = [
             (realm, name) for realm, strand in self.strands.items() for name in strand.get_ready()
@@ -162,6 +166,7 @@ class Stager:
         return self._active
 
     def terminate(self, realm: str, name: str, verdict: str) -> Generator[Event]:
+        done = True
         verdict = f"Fruition.{verdict}" if "." not in verdict else verdict
         for strand in self.realms[realm].values():
             for puzzle in strand.get("puzzles", []):
@@ -179,10 +184,12 @@ class Stager:
                         events = [events] if not isinstance(events, list) else events
                         for event in events:
                             yield Event(realm, name, verdict, target, event, "")
+                            if target == name:
+                                done = False
 
-        # TODO: Don't remove a puzzle if it has sent an event to itself.
-        self.strands[realm].done(name)
-        self._active.remove((realm, name))
+        if done:
+            self.strands[realm].done(name)
+            self._active.remove((realm, name))
         self._active.extend(
             [(realm, name) for realm, strand in self.strands.items() for name in strand.get_ready()]
         )

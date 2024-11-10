@@ -167,7 +167,7 @@ class StagerTests(unittest.TestCase):
         """),
     ]
 
-    def test_strands(self):
+    def test_strands_terminate(self):
         with self.assertWarns(UserWarning) as witness:
             data = list(Stager.load(*self.rules))
             self.assertTrue(witness.warnings)
@@ -204,6 +204,52 @@ class StagerTests(unittest.TestCase):
         self.assertEqual(events[2].realm, "busker")
         self.assertEqual(events[2].target, "e")
         self.assertEqual(events[2].payload, "Fruition.inception")
+
+        self.assertEqual(stager.active, [('busker.ext.zombie', 'a'), ('busker', 'b'), ('busker', 'e')])
+
+    def test_strands_unterminated_loop(self):
+        with self.assertWarns(UserWarning) as witness:
+            data = list(Stager.load(*self.rules))
+            self.assertTrue(witness.warnings)
+            data[0]["puzzles"][0]["chain"]["withdrawn"]["a"] = "Fruition.inception"
+            self.assertTrue(all("init" in str(warning.message) for warning in witness.warnings))
+
+        self.assertIsInstance(data[0]["puzzles"][0], dict)
+
+        events = data[0]["puzzles"][0].get("events")
+        self.assertIsInstance(events, list)
+        self.assertEqual(len(events), 1)
+
+        stager = Stager(data).prepare()
+        self.assertEqual(
+            set(stager.puzzles),
+            {("busker", p) for p in "abcdefgh"} | {("busker.ext.zombie", p) for p in "abcdz"}
+        )
+
+        self.assertIsInstance(stager.active, list)
+        self.assertEqual(stager.active, [("busker", "a"), ("busker.ext.zombie", "a")])
+
+        events = list(stager.terminate("busker", "a", "withdrawn"))
+        self.assertTrue(all(isinstance(i, Event) for i in events), events)
+        self.assertEqual(events[0].realm, "busker")
+        self.assertEqual(events[0].context, "a")
+        self.assertEqual(events[0].trigger, "Fruition.completion")
+        self.assertEqual(events[0].target, ["Condiment", "Artifact"])
+        self.assertEqual(events[0].payload, "spot.hall")
+        self.assertTrue(events[0].message)
+
+        self.assertEqual(events[1].realm, "busker")
+        self.assertEqual(events[1].target, "e")
+        self.assertEqual(events[1].payload, "Fruition.inception")
+
+        self.assertEqual(events[2].realm, "busker")
+        self.assertEqual(events[2].target, "a")
+        self.assertEqual(events[2].payload, "Fruition.inception")
+
+        self.assertEqual(
+            stager.active,
+            [("busker", "a"), ('busker.ext.zombie', 'a')]
+        )
 
     def test_strand_single(self):
         with self.assertWarns(UserWarning) as witness:
