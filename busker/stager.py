@@ -180,6 +180,7 @@ class Stager:
                         for event in events:
                             yield Event(realm, name, verdict, target, event, "")
 
+        # TODO: Don't remove a puzzle if it has sent an event to itself.
         self.strands[realm].done(name)
         self._active.remove((realm, name))
         self._active.extend(
