@@ -145,10 +145,7 @@ class Stager:
 
     def prepare(self):
         for strand in self.strands.values():
-            try:
-                strand.prepare()
-            except graphlib.CycleError:
-                pass
+            strand.prepare()
 
         self._active = [
             (realm, name) for realm, strand in self.strands.items() for name in strand.get_ready()
