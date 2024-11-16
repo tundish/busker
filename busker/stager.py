@@ -162,8 +162,7 @@ class Stager:
     def active(self):
         return self._active
 
-    def terminate(self, realm: str, name: str, verdict: str) -> Generator[Event]:
-        done = True
+    def terminate(self, realm: str, name: str, verdict: str, done=True) -> Generator[Event]:
         verdict = f"Fruition.{verdict}" if "." not in verdict else verdict
         for strand in self.realms[realm].values():
             for puzzle in strand.get("puzzles", []):
