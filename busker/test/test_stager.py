@@ -69,8 +69,8 @@ class StagerTests(unittest.TestCase):
 
         [[puzzles.events]]
         trigger = "Fruition.completion"
-        target = ["Condiment", "Artifact"]
-        payload = "spot.hall"
+        targets = ["Condiment", "Artifact"]
+        payload = { state = "spot.hall"}
         message = "Ketchup repositioned for next puzzle"
 
         [[puzzles]]
@@ -193,12 +193,12 @@ class StagerTests(unittest.TestCase):
         self.assertEqual(events[0].realm, "busker")
         self.assertEqual(events[0].context, "a")
         self.assertEqual(events[0].trigger, "Fruition.completion")
-        self.assertEqual(events[0].target, ["Condiment", "Artifact"])
+        self.assertEqual(events[0].targets, ["Condiment", "Artifact"])
         self.assertEqual(events[0].payload, "spot.hall")
         self.assertTrue(events[0].message)
 
         self.assertEqual(events[1].realm, "busker")
-        self.assertEqual(events[1].target, "b")
+        self.assertEqual(events[1].targets, "b")
         self.assertEqual(events[1].payload, "Fruition.inception")
 
         self.assertEqual(events[2].realm, "busker")
@@ -234,16 +234,16 @@ class StagerTests(unittest.TestCase):
         self.assertEqual(events[0].realm, "busker")
         self.assertEqual(events[0].context, "a")
         self.assertEqual(events[0].trigger, "Fruition.completion")
-        self.assertEqual(events[0].target, ["Condiment", "Artifact"])
+        self.assertEqual(events[0].targets, ["Condiment", "Artifact"])
         self.assertEqual(events[0].payload, "spot.hall")
         self.assertTrue(events[0].message)
 
         self.assertEqual(events[1].realm, "busker")
-        self.assertEqual(events[1].target, "e")
+        self.assertEqual(events[1].targets, "e")
         self.assertEqual(events[1].payload, "Fruition.inception")
 
         self.assertEqual(events[2].realm, "busker")
-        self.assertEqual(events[2].target, "a")
+        self.assertEqual(events[2].targets, "a")
         self.assertEqual(events[2].payload, "Fruition.inception")
 
         self.assertEqual(

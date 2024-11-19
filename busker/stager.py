@@ -172,7 +172,7 @@ class Stager:
                             realm,
                             context=name,
                             trigger=event.get("trigger"),
-                            target=t.copy() if not isinstance(t := event.get("target", []), str) else t,
+                            targets=t.copy() if not isinstance(t := event.get("targets", []), str) else t,
                             payload=copy.deepcopy(event.get("payload", {})),
                             message=event.get("message", "")
                         )
