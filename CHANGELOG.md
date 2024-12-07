@@ -1,8 +1,8 @@
 History
 =======
 
-0.15.0rc
---------
+0.15.0
+------
 
 * Introduced proofer module.
 * Add attributes `sketch`, `aspect`, `revert` to gathered puzzles.
