@@ -446,3 +446,63 @@ class StagerTests(unittest.TestCase):
             data = list(Stager.load(rule))
             self.assertTrue(data)
             self.assertFalse(witness, [w.message for w in witness])
+
+    def test_chain_array(self):
+
+        rule = textwrap.dedent("""
+        label = "Repo of the Unknown"
+        realm = "busker"
+
+        [[puzzles]]
+        name = "a"
+        chain = ["b", "e"]
+        states = ["Fruition.inception"]
+
+        [puzzles.selector]
+        paths = []
+        states = ["spot.kitchen", "spot.hall"]
+
+        [puzzles.state.spot]
+        kitchen = ["Kitchen"]
+        hall = ["Hall", "Hallway"]
+
+        [[puzzles.items]]
+        name = "Umbrella"
+        type = "Artifact"
+        states = ["spot.hall"]
+
+        [[puzzles.items]]
+        names = ["Ketchup", "Tomato Sauce"]
+        types = ["Condiment", "Artifact"]
+        states = ["spot.kitchen"]
+
+        [[puzzles.events]]
+        trigger = "Fruition.completion"
+        targets = ["Condiment", "Artifact"]
+        payload = { state = "spot.hall"}
+        message = "Ketchup repositioned for next puzzle"
+
+        [[puzzles]]
+        name = "b"
+        chain = ["c"]
+
+        [[puzzles]]
+        name = "c"
+        chain = ["d"]
+
+        [[puzzles]]
+        name = "d"
+
+        [[puzzles]]
+        name = "e"
+        chain = ["f", "g"]
+
+        [[puzzles]]
+        name = "f"
+        """)
+
+        with warnings.catch_warnings(record=True) as witness:
+            warnings.simplefilter("always")
+            data = list(Stager.load(rule))
+            self.assertTrue(data)
+            self.assertFalse(witness, [w.message for w in witness])
