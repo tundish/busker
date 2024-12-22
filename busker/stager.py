@@ -72,6 +72,9 @@ class Stager:
         for realm, strands in self.realms.items():
             for strand in strands.values():
                 for puzzle in strand.get("puzzles", []):
+                    if puzzle.get("init"):
+                        self.strands[realm].add(puzzle["name"])
+
                     chain = puzzle.get("chain", [])
                     try:
                         targets = [
@@ -137,7 +140,6 @@ class Stager:
                     rv["sketch"] = puzzle.get("sketch", "") or rv.get("sketch", "")
                     rv["aspect"] = puzzle.get("aspect", "") or rv.get("aspect", "")
                     rv["revert"] = puzzle.get("revert", "") or rv.get("revert", "")
-                    rv.setdefault("states", []).extend(puzzle.get("states", []))
                     rv.setdefault("init", {}).update(puzzle.get("init", {}))
                     rv["chain"] = puzzle.get("chain", []).copy()
 
