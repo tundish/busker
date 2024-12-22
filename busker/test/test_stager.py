@@ -373,9 +373,9 @@ class StagerTests(unittest.TestCase):
                 sketch="Hunt the Ketchup{aspect}",
                 aspect=" is in progress",
                 revert=" was abandoned",
-                state=dict(),
+                states=list(),
                 init={"Fruition": "elaboration", "int": 1},
-                chain=dict(),
+                chain=list(),
                 items=[
                     dict(
                         name="side_entry",
@@ -495,7 +495,7 @@ class StagerTests(unittest.TestCase):
 
         [[puzzles]]
         name = "e"
-        chain = ["f", "g"]
+        chain = ["e", "f", "g"]
 
         [[puzzles]]
         name = "f"
@@ -506,3 +506,16 @@ class StagerTests(unittest.TestCase):
             data = list(Stager.load(rule))
             self.assertTrue(data)
             self.assertFalse(witness, [w.message for w in witness])
+
+        stager = Stager(data).prepare()
+        puzzle = stager.gather_puzzle("busker", "a")
+        self.assertEqual(
+            stager.active,
+            [("busker", "a")]
+        )
+        events = list(stager.terminate("busker", "a", verdict="Fruition.completion", done=True))
+        self.assertEqual(len(events), 1)
+        self.assertEqual(
+            stager.active,
+            [("busker", "b"), ("busker", "e")]
+        )

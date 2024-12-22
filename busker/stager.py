@@ -72,10 +72,19 @@ class Stager:
         for realm, strands in self.realms.items():
             for strand in strands.values():
                 for puzzle in strand.get("puzzles", []):
-                    for table in puzzle.get("chain", {}).values():
-                        for target in table.keys():
-                            if target != puzzle["name"]:
-                                self.strands[realm].add(target, puzzle["name"])
+                    chain = puzzle.get("chain", [])
+                    try:
+                        targets = [
+                            target
+                            for table in chain.values()
+                            for target in table.keys()
+                            if target != puzzle["name"]
+                        ]
+                    except AttributeError:
+                        targets = [target for target in chain if target != puzzle["name"]]
+
+                    for target in targets:
+                        self.strands[realm].add(target, puzzle["name"])
 
     @property
     def puzzles(self):
@@ -128,9 +137,9 @@ class Stager:
                     rv["sketch"] = puzzle.get("sketch", "") or rv.get("sketch", "")
                     rv["aspect"] = puzzle.get("aspect", "") or rv.get("aspect", "")
                     rv["revert"] = puzzle.get("revert", "") or rv.get("revert", "")
-                    rv["state"] = puzzle.get("state", {}).copy()
+                    rv.setdefault("states", []).extend(puzzle.get("states", []))
                     rv.setdefault("init", {}).update(puzzle.get("init", {}))
-                    rv["chain"] = puzzle.get("chain", {}).copy()
+                    rv["chain"] = puzzle.get("chain", []).copy()
 
                     items.update({
                         i.get("name", (s, p, n)): dict(i, layout=self.layout(i, key=(s, p, n)))
@@ -176,7 +185,18 @@ class Stager:
                             payload=copy.deepcopy(event.get("payload", {})),
                             message=event.get("message", "")
                         )
-                    for target, events in puzzle.get("chain", {}).get(verdict.split(".")[-1], {}).items():
+                    chain = puzzle.get("chain", [])
+                    try:
+                        # Assume chain is a list
+                        if chain.count(name):
+                            done = False
+                    except AttributeError:
+                        pass
+                    else:
+                        continue
+
+                    # Assume chain is a dict. Synthesize events.
+                    for target, events in chain.get(verdict.split(".")[-1], {}).items():
                         events = [events] if not isinstance(events, list) else events
                         for event in events:
                             yield Event(realm, name, verdict, target, event, "")

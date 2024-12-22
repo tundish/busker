@@ -78,9 +78,11 @@ class Proofer:
 
             if any(puzzle.get("init") for puzzle in script.tables.get("puzzles", [])):
                 witness["init"] += 1
+            if any(puzzle.get("states") for puzzle in script.tables.get("puzzles", [])):
+                witness["states"] += 1
 
-            if script is scripts[-1] and not witness["init"]:
-                script.errors[0] = "At least one puzzle must contain an 'init' table"
+            if script is scripts[-1] and not witness["init"] and not witness["states"]:
+                script.errors[0] = "At least one puzzle must contain states or an 'init' table"
 
             yield script
 
