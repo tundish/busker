@@ -509,6 +509,14 @@ class StagerTests(unittest.TestCase):
 
         stager = Stager(data).prepare()
         puzzle = stager.gather_puzzle("busker", "a")
+        self.assertEqual(puzzle.get("states"), ["Fruition.inception"])
+        self.assertEqual(
+            stager.gather_state(),
+            dict(
+                kitchen=["Kitchen"],
+                hall=["Hall", "Hallway"],
+            )
+        )
         self.assertEqual(
             stager.active,
             [("busker", "a")]
