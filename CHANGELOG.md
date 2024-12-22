@@ -1,6 +1,12 @@
 History
 =======
 
+0.16.0
+------
+
+* Implement lightweight puzzle chain as list.
+* Add attribute `states` to gathered puzzles.
+
 0.15.0
 ------
 
