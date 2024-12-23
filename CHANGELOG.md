@@ -1,6 +1,11 @@
 History
 =======
 
+0.19.0
+------
+
+* Add unit test for Event priority.
+
 0.18.0
 ------
 
