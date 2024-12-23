@@ -1,6 +1,11 @@
 History
 =======
 
+0.21.0
+------
+
+* More robust error handling within compass layout.
+
 0.20.0
 ------
 

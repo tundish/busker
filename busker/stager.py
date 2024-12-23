@@ -48,7 +48,7 @@ class Stager:
     def layout(item: dict, key=None) -> dict:
         compass = next(
             (parts[-1] for i in item.get("states", [])
-             if (parts := i.lower().split("."))[0] == "compass"
+             if isinstance(i, str) and (parts := i.lower().split("."))[0] == "compass"
             ),
             "_"
         )
