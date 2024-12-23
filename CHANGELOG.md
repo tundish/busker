@@ -1,10 +1,15 @@
 History
 =======
 
+0.18.0
+------
+
+* Add `priority` attribute to Event.
+
 0.17.0
 ------
 
-* Revert sttes attribute
+* Revert states attribute
 * Add puzzles to graph when init table declared.
 
 0.16.0

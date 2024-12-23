@@ -30,7 +30,11 @@ Choice = namedtuple("Choice", ["form", "input", "value"], defaults=[None, None])
 
 Completion = namedtuple("Completion", ["runner", "exenv", "data"], defaults=[None])
 
-Event = namedtuple("Event", ["realm", "context",  "trigger", "targets", "payload", "message"], defaults=[None, ""])
+Event = namedtuple(
+    "Event",
+    ["realm", "context",  "trigger", "targets", "payload", "message", "priority"],
+    defaults=[None, "", 0]
+)
 
 
 class Host(enum.Enum):
