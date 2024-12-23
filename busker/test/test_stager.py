@@ -196,6 +196,7 @@ class StagerTests(unittest.TestCase):
         self.assertEqual(events[0].targets, ["Condiment", "Artifact"])
         self.assertEqual(events[0].payload, {"state": "spot.hall"})
         self.assertTrue(events[0].message)
+        self.assertEqual(events[0].priority, 0)
 
         self.assertEqual(events[1].realm, "busker")
         self.assertEqual(events[1].targets, "b")
@@ -480,6 +481,7 @@ class StagerTests(unittest.TestCase):
         targets = ["Condiment", "Artifact"]
         payload = { state = "spot.hall"}
         message = "Ketchup repositioned for next puzzle"
+        priority = 1
 
         [[puzzles]]
         name = "b"
@@ -521,6 +523,7 @@ class StagerTests(unittest.TestCase):
         )
         events = list(stager.terminate("busker", "a", verdict="Fruition.completion", done=True))
         self.assertEqual(len(events), 1)
+        self.assertEqual(events[0].priority, 1)
         self.assertEqual(
             stager.active,
             [("busker", "b"), ("busker", "e")]
