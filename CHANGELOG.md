@@ -1,6 +1,11 @@
 History
 =======
 
+0.20.0
+------
+
+* Renamed Event attribute `support`.
+
 0.19.0
 ------
 

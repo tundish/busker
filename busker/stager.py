@@ -186,7 +186,7 @@ class Stager:
                             targets=t.copy() if not isinstance(t := event.get("targets", []), str) else t,
                             payload=copy.deepcopy(event.get("payload", {})),
                             message=event.get("message", ""),
-                            priority=event.get("priority", 0)
+                            support=event.get("support", 0)
                         )
                     chain = puzzle.get("chain", [])
                     try:

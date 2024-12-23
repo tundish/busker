@@ -32,7 +32,7 @@ Completion = namedtuple("Completion", ["runner", "exenv", "data"], defaults=[Non
 
 Event = namedtuple(
     "Event",
-    ["realm", "context",  "trigger", "targets", "payload", "message", "priority"],
+    ["realm", "context",  "trigger", "targets", "payload", "message", "support"],
     defaults=[None, "", 0]
 )
 
