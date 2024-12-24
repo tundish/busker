@@ -2,7 +2,7 @@
  
 [project]
 name = "busker"
-version = "0.21.0"
+version = "0.22.0"
 description = "A utility for testing Balladeer projects."
 readme = "README.md"
 requires-python = ">=3.11"

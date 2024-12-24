@@ -1,6 +1,11 @@
 History
 =======
 
+0.22.0
+------
+
+* Only emit termination Events when they match verdict.
+
 0.21.0
 ------
 
