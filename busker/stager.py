@@ -192,11 +192,12 @@ class Stager:
                             done = False
                         yield rv
 
-                    chain = puzzle.get("chain", [])
-                    if not isinstance(chain, dict):
+                    try:
+                        chain_items = puzzle.get("chain", {}).get(verdict.split(".")[-1], {}).items()
+                    except AttributeError:
                         continue
                     # Synthesize events.
-                    for target, events in chain.get(verdict.split(".")[-1], {}).items():
+                    for target, events in chain_items:
                         events = [events] if not isinstance(events, list) else events
                         for event in events:
                             yield Event(realm, name, verdict, target, event, "")
