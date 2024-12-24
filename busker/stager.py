@@ -179,7 +179,7 @@ class Stager:
             for puzzle in strand.get("puzzles", []):
                 if puzzle.get("name") == name:
                     for event in puzzle.get("events", []):
-                        yield Event(
+                        rv = Event(
                             realm,
                             context=name,
                             trigger=event.get("trigger"),
@@ -188,17 +188,14 @@ class Stager:
                             message=event.get("message", ""),
                             support=event.get("support", 0)
                         )
-                    chain = puzzle.get("chain", [])
-                    try:
-                        # Assume chain is a list
-                        if chain.count(name):
+                        if rv.context in rv.targets:
                             done = False
-                    except AttributeError:
-                        pass
-                    else:
-                        continue
+                        yield rv
 
-                    # Assume chain is a dict. Synthesize events.
+                    chain = puzzle.get("chain", [])
+                    if not isinstance(chain, dict):
+                        continue
+                    # Synthesize events.
                     for target, events in chain.get(verdict.split(".")[-1], {}).items():
                         events = [events] if not isinstance(events, list) else events
                         for event in events:
