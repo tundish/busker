@@ -232,20 +232,17 @@ class StagerTests(unittest.TestCase):
 
         events = list(stager.terminate("busker", "a", "withdrawn"))
         self.assertTrue(all(isinstance(i, Event) for i in events), events)
+        self.assertEqual(len(events), 2, events)
+
         self.assertEqual(events[0].realm, "busker")
-        self.assertEqual(events[0].context, "a")
-        self.assertEqual(events[0].trigger, "Fruition.completion")
-        self.assertEqual(events[0].targets, ["Condiment", "Artifact"])
-        self.assertEqual(events[0].payload, {"state": "spot.hall"})
-        self.assertTrue(events[0].message)
+        self.assertEqual(events[0].targets, "e")
+        self.assertEqual(events[0].trigger, "Fruition.withdrawn")
+        self.assertEqual(events[0].payload, "Fruition.inception")
 
         self.assertEqual(events[1].realm, "busker")
-        self.assertEqual(events[1].targets, "e")
+        self.assertEqual(events[1].targets, "a")
+        self.assertEqual(events[1].trigger, "Fruition.withdrawn")
         self.assertEqual(events[1].payload, "Fruition.inception")
-
-        self.assertEqual(events[2].realm, "busker")
-        self.assertEqual(events[2].targets, "a")
-        self.assertEqual(events[2].payload, "Fruition.inception")
 
         self.assertEqual(
             stager.active,

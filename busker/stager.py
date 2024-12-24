@@ -188,9 +188,10 @@ class Stager:
                             message=event.get("message", ""),
                             support=event.get("support", 0)
                         )
-                        if rv.context in rv.targets:
-                            done = False
-                        yield rv
+                        if rv.trigger == verdict:
+                            yield rv
+                            if rv.context in rv.targets:
+                                done = False
 
                     try:
                         chain_items = puzzle.get("chain", {}).get(verdict.split(".")[-1], {}).items()
@@ -200,9 +201,11 @@ class Stager:
                     for target, events in chain_items:
                         events = [events] if not isinstance(events, list) else events
                         for event in events:
-                            yield Event(realm, name, verdict, target, event, "")
-                            if target == name:
-                                done = False
+                            rv = Event(realm, name, verdict, target, event, "")
+                            if rv.trigger == verdict:
+                                yield rv
+                                if rv.context in rv.targets:
+                                    done = False
 
         if done:
             self.strands[realm].done(name)
