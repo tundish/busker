@@ -19,7 +19,7 @@
 
 import unittest
 
-from busker.gui import Zone
+from busker.gui.zone import Zone
 
 
 class ZoneTests(unittest.TestCase):

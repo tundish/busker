@@ -21,7 +21,7 @@ import textwrap
 import tkinter as tk
 import unittest
 
-from busker.tagger import Tagger
+from busker.gui.tagger import Tagger
 
 
 class TaggerTests(unittest.TestCase):

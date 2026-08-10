@@ -29,10 +29,10 @@ import sysconfig
 import time
 import venv
 
-from busker.history import SharedHistory
-from busker.runner import Runner
-from busker.types import Completion
-from busker.types import ExecutionEnvironment
+from busker.core.history import SharedHistory
+from busker.core.runner import Runner
+from busker.core.types import Completion
+from busker.core.types import ExecutionEnvironment
 
 
 class Executive(SharedHistory):

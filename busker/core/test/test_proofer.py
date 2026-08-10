@@ -24,7 +24,7 @@ import textwrap
 import tomllib
 import unittest
 
-from busker.proofer import Proofer
+from busker.core.proofer import Proofer
 
 
 class ProoferTests(unittest.TestCase):

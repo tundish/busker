@@ -27,7 +27,7 @@ import re
 import urllib.request
 import xml.etree.ElementTree as ET
 
-from busker.history import SharedHistory
+from busker.core.history import SharedHistory
 
 
 Node = namedtuple(

@@ -34,8 +34,8 @@ import typing
 import uuid
 import venv
 
-from busker.types import Completion
-from busker.types import ExecutionEnvironment
+from busker.core.types import Completion
+from busker.core.types import ExecutionEnvironment
 
 
 class Runner:

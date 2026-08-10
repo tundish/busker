@@ -21,7 +21,7 @@ import unittest
 import textwrap
 from types import SimpleNamespace
 
-from busker.scraper import Scraper
+from busker.core.scraper import Scraper
 
 
 class ScraperTests(unittest.TestCase):

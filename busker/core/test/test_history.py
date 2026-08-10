@@ -24,8 +24,8 @@ import textwrap
 import tomllib
 import unittest
 
-from busker.history import SharedHistory
-from busker.history import SharedLogRecord
+from busker.core.history import SharedHistory
+from busker.core.history import SharedLogRecord
 
 
 class TOMLTests(unittest.TestCase):

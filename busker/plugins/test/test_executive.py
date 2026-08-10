@@ -25,7 +25,7 @@ from types import SimpleNamespace
 import tomllib
 import unittest
 
-from busker.executive import Executive
+from busker.plugins.executive import Executive
 
 
 class ExecutiveTests(unittest.TestCase):

@@ -29,8 +29,8 @@ import operator
 import tomllib
 import warnings
 
-from busker.proofer import Proofer
-from busker.types import Event
+from busker.core.proofer import Proofer
+from busker.core.types import Event
 
 
 class Stager:

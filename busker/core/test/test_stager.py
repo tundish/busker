@@ -22,8 +22,8 @@ import textwrap
 import unittest
 import warnings
 
-from busker.stager import Stager
-from busker.types import Event
+from busker.core.stager import Stager
+from busker.core.types import Event
 
 
 class StagerTests(unittest.TestCase):

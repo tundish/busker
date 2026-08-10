@@ -21,10 +21,10 @@ import pathlib
 import unittest
 import sys
 
-from busker.runner import Discovery
-from busker.runner import Installation
-from busker.runner import Server
-from busker.types import ExecutionEnvironment
+from busker.core.runner import Discovery
+from busker.core.runner import Installation
+from busker.core.runner import Server
+from busker.core.types import ExecutionEnvironment
 
 
 class InstallationTests(unittest.TestCase):

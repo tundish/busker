@@ -23,7 +23,7 @@ import tkinter as tk
 from tkinter import ttk
 from types import SimpleNamespace as Structure
 
-from busker.history import SharedHistory
+from busker.core.history import SharedHistory
 
 
 class Zone(SharedHistory):
