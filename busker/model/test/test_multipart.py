@@ -40,7 +40,7 @@ class MultipartTests(unittest.TestCase):
         {
         "port": 8080
         }
-        {"mark": 2863490869328, "busker": "0.25.0", "type": "text/plain"}
+        {"mark": 2863490869328, "busker": "0.25.0", "type": "text/plain", "path": "a.b.c"}
 
         <A> Knock knock.
         <B> Who's there?
@@ -51,8 +51,8 @@ class MultipartTests(unittest.TestCase):
         bits = list(doc.feed(text))
         self.assertEqual(len(bits), 3, bits)
         self.assertIsInstance(doc.data[()][0], dict)
-        self.assertIsInstance(doc.data[()][1], str)
-        self.assertIsInstance(doc.data[()][2], ast.AST)
+        self.assertIsInstance(doc.data[("a", "b", "c")][0], str)
+        self.assertIsInstance(doc.data[()][1], ast.AST)
 
     def test_root_regex_reject(self):
         for n, text in enumerate([

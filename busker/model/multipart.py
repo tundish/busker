@@ -106,7 +106,7 @@ class Multipart:
                     self.logger.error(f"Invalid Data. Pos: {d.end()}")
                     return
 
-            path = data.get("path", self.path)
+            path = tuple(filter(None, data.get("path", "").split(self.sep))) or tuple(self.path)
             self.data[path].append(payload)
             yield data
 
