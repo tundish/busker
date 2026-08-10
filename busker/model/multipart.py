@@ -29,10 +29,11 @@ from busker import __version__
 
 class Multipart:
 
-    def __init__(self, *args, path: list = None):
+    def __init__(self, *args, path: list = None, sep="."):
         self.logger = logging.getLogger("busker.multipart")
         self.mark_regex = re.compile(r"^\{.+?\}$", re.MULTILINE)
-        self.path = path
+        self.path = path or list()
+        self.sep = sep
         self.data = defaultdict(list)
         self.data[path].extend(args)
 
@@ -90,7 +91,15 @@ class Multipart:
             else:
                 data["payload"] = payload = text[d.end():]
 
-            if data.get("type") in data_types:
+            if data.get("type") in code_types:
+                try:
+                    path = self.sep.join(self.path)
+                    data["payload"] = payload = ast.parse(payload, filename=path, mode="exec")
+                except (ValueError, SyntaxError) as err:
+                    self.logger.error(f"Invalid Code. Pos: {d.end()}", exc_info=True)
+                    return
+
+            elif data.get("type") in data_types:
                 try:
                     data["payload"] = payload = json.loads(payload)
                 except json.JSONDecodeError:

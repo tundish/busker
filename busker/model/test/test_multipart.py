@@ -44,10 +44,15 @@ class MultipartTests(unittest.TestCase):
 
         <A> Knock knock.
         <B> Who's there?
+        {"mark": 2863490869328, "busker": "0.25.0", "type": "text/x-python"}
+        print("Hello, World!")
         """).lstrip()
         doc = Multipart()
         bits = list(doc.feed(text))
-        self.assertEqual(len(bits), 2, bits)
+        self.assertEqual(len(bits), 3, bits)
+        self.assertIsInstance(doc.data[None][0], dict)
+        self.assertIsInstance(doc.data[None][1], str)
+        self.assertIsInstance(doc.data[None][2], ast.AST)
 
     def test_root_regex_reject(self):
         for n, text in enumerate([
