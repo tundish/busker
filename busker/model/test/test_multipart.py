@@ -50,9 +50,9 @@ class MultipartTests(unittest.TestCase):
         doc = Multipart()
         bits = list(doc.feed(text))
         self.assertEqual(len(bits), 3, bits)
-        self.assertIsInstance(doc.data[None][0], dict)
-        self.assertIsInstance(doc.data[None][1], str)
-        self.assertIsInstance(doc.data[None][2], ast.AST)
+        self.assertIsInstance(doc.data[()][0], dict)
+        self.assertIsInstance(doc.data[()][1], str)
+        self.assertIsInstance(doc.data[()][2], ast.AST)
 
     def test_root_regex_reject(self):
         for n, text in enumerate([

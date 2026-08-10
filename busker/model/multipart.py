@@ -29,13 +29,13 @@ from busker import __version__
 
 class Multipart:
 
-    def __init__(self, *args, path: list = None, sep="."):
+    def __init__(self, *args, path: tuple = None, sep="."):
         self.logger = logging.getLogger("busker.multipart")
         self.mark_regex = re.compile(r"^\{.+?\}$", re.MULTILINE)
-        self.path = path or list()
+        self.path = path or tuple()
         self.sep = sep
         self.data = defaultdict(list)
-        self.data[path].extend(args)
+        self.data[self.path].extend(args)
 
     @property
     def header(self):
@@ -106,7 +106,7 @@ class Multipart:
                     self.logger.error(f"Invalid Data. Pos: {d.end()}")
                     return
 
-            path = data.get("path")
+            path = data.get("path", self.path)
             self.data[path].append(payload)
             yield data
 
