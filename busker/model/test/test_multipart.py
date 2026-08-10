@@ -95,7 +95,11 @@ class MultipartTests(unittest.TestCase):
         self.assertIsInstance(doc.header, dict)
         self.assertTrue(doc.header.get("mark", None))
         self.assertEqual(doc.header.get("busker", None), busker.__version__)
-        print(f"{doc.data=}")
+
+        rv = str(doc)
+        self.assertIn('"port": 8080', rv)
+        self.assertIn("Knock knock.", rv)
+        self.assertIn("Hello, World!", rv)
 
     def test_str(self):
         config = dict(port=8080)

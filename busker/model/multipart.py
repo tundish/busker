@@ -34,8 +34,7 @@ class Multipart:
         self.mark_regex = re.compile(r"^\{.+?\}$", re.MULTILINE)
         self.path = path
         self.data = defaultdict(list)
-        for arg in args:
-            self.data[path].append(arg)
+        self.data[path].extend(args)
 
     @property
     def header(self):
@@ -45,24 +44,7 @@ class Multipart:
             return dict(mark=id(self), busker=__version__, path=self.path[:])
 
     def __str__(self):
-        return "\n".join((
-            "{0}\n{1}".format(
-                json.dumps(
-                    dict(
-                        self.header,
-                        type="application/json"
-                        if isinstance(i, (dict, list))
-                        else "text/plain"
-                    ),
-                    sort_keys=False
-                ),
-                json.dumps(i, indent=0, sort_keys=False)
-                if isinstance(i, (dict, list))
-                else i
-            )
-            for n, (k, v) in enumerate(self.data.items())
-            for i in v
-        ))
+        return "\n".join(self.dump())
 
     def feed(
         self, text: str, header_length=84,
@@ -118,3 +100,16 @@ class Multipart:
             path = data.get("path")
             self.data[path].append(payload)
             yield data
+
+    def dump(self):
+        for n, (k, v) in enumerate(self.data.items()):
+            for i in v:
+                if isinstance(i, ast.AST):
+                    yield json.dumps(dict(self.header, type="text/x-python"), sort_keys=False)
+                    yield ast.unparse(i)
+                elif isinstance(i, (dict, list)):
+                    yield json.dumps(dict(self.header, type="application/json"), sort_keys=False)
+                    yield json.dumps(i, indent=0, sort_keys=False)
+                else:
+                    yield json.dumps(dict(self.header, type="text/plain"), sort_keys=False)
+                    yield i
