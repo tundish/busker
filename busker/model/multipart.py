@@ -15,6 +15,7 @@
 # You should have received a copy of the GNU General Public License along with busker.
 # If not, see <https://www.gnu.org/licenses/>.
 
+import ast
 from collections.abc import Generator
 from collections import defaultdict
 import io
@@ -63,7 +64,11 @@ class Multipart:
             for i in v
         ))
 
-    def feed(self, text: str, header_length=84, data_types=("application/json", )) -> Generator[dict]:
+    def feed(
+        self, text: str, header_length=84,
+        code_types=("text/x-python", ),
+        data_types=("application/json", )
+    ) -> Generator[dict]:
         delimiters = list(self.mark_regex.finditer(text))
         if not delimiters:
             self.logger.error("No delimiters found")

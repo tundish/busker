@@ -15,6 +15,7 @@
 # You should have received a copy of the GNU General Public License along with busker.
 # If not, see <https://www.gnu.org/licenses/>.
 
+import ast
 import pathlib
 import shutil
 import tempfile
@@ -89,7 +90,8 @@ class MultipartTests(unittest.TestCase):
         <A> Knock knock.
         <B> Who's there?
         """)
-        doc = Multipart(config, text)
+        code = ast.parse("print('Hello, World!')")
+        doc = Multipart(config, text, code)
         self.assertIsInstance(doc.header, dict)
         self.assertTrue(doc.header.get("mark", None))
         self.assertEqual(doc.header.get("busker", None), busker.__version__)
