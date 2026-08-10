@@ -12,7 +12,7 @@
 # the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 # See the GNU General Public License for more details.
 #
-# You should have received a copy of the GNU General Public License along with spiki.
+# You should have received a copy of the GNU General Public License along with busker.
 # If not, see <https://www.gnu.org/licenses/>.
 
 from collections.abc import Generator
@@ -23,13 +23,13 @@ import logging
 import mimetypes
 import re
 
-from spiki import __version__
+from busker import __version__
 
 
 class Multipart:
 
     def __init__(self, *args, path: list = None):
-        self.logger = logging.getLogger("spiki.multipart")
+        self.logger = logging.getLogger("busker.multipart")
         self.mark_regex = re.compile(r"^\{.+?\}$", re.MULTILINE)
         self.path = path
         self.data = defaultdict(list)
@@ -39,9 +39,9 @@ class Multipart:
     @property
     def header(self):
         if self.path is None:
-            return dict(mark=id(self), spiki=__version__)
+            return dict(mark=id(self), busker=__version__)
         else:
-            return dict(mark=id(self), spiki=__version__, path=self.path[:])
+            return dict(mark=id(self), busker=__version__, path=self.path[:])
 
     def __str__(self):
         return "\n".join((

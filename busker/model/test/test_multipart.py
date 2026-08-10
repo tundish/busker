@@ -12,7 +12,7 @@
 # the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 # See the GNU General Public License for more details.
 #
-# You should have received a copy of the GNU General Public License along with spiki.
+# You should have received a copy of the GNU General Public License along with busker.
 # If not, see <https://www.gnu.org/licenses/>.
 
 import pathlib
@@ -21,8 +21,8 @@ import tempfile
 import textwrap
 import unittest
 
-import spiki
-from spiki.multipart import Multipart
+import busker
+from busker.model.multipart import Multipart
 
 
 class MultipartTests(unittest.TestCase):
@@ -35,11 +35,11 @@ class MultipartTests(unittest.TestCase):
 
     def test_root_regex(self):
         text = textwrap.dedent("""
-        {"mark": 2863490869328, "spiki": "0.25.0", "type": "application/json"}
+        {"mark": 2863490869328, "busker": "0.25.0", "type": "application/json"}
         {
         "port": 8080
         }
-        {"mark": 2863490869328, "spiki": "0.25.0", "type": "text/plain"}
+        {"mark": 2863490869328, "busker": "0.25.0", "type": "text/plain"}
 
         <A> Knock knock.
         <B> Who's there?
@@ -51,26 +51,26 @@ class MultipartTests(unittest.TestCase):
     def test_root_regex_reject(self):
         for n, text in enumerate([
             textwrap.dedent("""
-            {"mark": 2863490869328, "spiki": "0.25.0", "type": "application/json"}
+            {"mark": 2863490869328, "busker": "0.25.0", "type": "application/json"}
             """),  # Leading whitespace
             textwrap.dedent("""
-            {{"mark": 2863490869328, "spiki": "0.25.0", "type": "application/json"}
+            {{"mark": 2863490869328, "busker": "0.25.0", "type": "application/json"}
             """).lstrip(),
             textwrap.dedent("""
-            {"mark": 2863490869328, "spiki": "0.25.0", "type": "application/json"}}
+            {"mark": 2863490869328, "busker": "0.25.0", "type": "application/json"}}
             """).lstrip(),
             textwrap.dedent("""
-            {"mark": 2863490869328, "spiki": "0.25.0", "type": "application/json"}
+            {"mark": 2863490869328, "busker": "0.25.0", "type": "application/json"}
             {
             "port": 8080
             }
-            {"mark": "2863490869328", "spiki": "0.25.0", "type": "text/plain"}
+            {"mark": "2863490869328", "busker": "0.25.0", "type": "text/plain"}
 
             <A> Knock knock.
             <B> Who's there?
             """).lstrip(),  # Mismatched mark
             textwrap.dedent("""
-            {"mark": 2863490869328, "spiki": "0.25.0", "type": "application/json"}
+            {"mark": 2863490869328, "busker": "0.25.0", "type": "application/json"}
             {
             "port": 8080,  # This is not valid JSON
             }
@@ -78,7 +78,7 @@ class MultipartTests(unittest.TestCase):
         ]):
             with self.subTest(n=n, text=text):
                 doc = Multipart()
-                with self.assertLogs("spiki.multipart", level="ERROR") as context:
+                with self.assertLogs("busker.multipart", level="ERROR") as context:
                     bits = list(doc.feed(text))
                 self.assertIn("ERROR", "\n".join(context.output))
                 self.assertIn("Pos: ", "\n".join(context.output))
@@ -92,7 +92,7 @@ class MultipartTests(unittest.TestCase):
         doc = Multipart(config, text)
         self.assertIsInstance(doc.header, dict)
         self.assertTrue(doc.header.get("mark", None))
-        self.assertEqual(doc.header.get("spiki", None), spiki.__version__)
+        self.assertEqual(doc.header.get("busker", None), busker.__version__)
         print(f"{doc.data=}")
 
     def test_str(self):
