@@ -21,3 +21,9 @@
 
 # Stage: Python code (world entity query model)
 # Story: Speech      (scene drama directives model)
+
+# Marking: The current active location(s) in the Multipart.
+# Context: A ChainMap of UserDict along the reverse path to the root.
+# Linkage: Associations between separate locations in the Multipart.
+# Actions: Declarations of commands which modify context and expedite marking.
+# Content: Dialogue, Effects and Multimedia driven from Speech cues.
