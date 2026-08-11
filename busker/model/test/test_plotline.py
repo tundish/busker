@@ -27,14 +27,20 @@ class PlotlineTests(unittest.TestCase):
     def test_types(self):
         doc = Multipart()
         doc.data[()].append(UserDict(a=1, b=2, c=3))
-        doc.data[(0)].append(
+        doc.data[(0,)].append(
             textwrap.dedent("""
-            In the beginning...
+            Once upon a time...
             """)
         )
-        doc.data[(2)].append(
+        doc.data[(1,)].append(
             textwrap.dedent("""
-            And they lived happily ever after.
+            There was a little sausage called Baldrick.
+            """)
+        )
+        doc.data[(1,)].append(UserDict(a="a", b=1))
+        doc.data[(2,)].append(
+            textwrap.dedent("""
+            And he lived happily ever after.
             """)
         )
         rv = str(doc)

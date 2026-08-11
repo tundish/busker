@@ -17,6 +17,7 @@
 
 import ast
 from collections import UserDict
+import json
 import pathlib
 import shutil
 import tempfile
@@ -31,19 +32,20 @@ class MultipartTests(unittest.TestCase):
 
     def test_types(self):
         doc = Multipart()
-        doc.data[()].append(UserDict(a=1, b=2, c=3))
-        doc.data[(0)].append(
+        doc.data[(0,)].append(UserDict(a=1, b=2, c=3))
+        doc.data[(1,)].append(
             textwrap.dedent("""
             In the beginning...
             """)
         )
-        doc.data[(2)].append(
+        doc.data[(2,)].append(
             textwrap.dedent("""
             And they lived happily ever after.
             """)
         )
-        rv = str(doc)
-        self.assertTrue(rv)
+        rv = str(doc).splitlines()
+        header = json.loads(rv[0])
+        self.assertEqual(header.get("path", ()), [0,], header)
 
     def test_root_regex(self):
         text = textwrap.dedent("""

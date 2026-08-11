@@ -124,11 +124,11 @@ class Multipart:
         for n, (k, v) in enumerate(self.data.items()):
             for i in v:
                 if isinstance(i, ast.AST):
-                    yield json.dumps(dict(self.header, type="text/x-python"), sort_keys=False)
+                    yield json.dumps(dict(self.header, type="text/x-python", path=k), sort_keys=False)
                     yield ast.unparse(i)
                 elif isinstance(i, (dict, list, UserDict, UserList)):
-                    yield json.dumps(dict(self.header, type="application/json"), sort_keys=False)
+                    yield json.dumps(dict(self.header, type="application/json", path=k), sort_keys=False)
                     yield json.dumps(i, indent=0, sort_keys=False, default=self.coerce)
                 else:
-                    yield json.dumps(dict(self.header, type="text/plain"), sort_keys=False)
+                    yield json.dumps(dict(self.header, type="text/plain", path=k), sort_keys=False)
                     yield i
