@@ -58,7 +58,7 @@ class Multipart:
         return "\n".join(self.dump())
 
     def feed(
-        self, text: str, header_length=84,
+        self, text: str, header_length=255,
         code_types=("text/x-python", ),
         data_types=("application/json", )
     ) -> Generator[dict]:
@@ -103,7 +103,7 @@ class Multipart:
 
             if data.get("type") in code_types:
                 try:
-                    path = self.sep.join(self.path)
+                    path = self.sep.join([str(i) for i in data.get("path", self.path)])
                     data["payload"] = payload = ast.parse(payload, filename=path, mode="exec")
                 except (ValueError, SyntaxError) as err:
                     self.logger.error(f"Invalid Code. Pos: {d.end()}", exc_info=True)
@@ -116,7 +116,7 @@ class Multipart:
                     self.logger.error(f"Invalid Data. Pos: {d.end()}")
                     return
 
-            path = tuple(filter(None, data.get("path", "").split(self.sep))) or tuple(self.path)
+            path = tuple(data.get("path", self.path))
             self.data[path].append(payload)
             yield data
 

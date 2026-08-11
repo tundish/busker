@@ -53,7 +53,7 @@ class MultipartTests(unittest.TestCase):
         {
         "port": 8080
         }
-        {"mark": 2863490869328, "busker": "0.25.0", "type": "text/plain", "path": "a.b.c"}
+        {"mark": 2863490869328, "busker": "0.25.0", "type": "text/plain", "path": ["a", "b", "c"]}
 
         <A> Knock knock.
         <B> Who's there?
