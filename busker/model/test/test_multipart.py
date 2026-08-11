@@ -30,7 +30,7 @@ from busker.model.multipart import Multipart
 
 class MultipartTests(unittest.TestCase):
 
-    def test_types(self):
+    def test_dump(self):
         doc = Multipart()
         doc.data[(0,)].append(UserDict(a=1, b=2, c=3))
         doc.data[(1,)].append(

@@ -28,7 +28,17 @@
 # Actions: Declarations of commands which modify context and expedite marking.
 # Content: Dialogue, Effects and Multimedia driven from Speech cues.
 
+import enum
+
 
 class Plotline:
-    pass
+
+    class Type(enum.StrEnum):
+        ACTIONS = enum.auto()
+        CONTENT = enum.auto()
+        CONTEXT = enum.auto()
+        LINKAGE = enum.auto()
+        MARKING = enum.auto()
+
+
 

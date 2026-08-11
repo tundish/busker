@@ -20,13 +20,14 @@ import textwrap
 import unittest
 
 from busker.model.multipart import Multipart
+from busker.model.plotline import Plotline
 
 
 class PlotlineTests(unittest.TestCase):
 
     def test_types(self):
         doc = Multipart()
-        doc.data[()].append(UserDict(a=1, b=2, c=3))
+        doc.data[()].append(dict(type=Plotline.Type.CONTEXT, a=1, b=2, c=3))
         doc.data[(0,)].append(
             textwrap.dedent("""
             Once upon a time...
@@ -37,12 +38,13 @@ class PlotlineTests(unittest.TestCase):
             There was a little sausage called Baldrick.
             """)
         )
-        doc.data[(1,)].append(UserDict(a="a", b=1))
+        doc.data[(1,)].append(dict(type=Plotline.Type.CONTEXT, a="a", b=1))
         doc.data[(2,)].append(
             textwrap.dedent("""
             And he lived happily ever after.
             """)
         )
-        rv = str(doc)
-        self.fail(rv)
+        text = str(doc)
+        bits = list(doc.feed(text))
+        self.fail(bits)
 
