@@ -14,3 +14,29 @@
 #
 # You should have received a copy of the GNU General Public License along with busker.
 # If not, see <https://www.gnu.org/licenses/>.
+
+from collections import UserDict
+import textwrap
+import unittest
+
+from busker.model.multipart import Multipart
+
+
+class PlotlineTests(unittest.TestCase):
+
+    def test_types(self):
+        doc = Multipart()
+        doc.data[()].append(UserDict(a=1, b=2, c=3))
+        doc.data[(0)].append(
+            textwrap.dedent("""
+            In the beginning...
+            """)
+        )
+        doc.data[(2)].append(
+            textwrap.dedent("""
+            And they lived happily ever after.
+            """)
+        )
+        rv = str(doc)
+        self.fail(rv)
+

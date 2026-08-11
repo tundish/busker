@@ -27,3 +27,8 @@
 # Linkage: Associations between separate locations in the Multipart.
 # Actions: Declarations of commands which modify context and expedite marking.
 # Content: Dialogue, Effects and Multimedia driven from Speech cues.
+
+
+class Plotline:
+    pass
+

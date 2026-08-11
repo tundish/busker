@@ -16,6 +16,7 @@
 # If not, see <https://www.gnu.org/licenses/>.
 
 import ast
+from collections import UserDict
 import pathlib
 import shutil
 import tempfile
@@ -28,11 +29,21 @@ from busker.model.multipart import Multipart
 
 class MultipartTests(unittest.TestCase):
 
-    def setUp(self):
-        self.path = pathlib.Path(tempfile.mkdtemp())
-
-    def tearDown(self):
-        shutil.rmtree(self.path)
+    def test_types(self):
+        doc = Multipart()
+        doc.data[()].append(UserDict(a=1, b=2, c=3))
+        doc.data[(0)].append(
+            textwrap.dedent("""
+            In the beginning...
+            """)
+        )
+        doc.data[(2)].append(
+            textwrap.dedent("""
+            And they lived happily ever after.
+            """)
+        )
+        rv = str(doc)
+        self.assertTrue(rv)
 
     def test_root_regex(self):
         text = textwrap.dedent("""

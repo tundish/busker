@@ -17,7 +17,10 @@
 
 import ast
 from collections.abc import Generator
+from collections.abc import MutableMapping
 from collections import defaultdict
+from collections import UserDict
+from collections import UserList
 import io
 import json
 import logging
@@ -43,6 +46,13 @@ class Multipart:
             return dict(mark=id(self), busker=__version__)
         else:
             return dict(mark=id(self), busker=__version__, path=self.path[:])
+
+    @staticmethod
+    def coerce(obj: object):
+        if isinstance(obj, MutableMapping):
+            return dict(obj)
+        else:
+            raise TypeError(obj)
 
     def __str__(self):
         return "\n".join(self.dump())
@@ -116,9 +126,9 @@ class Multipart:
                 if isinstance(i, ast.AST):
                     yield json.dumps(dict(self.header, type="text/x-python"), sort_keys=False)
                     yield ast.unparse(i)
-                elif isinstance(i, (dict, list)):
+                elif isinstance(i, (dict, list, UserDict, UserList)):
                     yield json.dumps(dict(self.header, type="application/json"), sort_keys=False)
-                    yield json.dumps(i, indent=0, sort_keys=False)
+                    yield json.dumps(i, indent=0, sort_keys=False, default=self.coerce)
                 else:
                     yield json.dumps(dict(self.header, type="text/plain"), sort_keys=False)
                     yield i
