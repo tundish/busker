@@ -1,6 +1,11 @@
 History
 =======
 
+0.24.0
+------
+
+* Significant restructuring after adding Multipart module.
+
 0.22.0
 ------
 

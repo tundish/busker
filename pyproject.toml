@@ -28,7 +28,7 @@ test = [
 ]
 
 [project.scripts]
-busker-gui = "busker.main:run"
+busker-gui = "busker.gui.main:run"
 busker-stagegraph = "busker.utils.graph:run"
 
 [build-system]
@@ -38,8 +38,18 @@ build-backend = "setuptools.build_meta"
 [tool.setuptools]
 packages = [
     "busker",
+    "busker.core",
+    "busker.core.test",
+    "busker.data",
+    "busker.engine",
+    "busker.engine.test",
+    "busker.gui",
+    "busker.gui.test",
+    "busker.model",
+    "busker.model.test",
+    "busker.plugins",
+    "busker.plugins.test",
     "busker.utils",
-    "busker.test",
 ]
 
 [tool.setuptools.package-data]
