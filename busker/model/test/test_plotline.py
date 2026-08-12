@@ -16,6 +16,8 @@
 # If not, see <https://www.gnu.org/licenses/>.
 
 from collections import UserDict
+from collections import UserList
+from collections import UserString
 import textwrap
 import unittest
 
@@ -26,27 +28,52 @@ from busker.model.plotline import Plotline
 class PlotlineTests(unittest.TestCase):
 
     def setUp(self):
-        self.doc = Multipart()
-        self.doc.data[()].append(dict(type=Plotline.Type.CONTEXT, a=1, b=2, c=3))
-        self.doc.data[(0,)].append(
-            textwrap.dedent("""
-            Once upon a time...
-            """)
-        )
-        self.doc.data[(1,)].append(
-            textwrap.dedent("""
-            There was a little sausage called Baldrick.
-            """)
-        )
-        self.doc.data[(1,)].append(dict(type=Plotline.Type.CONTEXT, a="a", b=1))
-        self.doc.data[(2,)].append(
-            textwrap.dedent("""
-            And he lived happily ever after.
-            """)
-        )
+        text = textwrap.dedent("""
+        {"mark": 2863490869328, "type": "application/json"}
+        {
+        "type": "context",
+        "rank": 0
+        }
+        {"mark": 2863490869328, "type": "application/json", "path": ["a"]}
+        {
+        "type": "context",
+        "rank": 0
+        }
+        {"mark": 2863490869328, "type": "application/json", "path": ["a"]}
+        {
+        "type": "marking",
+        "rank": 0
+        }
+        {"mark": 2863490869328, "type": "application/json", "path": ["a"]}
+        {
+        "type": "context",
+        "rank": 1
+        }
+        {"mark": 2863490869328, "type": "application/json", "path": ["a", "b"]}
+        {
+        "type": "context",
+        "rank": 0
+        }
+        {"mark": 2863490869328, "type": "application/json", "path": ["a", "b"]}
+        {
+        "type": "content",
+        "status": "draft"
+        }
+        {"mark": 2863490869328, "type": "text/plain", "path": ["a", "b"]}
+        Yesterday, upon the stair
+
+        {"mark": 2863490869328, "type": "text/plain", "path": ["a", "b"]}
+        I met a man who wasn't there.
+
+        {"mark": 2863490869328, "type": "text/plain", "path": ["a", "b"]}
+        He wasn't there again today,
+
+        {"mark": 2863490869328, "type": "text/plain", "path": ["a", "b"]}
+        I wish that man would go away!
+
+        """).lstrip()
+        self.plot = Plotline.scan(text)
 
     def test_types(self):
-        text = str(self.doc)
-        bits = list(self.doc.feed(text))
-        self.fail(bits)
+        self.fail(self.plot)
 

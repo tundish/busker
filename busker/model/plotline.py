@@ -46,8 +46,9 @@ class Plotline:
         MARKING = enum.auto()
 
     @classmethod
-    def scan(text: str):
-        return cls()
+    def scan(cls, text: str):
+        doc = Multipart(text=text, factory={dict: UserDict, list: UserList, str: UserString})
+        return cls(doc)
 
     def __init__(self, doc: Multipart):
         self.doc = doc
