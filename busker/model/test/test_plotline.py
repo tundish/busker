@@ -75,5 +75,7 @@ class PlotlineTests(unittest.TestCase):
         self.plot = Plotline.scan(text)
 
     def test_types(self):
-        self.fail(self.plot)
+        for key in ((), ("a",), ("a", "b")):
+            with self.subTest(key=key):
+                self.fail(self.plot.doc.data[key])
 
