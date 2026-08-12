@@ -30,6 +30,8 @@
 
 import enum
 
+from busker.model.multipart import Multipart
+
 
 class Plotline:
 
@@ -40,5 +42,7 @@ class Plotline:
         LINKAGE = enum.auto()
         MARKING = enum.auto()
 
-
+    @classmethod
+    def scan(doc: Multipart):
+        return cls()
 

@@ -25,26 +25,28 @@ from busker.model.plotline import Plotline
 
 class PlotlineTests(unittest.TestCase):
 
-    def test_types(self):
-        doc = Multipart()
-        doc.data[()].append(dict(type=Plotline.Type.CONTEXT, a=1, b=2, c=3))
-        doc.data[(0,)].append(
+    def setUp(self):
+        self.doc = Multipart()
+        self.doc.data[()].append(dict(type=Plotline.Type.CONTEXT, a=1, b=2, c=3))
+        self.doc.data[(0,)].append(
             textwrap.dedent("""
             Once upon a time...
             """)
         )
-        doc.data[(1,)].append(
+        self.doc.data[(1,)].append(
             textwrap.dedent("""
             There was a little sausage called Baldrick.
             """)
         )
-        doc.data[(1,)].append(dict(type=Plotline.Type.CONTEXT, a="a", b=1))
-        doc.data[(2,)].append(
+        self.doc.data[(1,)].append(dict(type=Plotline.Type.CONTEXT, a="a", b=1))
+        self.doc.data[(2,)].append(
             textwrap.dedent("""
             And he lived happily ever after.
             """)
         )
-        text = str(doc)
-        bits = list(doc.feed(text))
+
+    def test_types(self):
+        text = str(self.doc)
+        bits = list(self.doc.feed(text))
         self.fail(bits)
 
