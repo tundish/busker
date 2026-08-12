@@ -29,6 +29,7 @@
 # Content: Dialogue, Effects and Multimedia driven from Speech cues.
 
 import enum
+from collections import ChainMap
 from collections import UserDict
 from collections import UserList
 from collections import UserString
@@ -48,6 +49,8 @@ class Plotline:
     @classmethod
     def scan(cls, text: str):
         doc = Multipart(text=text, factory={dict: UserDict, list: UserList, str: UserString})
+        for seq in doc.data.values():
+            print(f"{seq=}")
         return cls(doc)
 
     def __init__(self, doc: Multipart):

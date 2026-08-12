@@ -128,7 +128,8 @@ class Multipart:
                         payload = self.factory[type(payload)](payload)
                     data["payload"] = payload
                 except json.JSONDecodeError:
-                    self.logger.error(f"Invalid Data. Pos: {d.end()}")
+                    self.logger.error(f"Invalid Data. Pos: {d.end()}", exc_info=True)
+                    print(f"{payload=}", f"{payload[54:63]=}")
                     return
 
             elif type(payload) in self.factory:

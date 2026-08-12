@@ -28,6 +28,9 @@ from busker.model.plotline import Plotline
 class PlotlineTests(unittest.TestCase):
 
     def setUp(self):
+        import json
+        check = json.dumps(dict(place="$[*]['description']"))
+        print(f"{check=}")
         text = textwrap.dedent("""
         {"mark": 2863490869328, "type": "application/json"}
         {
@@ -36,14 +39,14 @@ class PlotlineTests(unittest.TestCase):
         }
         {"mark": 2863490869328, "type": "application/json"}
         {
-        "type": "actions",
-        "params": [
-            "marker": "$['marker']"
-            "place": "$[*]['description']"
-        ],
-        "phrases": [
-            "Go {place}"
-        ]
+            "type": "actions",
+            "params": [
+                "marker": "$['marker']",
+                "place": "$[*]['description']"
+            ],
+            "phrases": [
+                "Go {place}"
+            ]
         }
         {"mark": 2863490869328, "type": "text/x-python"}
 
