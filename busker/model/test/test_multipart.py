@@ -134,27 +134,27 @@ class MultipartTests(unittest.TestCase):
 
     def test_factory(self):
         text = textwrap.dedent("""
-        {"mark": 2863490869328, "busker": "0.25.0", "type": "application/json"}
+        {"mark": 2863490869328, "type": "application/json"}
         {
         "rank": 0
         }
-        {"mark": 2863490869328, "busker": "0.25.0", "type": "application/json", "path": ["a"]}
+        {"mark": 2863490869328, "type": "application/json", "path": ["a"]}
         {
         "rank": 0
         }
-        {"mark": 2863490869328, "busker": "0.25.0", "type": "application/json", "path": ["a"]}
+        {"mark": 2863490869328, "type": "application/json", "path": ["a"]}
         {
         "rank": 1
         }
-        {"mark": 2863490869328, "busker": "0.25.0", "type": "application/json", "path": ["a", "b"]}
+        {"mark": 2863490869328, "type": "application/json", "path": ["a", "b"]}
         {
         "rank": 0
         }
-        {"mark": 2863490869328, "busker": "0.25.0", "type": "application/json", "path": ["a", "b"]}
+        {"mark": 2863490869328, "type": "application/json", "path": ["a", "b"]}
         {
         "rank": 1
         }
-        {"mark": 2863490869328, "busker": "0.25.0", "type": "text/plain", "path": ["a", "b"]}
+        {"mark": 2863490869328, "type": "text/plain", "path": ["a", "b"]}
         Yesterday, upon the stair...
         """).lstrip()
         doc = Multipart(text=text)

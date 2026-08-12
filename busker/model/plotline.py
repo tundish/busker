@@ -29,6 +29,9 @@
 # Content: Dialogue, Effects and Multimedia driven from Speech cues.
 
 import enum
+from collections import UserDict
+from collections import UserList
+from collections import UserString
 
 from busker.model.multipart import Multipart
 
@@ -43,6 +46,8 @@ class Plotline:
         MARKING = enum.auto()
 
     @classmethod
-    def scan(doc: Multipart):
+    def scan(text: str):
         return cls()
 
+    def __init__(self, doc: Multipart):
+        self.doc = doc
