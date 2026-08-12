@@ -17,6 +17,8 @@
 
 import ast
 from collections import UserDict
+from collections import UserList
+from collections import UserString
 import json
 import pathlib
 import shutil
@@ -129,3 +131,48 @@ class MultipartTests(unittest.TestCase):
         rv = str(doc)
         lines = rv.splitlines()
         self.assertEqual(len(lines), 8, rv)
+
+    def test_factory(self):
+        text = textwrap.dedent("""
+        {"mark": 2863490869328, "busker": "0.25.0", "type": "application/json"}
+        {
+        "rank": 0
+        }
+        {"mark": 2863490869328, "busker": "0.25.0", "type": "application/json", "path": ["a"]}
+        {
+        "rank": 0
+        }
+        {"mark": 2863490869328, "busker": "0.25.0", "type": "application/json", "path": ["a"]}
+        {
+        "rank": 1
+        }
+        {"mark": 2863490869328, "busker": "0.25.0", "type": "application/json", "path": ["a", "b"]}
+        {
+        "rank": 0
+        }
+        {"mark": 2863490869328, "busker": "0.25.0", "type": "application/json", "path": ["a", "b"]}
+        {
+        "rank": 1
+        }
+        {"mark": 2863490869328, "busker": "0.25.0", "type": "text/plain", "path": ["a", "b"]}
+        Yesterday, upon the stair...
+        """).lstrip()
+        doc = Multipart(text=text)
+        for k, seq in doc.data.items():
+            with self.subTest(k=k):
+                self.assertIsInstance(seq, list)
+                self.assertTrue(seq)
+                for i in seq:
+                    with self.subTest(i=i):
+                        self.assertTrue(i)
+                        self.assertIsInstance(i, (dict, str))
+
+        doc = Multipart(text=text, factory={dict: UserDict, list: UserList, str: UserString})
+        for k, seq in doc.data.items():
+            with self.subTest(k=k):
+                self.assertIsInstance(seq, UserList)
+                self.assertTrue(seq)
+                for i in seq:
+                    with self.subTest(i=i):
+                        self.assertTrue(i)
+                        self.assertIsInstance(i, (UserDict, UserString))

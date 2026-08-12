@@ -32,13 +32,25 @@ from busker import __version__
 
 class Multipart:
 
-    def __init__(self, *args, path: tuple = None, sep="."):
+    def __init__(
+        self, *args,
+        text: str = None,
+        path: tuple = None, sep=".",
+        factory: dict= None,
+    ):
         self.logger = logging.getLogger("busker.multipart")
         self.mark_regex = re.compile(r"^\{.+?\}$", re.MULTILINE)
         self.path = path or tuple()
         self.sep = sep
-        self.data = defaultdict(list)
+
+        self.factory = {dict: dict, list: list, str: str}
+        self.factory.update(factory or {})
+
+        self.data = defaultdict(self.factory[list])
         self.data[self.path].extend(args)
+
+        if text is not None:
+            list(self.feed(text))
 
     @property
     def header(self):
@@ -111,10 +123,16 @@ class Multipart:
 
             elif data.get("type") in data_types:
                 try:
-                    data["payload"] = payload = json.loads(payload)
+                    payload = json.loads(payload)
+                    if type(payload) in self.factory:
+                        payload = self.factory[type(payload)](payload)
+                    data["payload"] = payload
                 except json.JSONDecodeError:
                     self.logger.error(f"Invalid Data. Pos: {d.end()}")
                     return
+
+            elif type(payload) in self.factory:
+                data["payload"] = payload = self.factory[type(payload)](payload)
 
             path = tuple(data.get("path", self.path))
             self.data[path].append(payload)
