@@ -32,12 +32,26 @@ class PlotlineTests(unittest.TestCase):
         {"mark": 2863490869328, "type": "application/json"}
         {
         "type": "context",
-        "rank": 0
+        "score": 0
         }
+        {"mark": 2863490869328, "type": "application/json"}
+        {
+        "type": "actions",
+        "params": [
+            "marker": "$['marker']"
+            "place": "$[*]['description']"
+        ],
+        "phrases": [
+            "Go {place}"
+        ]
+        }
+        {"mark": 2863490869328, "type": "text/x-python"}
+        def fn(context: dict, place: str, marker: dict, **kwargs):
+            pass
         {"mark": 2863490869328, "type": "application/json", "path": ["a"]}
         {
         "type": "context",
-        "rank": 0
+        "description": "outside"
         }
         {"mark": 2863490869328, "type": "application/json", "path": ["a"]}
         {
@@ -52,7 +66,7 @@ class PlotlineTests(unittest.TestCase):
         {"mark": 2863490869328, "type": "application/json", "path": ["a", "b"]}
         {
         "type": "context",
-        "rank": 0
+        "description": "inside"
         }
         {"mark": 2863490869328, "type": "application/json", "path": ["a", "b"]}
         {
