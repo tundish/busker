@@ -36,6 +36,14 @@ class PlotlineTests(unittest.TestCase):
         }
         {"mark": 2863490869328, "type": "application/json"}
         {
+        "type": "context",
+        "world": [
+            {"inside": {"spot": 1}},
+            {"outside": {"spot": 2}}
+        ]
+        }
+        {"mark": 2863490869328, "type": "application/json"}
+        {
             "type": "actions",
             "params": {
                 "marker": "$['marker']",
@@ -90,8 +98,13 @@ class PlotlineTests(unittest.TestCase):
         """).lstrip()
         self.plot = Plotline.scan(text)
 
+    def test_frames(self):
+        frame = self.plot.doc.data[()]
+        self.fail(frame)
+
     def test_types(self):
         for key in ((), ("a",), ("a", "b")):
             with self.subTest(key=key):
                 self.fail(self.plot.doc.data[key])
+
 

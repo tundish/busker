@@ -37,6 +37,10 @@ from collections import UserString
 from busker.model.multipart import Multipart
 
 
+class Frame(UserDict):
+    pass
+
+
 class Plotline:
 
     class Type(enum.StrEnum):
