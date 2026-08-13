@@ -22,13 +22,14 @@ import textwrap
 import unittest
 
 from busker.model.multipart import Multipart
+from busker.model.plotline import Frame
 from busker.model.plotline import Plotline
 
 
 class PlotlineTests(unittest.TestCase):
 
-    def setUp(self):
-        text = textwrap.dedent("""
+    texts = [
+        textwrap.dedent("""
         {"mark": 2863490869328, "type": "application/json"}
         {
         "type": "context",
@@ -95,16 +96,22 @@ class PlotlineTests(unittest.TestCase):
         {"mark": 2863490869328, "type": "text/plain", "path": ["a", "b"]}
         I wish that man would go away!
 
-        """).lstrip()
-        self.plot = Plotline.scan(text)
+        """).lstrip(),
+    ]
+
+    def setUp(self):
+        self.plot = Plotline.scan(self.texts[0])
 
     def test_frames(self):
         frame = self.plot.doc.data[()]
-        self.fail(frame)
+        self.assertIsInstance(frame, Frame)
+        self.fail(frame[2])
 
     def test_types(self):
         for key in ((), ("a",), ("a", "b")):
             with self.subTest(key=key):
-                self.fail(self.plot.doc.data[key])
+                frame = self.plot.doc.data[key]
+                self.assertIsInstance(frame, Frame)
+                self.fail(frame)
 
 

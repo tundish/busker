@@ -37,8 +37,14 @@ from collections import UserString
 from busker.model.multipart import Multipart
 
 
-class Frame(UserDict):
-    pass
+class Frame(UserList):
+    def refresh(self):
+        return self
+
+
+class Element(UserDict):
+    def refresh(self):
+        return self
 
 
 class Plotline:
@@ -53,7 +59,10 @@ class Plotline:
     @classmethod
     def scan(cls, text: str):
         doc = Multipart(text=text, factory={dict: UserDict, list: UserList, str: UserString})
-        for seq in doc.data.values():
+        for k in list(doc.data):
+            doc.data[k] = Frame(doc.data[k].data).refresh()
+
+        for k, seq in doc.data.items():
             print(f"{seq=}")
         return cls(doc)
 
