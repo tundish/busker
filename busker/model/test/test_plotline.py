@@ -153,6 +153,23 @@ class PlotlineTests(unittest.TestCase):
         for n, elem in enumerate(frame):
             self.assertIsInstance(elem, (Element, ast.Module))
 
-    def test_linkage(self):
+    def test_linkage_route(self):
         plot = Plotline.scan(self.texts[1])
-        self.fail(plot)
+        r = plot.route(("spots", "kitchen"), ("spots", "bedroom"))
+        self.assertEqual(3, len(r))
+        self.assertEqual(3, len(set(r)))
+
+    def test_linkage_travel(self):
+        plot = Plotline.scan(self.texts[1])
+
+        self.assertEqual(3, len(plot.travel(("spots", "hall"))))
+
+        travel = {i[0]: i[1] for i in plot.travel(("spots", "hall"))}
+        self.assertEqual(
+            set(travel.values()),
+            {("spots", "bedroom"), ("spots", "kitchen"), ("spots", "stairs")}
+        )
+        self.assertEqual(travel[(0, 1)], ("spots", "stairs"))
+
+        travel = {i[0]: i[1] for i in plot.travel(("spots", "stairs"))}
+        self.assertEqual(travel[(1, 2)], ("spots", "hall"))
