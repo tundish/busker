@@ -35,6 +35,7 @@ class PlotlineTests(unittest.TestCase):
         {"mark": 2863490869328, "type": "application/json"}
         {
         "type": "context",
+        "step": 2
         "score": 0
         }
         {"mark": 2863490869328, "type": "application/json"}
@@ -99,10 +100,53 @@ class PlotlineTests(unittest.TestCase):
         I wish that man would go away!
 
         """).lstrip(),
+        textwrap.dedent("""
+        {"mark": 127416676279376, "type": "application/json", "path": ["spots", "bedroom"]}
+        {
+        "type": "linkage",
+        "port": 20260813190453,
+        "link": [20260813190710]
+        }
+        {"mark": 127416676279376, "type": "application/json", "path": ["spots", "bedroom", "door"]}
+        {
+        "type": "linkage",
+        "port": 20260813190710,
+        "link": [20260813190453, 20260813190851"]
+        }
+        {"mark": 127416676279376, "type": "application/json", "path": ["spots", "hall"]}
+        {
+        "type": "linkage",
+        "port": 20260813190851,
+        "link": [20260813190710, 20260813192820]
+        }
+        {"mark": 127416676279376, "type": "application/json", "path": ["spots", "kitchen"]}
+        {
+        "type": "linkage",
+        "port": 20260813191107,
+        "link": [20260813191208"]
+        }
+        {"mark": 127416676279376, "type": "application/json", "path": ["spots", "kitchen", "door"]}
+        {
+        "type": "linkage",
+        "port": 20260813191208,
+        "link": [20260813191107, 20260813190851],
+        "turn": [5, 8],
+        "open": true
+        }
+        {"mark": 127416676279376, "type": "application/json", "path": ["spots", "stairs"]}
+        {
+        "type": "linkage",
+        "port": 20260813192820,
+        "link": [20260813190851],
+        "turn": [1, 2],
+        "open": true
+        }
+        """).lstrip()
     ]
 
     def setUp(self):
         self.plot = Plotline.scan(self.texts[0])
+        print(id(self.plot))
 
     def test_frames(self):
         frame = self.plot.doc.data[()]
