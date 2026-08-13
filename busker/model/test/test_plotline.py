@@ -15,6 +15,7 @@
 # You should have received a copy of the GNU General Public License along with busker.
 # If not, see <https://www.gnu.org/licenses/>.
 
+import ast
 from collections import UserDict
 from collections import UserList
 from collections import UserString
@@ -22,6 +23,7 @@ import textwrap
 import unittest
 
 from busker.model.multipart import Multipart
+from busker.model.plotline import Element
 from busker.model.plotline import Frame
 from busker.model.plotline import Plotline
 
@@ -105,13 +107,12 @@ class PlotlineTests(unittest.TestCase):
     def test_frames(self):
         frame = self.plot.doc.data[()]
         self.assertIsInstance(frame, Frame)
-        self.fail(frame[2])
+        for n, elem in enumerate(frame):
+            self.assertIsInstance(elem, (Element, ast.Module))
 
     def test_types(self):
         for key in ((), ("a",), ("a", "b")):
             with self.subTest(key=key):
                 frame = self.plot.doc.data[key]
                 self.assertIsInstance(frame, Frame)
-                self.fail(frame)
-
 

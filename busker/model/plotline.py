@@ -39,11 +39,17 @@ from busker.model.multipart import Multipart
 
 class Frame(UserList):
     def refresh(self):
+        for obj in self.data:
+            try:
+                obj.refresh(parent=self)
+            except AttributeError:
+                pass
         return self
 
 
 class Element(UserDict):
-    def refresh(self):
+    def refresh(self, parent=None):
+        self.parent = parent
         return self
 
 
@@ -59,11 +65,15 @@ class Plotline:
     @classmethod
     def scan(cls, text: str):
         doc = Multipart(text=text, factory={dict: UserDict, list: UserList, str: UserString})
-        for k in list(doc.data):
-            doc.data[k] = Frame(doc.data[k].data).refresh()
-
-        for k, seq in doc.data.items():
-            print(f"{seq=}")
+        for p in list(doc.data):
+            frame = doc.data[p] = Frame(doc.data[p].data)
+            for n, obj in enumerate(frame.copy()):
+                try:
+                    typ = cls.Type[obj["type"].upper()]
+                    frame[n] = Element(obj.data)
+                except (AttributeError, TypeError):
+                    pass
+            frame.refresh()
         return cls(doc)
 
     def __init__(self, doc: Multipart):
