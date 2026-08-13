@@ -35,7 +35,7 @@ class PlotlineTests(unittest.TestCase):
         {"mark": 2863490869328, "type": "application/json"}
         {
         "type": "context",
-        "step": 2
+        "step": 2,
         "score": 0
         }
         {"mark": 2863490869328, "type": "application/json"}
@@ -111,7 +111,7 @@ class PlotlineTests(unittest.TestCase):
         {
         "type": "linkage",
         "port": 20260813190710,
-        "link": [20260813190453, 20260813190851"]
+        "link": [20260813190453, 20260813190851]
         }
         {"mark": 127416676279376, "type": "application/json", "path": ["spots", "hall"]}
         {
@@ -123,7 +123,7 @@ class PlotlineTests(unittest.TestCase):
         {
         "type": "linkage",
         "port": 20260813191107,
-        "link": [20260813191208"]
+        "link": [20260813191208]
         }
         {"mark": 127416676279376, "type": "application/json", "path": ["spots", "kitchen", "door"]}
         {
@@ -131,6 +131,7 @@ class PlotlineTests(unittest.TestCase):
         "port": 20260813191208,
         "link": [20260813191107, 20260813190851],
         "turn": [5, 8],
+        "cost": 0,
         "open": true
         }
         {"mark": 127416676279376, "type": "application/json", "path": ["spots", "stairs"]}
@@ -139,24 +140,19 @@ class PlotlineTests(unittest.TestCase):
         "port": 20260813192820,
         "link": [20260813190851],
         "turn": [1, 2],
+        "cost": 3,
         "open": true
         }
         """).lstrip()
     ]
 
-    def setUp(self):
-        self.plot = Plotline.scan(self.texts[0])
-        print(id(self.plot))
-
     def test_frames(self):
-        frame = self.plot.doc.data[()]
+        plot = Plotline.scan(self.texts[0])
+        frame = plot.doc.data[()]
         self.assertIsInstance(frame, Frame)
         for n, elem in enumerate(frame):
             self.assertIsInstance(elem, (Element, ast.Module))
 
-    def test_types(self):
-        for key in ((), ("a",), ("a", "b")):
-            with self.subTest(key=key):
-                frame = self.plot.doc.data[key]
-                self.assertIsInstance(frame, Frame)
-
+    def test_linkage(self):
+        plot = Plotline.scan(self.texts[1])
+        self.fail(plot)
