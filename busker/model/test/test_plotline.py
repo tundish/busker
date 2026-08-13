@@ -105,40 +105,67 @@ class PlotlineTests(unittest.TestCase):
         {
         "type": "linkage",
         "port": 20260813190453,
-        "link": [20260813190710]
+        "link": 20260813190710
         }
         {"mark": 127416676279376, "type": "application/json", "path": ["spots", "bedroom", "door"]}
         {
         "type": "linkage",
         "port": 20260813190710,
-        "link": [20260813190453, 20260813190851]
+        "link": 20260813190453
+        }
+        {"mark": 127416676279376, "type": "application/json", "path": ["spots", "bedroom", "door"]}
+        {
+        "type": "linkage",
+        "port": 20260813201044,
+        "link": 20260813190851
         }
         {"mark": 127416676279376, "type": "application/json", "path": ["spots", "hall"]}
         {
         "type": "linkage",
         "port": 20260813190851,
-        "link": [20260813190710, 20260813192820]
+        "link": 20260813201044
         }
-        {"mark": 127416676279376, "type": "application/json", "path": ["spots", "kitchen"]}
+        {"mark": 127416676279376, "type": "application/json", "path": ["spots", "hall"]}
         {
         "type": "linkage",
-        "port": 20260813191107,
-        "link": [20260813191208]
+        "port": 20260813201319,
+        "link": 20260813201422
+        }
+        {"mark": 127416676279376, "type": "application/json", "path": ["spots", "hall"]}
+        {
+        "type": "linkage",
+        "port": 20260813202041,
+        "link": 20260813192820
+        }
+        {"mark": 127416676279376, "type": "application/json", "path": ["spots", "kitchen", "door"]}
+        {
+        "type": "linkage",
+        "port": 20260813201422,
+        "link": 20260813201319,
+        "turn": [5, 8],
+        "cost": 0,
+        "open": true
         }
         {"mark": 127416676279376, "type": "application/json", "path": ["spots", "kitchen", "door"]}
         {
         "type": "linkage",
         "port": 20260813191208,
-        "link": [20260813191107, 20260813190851],
+        "link": 20260813191107,
         "turn": [5, 8],
         "cost": 0,
         "open": true
+        }
+        {"mark": 127416676279376, "type": "application/json", "path": ["spots", "kitchen"]}
+        {
+        "type": "linkage",
+        "port": 20260813191107,
+        "link": 20260813191208
         }
         {"mark": 127416676279376, "type": "application/json", "path": ["spots", "stairs"]}
         {
         "type": "linkage",
         "port": 20260813192820,
-        "link": [20260813190851],
+        "link": 20260813202041,
         "turn": [1, 2],
         "cost": 3,
         "open": true
