@@ -83,12 +83,10 @@ class Plotline:
     @property
     def linkage(self) -> Generator:
         """
-        Generates the topological mesh of the map.
+        Generates the topological mesh of linked paths
 
-        Each item is a tuple representing an arc from one spot to another, if permitted by a transit.
-        Compass direction, when known, is the second element of the tuple.
-
-        The built map of the previous example generates the following six arcs:
+        Each item is a tuple representing an arc from one path to another, if ports are open.
+        Turn value, when known, is the second element of the tuple.
 
         """
         # TODO: Traverse linkages
@@ -99,17 +97,12 @@ class Plotline:
             if elem.type == self.Type.LINKAGE
         ]
 
-        return
-        for t in self.transits:
-            d = t.get_state(self.exit)
-            a = t.get_state(self.into)
-            v = t.get_state(Traffic)
-            c = t.get_state(Compass)
-            b = c and c.back
-            if v in (Traffic.flowing, Traffic.forward):
-                yield d, c, t, a
-            if v in (Traffic.flowing, Traffic.reverse):
-                yield a, b, t, d
+        for elem in linkage_elements:
+            p = elem.get("port")
+            l = elem.get("link")
+            t = elem.get("turn")
+            if elem.get("open", True):
+                yield p, t, elem, l
 
     def branches(self, spot: dict) -> set:
         """
