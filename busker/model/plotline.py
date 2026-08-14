@@ -32,6 +32,7 @@ import enum
 from collections.abc import Generator
 from collections import ChainMap
 from collections import ChainMap
+from collections import defaultdict
 from collections import UserDict
 from collections import UserList
 from collections import UserString
@@ -73,13 +74,14 @@ class Plotline:
                 try:
                     typ = cls.Type[obj["type"].upper()]
                     frame[n] = Element(obj.data)
+                    frame[n].type = typ
                 except (AttributeError, TypeError):
                     pass
             frame.refresh()
         return cls(doc)
 
     @property
-    def topology(self) -> Generator:
+    def linkage(self) -> Generator:
         """
         Generates the topological mesh of the map.
 
@@ -88,17 +90,16 @@ class Plotline:
 
         The built map of the previous example generates the following six arcs:
 
-        .. code-block:: python
-           :linenos:
-
-           (<Exit.bedroom: ['bedroom']>, None, Transit(names=['bedroom door'], ...), <Into.hall: ['hall', 'hallway']>)
-           (<Into.hall: ['hall', 'hallway']>, None, Transit(names=['bedroom door'], ...), <Exit.bedroom: ['bedroom']>)
-           (<Exit.hall: ['hall', 'hallway']>, <Compass.N: ['North', (0, 1, 0)]>, Transit(names=[], ...), <Into.stairs: ['stairs', ...]>)
-           (<Into.stairs: ['stairs', ...]>, <Compass.S: ['South', (0, -1, 0)]>, Transit(names=[], ...) <Exit.hall: ['hall', 'hallway']>)
-           (<Exit.kitchen: ['kitchen']>, <Compass.SW: ['Southwest', 'South West', (-1, -1, 0)]>, Transit(names=['kitchen door'], ...) <Into.hall: ['hall', 'hallway']>)
-           (<Into.hall: ['hall', 'hallway']>, <Compass.NE: ['Northeast', 'North East', (1, 1, 0)]>, Transit(names=['kitchen door'], ...) <Exit.kitchen: ['kitchen']>)
-
         """
+        # TODO: Traverse linkages
+        linkage_elements = [
+            elem
+            for frame in self.doc.data.values()
+            for elem in frame
+            if elem.type == self.Type.LINKAGE
+        ]
+
+        return
         for t in self.transits:
             d = t.get_state(self.exit)
             a = t.get_state(self.into)
@@ -110,46 +111,37 @@ class Plotline:
             if v in (Traffic.flowing, Traffic.reverse):
                 yield a, b, t, d
 
-    def options(self, spot: dict) -> set:
+    def branches(self, spot: dict) -> set:
         """
-        Returns a set of all the permitted transits from the supplied spot.
+        Returns a set of all the permitted linkage from the supplied path.
         Each item of the set is a tuple of three elements.
         The first is a compass heading if one is defined, otherwise it's an integer unique in the result set. 
         The second element is the destination spot. The third is the viable transit.
 
         Using the example above, this line of code will return a set with three items:
 
-        >>> map.options(map.spot.hall)
-        {(<Compass.NE: ['Northeast', 'North East', (1, 1, 0)]>, <Spot.kitchen: ['kitchen']>, Transit(names=['kitchen door'], ...),
-        (<Compass.N: ['North', (0, 1, 0)]>, <Spot.stairs: ['stairs', ...]>, Transit(names=[], ...)),
-        (1, <Spot.bedroom: ['bedroom']>, Transit(names=['bedroom door'], ...))}
-
         """
         typ = type(spot)
         return {
             (c or n, typ[a.name], t)
-            for n, (d, c, t, a) in enumerate(self.topology)
+            for n, (d, c, t, a) in enumerate(self.linkage)
             if d.name == spot.name
         }
 
-    def route(self, start: tuple, end: tuple) -> list[tuple]:
+    def arc(self, start: tuple, end: tuple) -> list[tuple]:
         """
         Return a list containing the shortest route between the spots `start` and `end`.
         The endpoints are included in the output.
 
-        >>> map.route(map.spot.kitchen, map.spot.bedroom)
-        [<Spot.kitchen: ['kitchen']>,
-         <Spot.hall: ['hall', 'hallway']>,
-         <Spot.bedroom: ['bedroom']>]
         """
-        if (start.name, end.name) in self.routes:
-            return self.routes[(start.name, end.name)]
+        if (start, end) in self.twists:
+            return self.twists[(start, end)]
 
         rvs = set()
-        paths = [[start.name]]
+        paths = [[start]]
 
         graph = defaultdict(set)
-        for d, _, t, a in self.topology:
+        for d, _, t, a in self.linkage:
             graph[d.name].add(a.name)
 
         n = len(graph)
@@ -157,7 +149,7 @@ class Plotline:
         while n >= 0 or not rvs:
             nxt = []
             for p in paths:
-                if p[-1] == end.name:
+                if p[-1] == end:
                     rvs.add(tuple(p))
                 else:
                     nodes = graph[p[-1]]
@@ -175,3 +167,4 @@ class Plotline:
 
     def __init__(self, doc: Multipart):
         self.doc = doc
+        self.twists = {}

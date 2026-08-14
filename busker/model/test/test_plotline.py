@@ -166,7 +166,7 @@ class PlotlineTests(unittest.TestCase):
         "type": "linkage",
         "port": 20260813192820,
         "link": 20260813202041,
-        "turn": [1, 2],
+        "twist": [1, 2],
         "cost": 3,
         "open": true
         }
@@ -180,23 +180,28 @@ class PlotlineTests(unittest.TestCase):
         for n, elem in enumerate(frame):
             self.assertIsInstance(elem, (Element, ast.Module))
 
+    def test_plotline_linkage(self):
+        plot = Plotline.scan(self.texts[1])
+        linkage = list(plot.linkage)
+        self.fail(linkage)
+
     def test_linkage_route(self):
         plot = Plotline.scan(self.texts[1])
-        r = plot.route(("spots", "kitchen"), ("spots", "bedroom"))
+        r = plot.arc(("spots", "kitchen"), ("spots", "bedroom"))
         self.assertEqual(3, len(r))
         self.assertEqual(3, len(set(r)))
 
-    def test_linkage_travel(self):
+    def test_linkage_branch(self):
         plot = Plotline.scan(self.texts[1])
 
-        self.assertEqual(3, len(plot.travel(("spots", "hall"))))
+        self.assertEqual(3, len(plot.branches(("spots", "hall"))))
 
-        travel = {i[0]: i[1] for i in plot.travel(("spots", "hall"))}
+        branches = {i[0]: i[1] for i in plot.branches(("spots", "hall"))}
         self.assertEqual(
-            set(travel.values()),
+            set(branches.values()),
             {("spots", "bedroom"), ("spots", "kitchen"), ("spots", "stairs")}
         )
         self.assertEqual(travel[(0, 1)], ("spots", "stairs"))
 
-        travel = {i[0]: i[1] for i in plot.travel(("spots", "stairs"))}
-        self.assertEqual(travel[(1, 2)], ("spots", "hall"))
+        branches = {i[0]: i[1] for i in plot.branches(("spots", "stairs"))}
+        self.assertEqual(branches[(1, 2)], ("spots", "hall"))
