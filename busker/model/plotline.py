@@ -70,6 +70,7 @@ class Plotline:
         doc = Multipart(text=text, factory={dict: UserDict, list: UserList, str: UserString})
         for p in list(doc.data):
             frame = doc.data[p] = Frame(doc.data[p].data)
+            frame.path = p
             for n, obj in enumerate(frame.copy()):
                 try:
                     typ = cls.Type[obj["type"].upper()]

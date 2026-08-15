@@ -175,6 +175,9 @@ class PlotlineTests(unittest.TestCase):
 
     def test_frames(self):
         plot = Plotline.scan(self.texts[0])
+        for p, f in plot.doc.data.items():
+            self.assertEqual(f.path, p)
+
         frame = plot.doc.data[()]
         self.assertIsInstance(frame, Frame)
         for n, elem in enumerate(frame):
