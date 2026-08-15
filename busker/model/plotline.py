@@ -67,6 +67,11 @@ class Plotline:
 
     @classmethod
     def scan(cls, text: str):
+        """
+        Read through the text and assemble a Multipart document.
+        Decorate each frame with its path, and each Element with its type.
+
+        """
         doc = Multipart(text=text, factory={dict: UserDict, list: UserList, str: UserString})
         for p in list(doc.data):
             frame = doc.data[p] = Frame(doc.data[p].data)
@@ -78,13 +83,19 @@ class Plotline:
                     frame[n].type = typ
                 except (AttributeError, TypeError):
                     pass
+                finally:
+                    frame[n].parent = frame
             frame.refresh()
         return cls(doc)
+
+    def __init__(self, doc: Multipart):
+        self.doc = doc
+        self.twists = {}
 
     @property
     def linkage(self) -> Generator:
         """
-        Generates the topological mesh of linked paths
+        Generate the topological mesh of linked paths
 
         Each item is a tuple representing an arc from one path to another, if ports are open.
         Turn value, when known, is the second element of the tuple.
@@ -156,9 +167,5 @@ class Plotline:
             n = n - d
 
         rv = [type(start)[i] for i in sorted(rvs, key=len)[0]] if rvs else []
-        self.routes[(start.name, end.name)] = rv
+        self.twists[(start, end)] = rv
         return rv
-
-    def __init__(self, doc: Multipart):
-        self.doc = doc
-        self.twists = {}

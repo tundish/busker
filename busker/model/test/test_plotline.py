@@ -173,15 +173,16 @@ class PlotlineTests(unittest.TestCase):
         """).lstrip()
     ]
 
-    def test_frames(self):
+    def test_scan(self):
         plot = Plotline.scan(self.texts[0])
-        for p, f in plot.doc.data.items():
-            self.assertEqual(f.path, p)
+        for path, frame in plot.doc.data.items():
+            with self.subTest(frame=frame, path=path):
+                self.assertIsInstance(frame, Frame)
+                self.assertEqual(frame.path, path)
 
-        frame = plot.doc.data[()]
-        self.assertIsInstance(frame, Frame)
-        for n, elem in enumerate(frame):
-            self.assertIsInstance(elem, (Element, ast.Module))
+                for elem in frame:
+                    self.assertIsInstance(elem, (Element, ast.Module, UserString))
+                    self.assertEqual(elem.parent, frame)
 
     def test_plotline_linkage(self):
         plot = Plotline.scan(self.texts[1])
