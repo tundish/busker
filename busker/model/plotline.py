@@ -145,30 +145,29 @@ class Plotline:
         if (start, end) in self.routes:
             return self.routes[(start, end)][0]
 
-        rvs = set()
-        paths = [[start]]
+        proven = set()
+        incomplete = [[start]]
 
-        graph = defaultdict(set)
-        for d, _, t, a in self.mesh:
-            graph[d.name].add(a.name)
+        topology = defaultdict(set)
+        for a, b in self.mesh:
+            topology[a.path].add(b.path)
 
-        n = len(graph)
+        n = len(topology)
         d = 1
-        while n >= 0 or not rvs:
-            nxt = []
-            for p in paths:
-                if p[-1] == end:
-                    rvs.add(tuple(p))
+        while n >= 0 or not proven:
+            options = []
+            for candidate in incomplete:
+                if candidate[-1] == end:
+                    proven.add(tuple(candidate))
                 else:
-                    nodes = graph[p[-1]]
-                    d = len(nodes)
-                    for i in nodes:
-                        if i not in p:
-                            nxt.append(p.copy())
-                            nxt[-1].append(i)
-            paths = nxt
+                    hops = topology[candidate[-1]]
+                    d = len(hops)
+                    for hop in hops:
+                        if hop not in candidate:
+                            options.append(candidate.copy())
+                            options[-1].append(hop)
+            incomplete = options
             n = n - d
 
-        rv = [type(start)[i] for i in sorted(rvs, key=len)] if rvs else []
-        self.routes[(start, end)] = rv
+        rv = self.routes[(start, end)] = sorted(proven, key=len) if proven else []
         return rv[0]
