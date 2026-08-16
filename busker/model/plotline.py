@@ -95,7 +95,7 @@ class Plotline:
 
     def __init__(self, doc: Multipart):
         self.doc = doc
-        self.twists = {}
+        self.routes = {}
 
     @property
     def mesh(self) -> Generator:
@@ -136,14 +136,14 @@ class Plotline:
         """
         return {(a, b) for a, b in self.mesh if a.path == path}
 
-    def arc(self, start: tuple, end: tuple) -> list[tuple]:
+    def route(self, start: tuple, end: tuple) -> list[tuple]:
         """
         Return a list containing the shortest route between the spots `start` and `end`.
         The endpoints are included in the output.
 
         """
-        if (start, end) in self.twists:
-            return self.twists[(start, end)]
+        if (start, end) in self.routes:
+            return self.routes[(start, end)][0]
 
         rvs = set()
         paths = [[start]]
@@ -169,6 +169,6 @@ class Plotline:
             paths = nxt
             n = n - d
 
-        rv = [type(start)[i] for i in sorted(rvs, key=len)[0]] if rvs else []
-        self.twists[(start, end)] = rv
-        return rv
+        rv = [type(start)[i] for i in sorted(rvs, key=len)] if rvs else []
+        self.routes[(start, end)] = rv
+        return rv[0]

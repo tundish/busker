@@ -218,6 +218,6 @@ class PlotlineTests(unittest.TestCase):
 
     def test_linkage_route(self):
         plot = Plotline.scan(self.texts[1])
-        r = plot.arc(("spots", "kitchen"), ("spots", "bedroom"))
+        r = plot.route(("spots", "kitchen"), ("spots", "bedroom"))
         self.assertEqual(3, len(r))
         self.assertEqual(3, len(set(r)))
