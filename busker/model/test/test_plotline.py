@@ -16,6 +16,7 @@
 # If not, see <https://www.gnu.org/licenses/>.
 
 import ast
+from collections import Counter
 from collections import UserDict
 from collections import UserList
 from collections import UserString
@@ -186,8 +187,12 @@ class PlotlineTests(unittest.TestCase):
 
     def test_plotline_linkage(self):
         plot = Plotline.scan(self.texts[1])
+        count = Counter(
+           e.get(k) for p, f in plot.doc.data.items() for e in f for k in ("port", "link")
+        )
+        self.assertTrue(all(v == 2 for v in count.values()))
         linkage = list(plot.linkage)
-        self.fail(linkage)
+        self.assertEqual(len(count), len(linkage), linkage)
 
     def test_linkage_route(self):
         plot = Plotline.scan(self.texts[1])
