@@ -51,7 +51,7 @@ class MultipartTests(unittest.TestCase):
                 header = json.loads(rv[0])
                 self.assertEqual(header.get("path", ()), [0,], header)
 
-    def test_root_regex(self):
+    def test_feed(self):
         text = textwrap.dedent("""
         {"mark": 2863490869328, "busker": "0.25.0", "type": "application/json"}
         {
@@ -71,7 +71,7 @@ class MultipartTests(unittest.TestCase):
         self.assertIsInstance(doc.data[("a", "b", "c")][0], str)
         self.assertIsInstance(doc.data[()][1], ast.AST)
 
-    def test_root_regex_reject(self):
+    def test_feed_reject(self):
         for n, text in enumerate([
             textwrap.dedent("""
             {"mark": 2863490869328, "busker": "0.25.0", "type": "application/json"}
@@ -106,7 +106,7 @@ class MultipartTests(unittest.TestCase):
                 self.assertIn("ERROR", "\n".join(context.output))
                 self.assertIn("Pos: ", "\n".join(context.output))
 
-    def test_simple(self):
+    def test_header(self):
         config = dict(port=8080)
         text = textwrap.dedent("""
         <A> Knock knock.
