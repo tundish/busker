@@ -102,6 +102,12 @@ class PlotlineTests(unittest.TestCase):
 
         """).lstrip(),
         textwrap.dedent("""
+        {"mark": 127416676279376, "type": "application/json", "path": []}
+        {
+        "type": "marking",
+        "path": ["spots", "bedroom"],
+        "pose": 0
+        }
         {"mark": 127416676279376, "type": "application/json", "path": ["spots", "bedroom"]}
         {
         "type": "linkage",
@@ -189,6 +195,7 @@ class PlotlineTests(unittest.TestCase):
         plot = Plotline.scan(self.texts[1])
         count = Counter(
            e.get(k) for p, f in plot.doc.data.items() for e in f for k in ("port", "link")
+           if e.get("type") == plot.Type.LINKAGE.value
         )
         self.assertTrue(all(v == 2 for v in count.values()))
         linkage = list(plot.linkage)

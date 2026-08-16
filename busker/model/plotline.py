@@ -29,13 +29,14 @@
 # Content: Dialogue, Effects and Multimedia driven from Speech cues.
 
 import enum
-from collections.abc import Generator
 from collections import ChainMap
 from collections import ChainMap
 from collections import defaultdict
+from collections import namedtuple
 from collections import UserDict
 from collections import UserList
 from collections import UserString
+from collections.abc import Generator
 
 from busker.model.multipart import Multipart
 
@@ -64,6 +65,8 @@ class Plotline:
         CONTEXT = enum.auto()
         LINKAGE = enum.auto()
         MARKING = enum.auto()
+
+    Point = namedtuple("Point", ["path", "element", "port", "turn"], defaults=[0])
 
     @classmethod
     def scan(cls, text: str):
@@ -101,20 +104,20 @@ class Plotline:
         Turn value, when known, is the second element of the tuple.
 
         """
-        # TODO: Traverse linkages
-        linkage_elements = [
-            elem
+        linkage_elements = {
+            elem.get("port"): elem
             for frame in self.doc.data.values()
             for elem in frame
             if elem.type == self.Type.LINKAGE
-        ]
+        }
 
-        for elem in linkage_elements:
-            p = elem.get("port")
-            l = elem.get("link")
-            t = elem.get("turn")
+        for port, elem in linkage_elements.items():
+            twin = linkage_elements[elem["link"]]
             if elem.get("open", True):
-                yield p, t, elem, l
+                yield (
+                    self.Point(elem.parent.path, elem, elem["port"], elem.get("turn", 0)),
+                    self.Point(twin.parent.path, twin, twin["port"], twin.get("turn", 0)),
+                )
 
     def branches(self, spot: dict) -> set:
         """
