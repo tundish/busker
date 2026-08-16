@@ -67,7 +67,7 @@ class Plotline:
         MARKING = enum.auto()
 
     Point = namedtuple(
-        "Point", ["path", "element", "port", "spin", "cost"], defaults=[0, 0]
+        "Point", ["path", "port", "spin", "cost"], defaults=[0, 0]
     )
 
     @classmethod
@@ -98,7 +98,7 @@ class Plotline:
         self.twists = {}
 
     @property
-    def linkage(self) -> Generator:
+    def mesh(self) -> Generator:
         """
         Generate the topological mesh of linked paths
 
@@ -120,31 +120,21 @@ class Plotline:
 
             yield (
                 self.Point(
-                    elem.parent.path, elem, elem["port"],
-                    elem.get("spin", 0), elem.get("cost", 0)
+                    elem.parent.path, elem["port"],
+                    tuple(elem.get("spin", [0, 1])), elem.get("cost", 0)
                 ),
                 self.Point(
-                    twin.parent.path, twin, twin["port"],
-                    twin.get("spin", 0), twin.get("cost", 0)
+                    twin.parent.path, twin["port"],
+                    tuple(twin.get("spin", [0, 1])), twin.get("cost", 0)
                 ),
             )
 
-    def branches(self, spot: dict) -> set:
+    def branches(self, path: tuple) -> set[tuple, tuple]:
         """
-        Returns a set of all the permitted linkage from the supplied path.
-        Each item of the set is a tuple of three elements.
-        The first is a compass heading if one is defined, otherwise it's an integer unique in the result set. 
-        The second element is the destination spot. The third is the viable transit.
-
-        Using the example above, this line of code will return a set with three items:
+        Returns a set of the permitted exits from the supplied path.
 
         """
-        typ = type(spot)
-        return {
-            (c or n, typ[a.name], t)
-            for n, (d, c, t, a) in enumerate(self.linkage)
-            if d.name == spot.name
-        }
+        return {(a, b) for a, b in self.mesh if a.path == path}
 
     def arc(self, start: tuple, end: tuple) -> list[tuple]:
         """
@@ -159,7 +149,7 @@ class Plotline:
         paths = [[start]]
 
         graph = defaultdict(set)
-        for d, _, t, a in self.linkage:
+        for d, _, t, a in self.mesh:
             graph[d.name].add(a.name)
 
         n = len(graph)

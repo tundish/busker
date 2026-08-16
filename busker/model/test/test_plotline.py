@@ -185,41 +185,39 @@ class PlotlineTests(unittest.TestCase):
         for path, frame in plot.doc.data.items():
             with self.subTest(frame=frame, path=path):
                 self.assertIsInstance(frame, Frame)
+                self.assertIsInstance(frame.path, tuple)
                 self.assertEqual(frame.path, path)
 
                 for elem in frame:
                     self.assertIsInstance(elem, (Element, ast.Module, UserString))
                     self.assertEqual(elem.parent, frame)
 
-    def test_plotline_linkage(self):
+    def test_plotline_mesh(self):
         plot = Plotline.scan(self.texts[1])
         count = Counter(
            e.get(k) for p, f in plot.doc.data.items() for e in f for k in ("port", "link")
            if e.get("type") == plot.Type.LINKAGE.value
         )
         self.assertTrue(all(v == 2 for v in count.values()))
-        linkage = list(plot.linkage)
-        import pprint
-        pprint.pprint(linkage)
-        self.assertEqual(len(count), len(linkage), linkage)
+        mesh = list(plot.mesh)
+        self.assertEqual(len(count), len(mesh), mesh)
+
+    def test_plotline_branches(self):
+        plot = Plotline.scan(self.texts[1])
+
+        self.assertEqual(3, len(plot.branches(("spots", "hall"))))
+
+        branches = {i[0].port: i for i in plot.branches(("spots", "hall"))}
+        self.assertEqual(
+            set(i[1].path for i in branches.values()),
+            {("spots", "bedroom", "door"), ("spots", "kitchen", "door"), ("spots", "stairs")}
+        )
+
+        branches = {i[0].port: i for i in plot.branches(("spots", "stairs"))}
+        self.assertEqual(set(i[1].path for i in branches.values()), {("spots", "hall")})
 
     def test_linkage_route(self):
         plot = Plotline.scan(self.texts[1])
         r = plot.arc(("spots", "kitchen"), ("spots", "bedroom"))
         self.assertEqual(3, len(r))
         self.assertEqual(3, len(set(r)))
-
-    def test_linkage_branch(self):
-        plot = Plotline.scan(self.texts[1])
-
-        self.assertEqual(3, len(plot.branches(("spots", "hall"))))
-
-        branches = {i[0]: i[1] for i in plot.branches(("spots", "hall"))}
-        self.assertEqual(
-            set(branches.values()),
-            {("spots", "bedroom"), ("spots", "kitchen"), ("spots", "stairs")}
-        )
-        self.assertEqual(travel[(0, 1)], ("spots", "stairs"))
-
-        branches = {i[0]: i[1] for i in plot.branches(("spots", "stairs"))}
-        self.assertEqual(branches[(1, 2)], ("spots", "hall"))
