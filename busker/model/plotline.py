@@ -66,7 +66,9 @@ class Plotline:
         LINKAGE = enum.auto()
         MARKING = enum.auto()
 
-    Point = namedtuple("Point", ["path", "element", "port", "turn"], defaults=[0])
+    Point = namedtuple(
+        "Point", ["path", "element", "port", "spin", "cost"], defaults=[0, 0]
+    )
 
     @classmethod
     def scan(cls, text: str):
@@ -113,11 +115,19 @@ class Plotline:
 
         for port, elem in linkage_elements.items():
             twin = linkage_elements[elem["link"]]
-            if elem.get("open", True):
-                yield (
-                    self.Point(elem.parent.path, elem, elem["port"], elem.get("turn", 0)),
-                    self.Point(twin.parent.path, twin, twin["port"], twin.get("turn", 0)),
-                )
+            if not elem.get("open", True):
+                continue
+
+            yield (
+                self.Point(
+                    elem.parent.path, elem, elem["port"],
+                    elem.get("spin", 0), elem.get("cost", 0)
+                ),
+                self.Point(
+                    twin.parent.path, twin, twin["port"],
+                    twin.get("spin", 0), twin.get("cost", 0)
+                ),
+            )
 
     def branches(self, spot: dict) -> set:
         """

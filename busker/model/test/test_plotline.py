@@ -149,7 +149,7 @@ class PlotlineTests(unittest.TestCase):
         "type": "linkage",
         "port": 20260813201422,
         "link": 20260813201319,
-        "turn": [5, 8],
+        "spin": [5, 8],
         "cost": 0,
         "open": true
         }
@@ -158,7 +158,7 @@ class PlotlineTests(unittest.TestCase):
         "type": "linkage",
         "port": 20260813191208,
         "link": 20260813191107,
-        "turn": [5, 8],
+        "spin": [1, 8],
         "cost": 0,
         "open": true
         }
@@ -173,7 +173,7 @@ class PlotlineTests(unittest.TestCase):
         "type": "linkage",
         "port": 20260813192820,
         "link": 20260813202041,
-        "twist": [1, 2],
+        "spin": [1, 2],
         "cost": 3,
         "open": true
         }
@@ -199,6 +199,8 @@ class PlotlineTests(unittest.TestCase):
         )
         self.assertTrue(all(v == 2 for v in count.values()))
         linkage = list(plot.linkage)
+        import pprint
+        pprint.pprint(linkage)
         self.assertEqual(len(count), len(linkage), linkage)
 
     def test_linkage_route(self):
