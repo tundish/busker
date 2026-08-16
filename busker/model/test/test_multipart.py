@@ -46,8 +46,10 @@ class MultipartTests(unittest.TestCase):
             """)
         )
         rv = str(doc).splitlines()
-        header = json.loads(rv[0])
-        self.assertEqual(header.get("path", ()), [0,], header)
+        for n in (0, 6, 10):
+            with self.subTest(n=n):
+                header = json.loads(rv[0])
+                self.assertEqual(header.get("path", ()), [0,], header)
 
     def test_root_regex(self):
         text = textwrap.dedent("""
