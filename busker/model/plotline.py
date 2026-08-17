@@ -58,6 +58,10 @@ class Element(UserDict):
 
 
 class Plotline:
+    """
+    Implements a Resource HyperTree (.rht).
+
+    """
 
     class Type(enum.StrEnum):
         ACTIONS = enum.auto()
