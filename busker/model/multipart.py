@@ -139,14 +139,16 @@ class Multipart:
             yield data
 
     def dump(self):
+        header = self.header
         for n, (k, v) in enumerate(self.data.items()):
+            if n == 1: header.pop("busker", None)
             for i in v:
                 if isinstance(i, ast.AST):
-                    yield json.dumps(dict(self.header, type="text/x-python", path=k), sort_keys=False)
+                    yield json.dumps(dict(header, type="text/x-python", path=k), sort_keys=False)
                     yield ast.unparse(i)
                 elif isinstance(i, (dict, list, UserDict, UserList)):
-                    yield json.dumps(dict(self.header, type="application/json", path=k), sort_keys=False)
+                    yield json.dumps(dict(header, type="application/json", path=k), sort_keys=False)
                     yield json.dumps(i, indent=0, sort_keys=False, default=self.coerce)
                 else:
-                    yield json.dumps(dict(self.header, type="text/plain", path=k), sort_keys=False)
+                    yield json.dumps(dict(header, type="text/plain", path=k), sort_keys=False)
                     yield i
