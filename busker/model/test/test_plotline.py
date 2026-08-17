@@ -177,12 +177,54 @@ class PlotlineTests(unittest.TestCase):
         "cost": 3,
         "open": true
         }
-        """).lstrip()
+        """).lstrip(),
+        textwrap.dedent("""
+        {"mark": 127416676279376, "type": "application/json", "path": []}
+        {
+        "type": "context",
+        "day": "Sunday",
+        "chord": ["A", "D", "E"]
+        }
+        {"mark": 127416676279376, "type": "application/json", "path": ["a"]}
+        {
+        "type": "context"
+        }
+        {"mark": 127416676279376, "type": "application/json", "path": ["a", 0]}
+        {
+        "type": "context"
+        }
+        {"mark": 127416676279376, "type": "application/json", "path": ["a", 0, 1]}
+        {
+        "type": "context",
+        "day": "Monday"
+        }
+        {"mark": 127416676279376, "type": "application/json", "path": ["a", 0, 1, 2]}
+        {
+        "type": "context",
+        "chord": ["C", "F", "G"]
+        }
+        {"mark": 127416676279376, "type": "application/json", "path": ["b"]}
+        {
+        "type": "context",
+        "day": "Monday"
+        }
+        {"mark": 127416676279376, "type": "application/json", "path": ["b", 0]}
+        {
+        "type": "context",
+        "day": "Tuesday"
+        }
+        {"mark": 127416676279376, "type": "application/json", "path": ["b", 1]}
+        {
+        "type": "context",
+        "day": "Wednesday",
+        "chord": ["C", "F", "G"]
+        }
+        """).lstrip(),
     ]
 
     def test_scan(self):
-        plot = Plotline.scan(self.texts[0])
-        for path, frame in plot.doc.data.items():
+        rht = Plotline.scan(self.texts[0])
+        for path, frame in rht.doc.data.items():
             with self.subTest(frame=frame, path=path):
                 self.assertIsInstance(frame, Frame)
                 self.assertIsInstance(frame.path, tuple)
@@ -192,33 +234,33 @@ class PlotlineTests(unittest.TestCase):
                     self.assertIsInstance(elem, (Element, ast.Module, UserString))
                     self.assertEqual(elem.parent, frame)
 
-    def test_plotline_mesh(self):
-        plot = Plotline.scan(self.texts[1])
+    def test_rhtline_mesh(self):
+        rht = Plotline.scan(self.texts[1])
         count = Counter(
-           e.get(k) for p, f in plot.doc.data.items() for e in f for k in ("port", "link")
-           if e.get("type") == plot.Type.LINKAGE.value
+           e.get(k) for p, f in rht.doc.data.items() for e in f for k in ("port", "link")
+           if e.get("type") == rht.Type.LINKAGE.value
         )
         self.assertTrue(all(v == 2 for v in count.values()))
-        mesh = list(plot.mesh)
+        mesh = list(rht.mesh)
         self.assertEqual(len(count), len(mesh), mesh)
 
-    def test_plotline_branches(self):
-        plot = Plotline.scan(self.texts[1])
+    def test_rhtline_branches(self):
+        rht = Plotline.scan(self.texts[1])
 
-        self.assertEqual(3, len(plot.branches(("spots", "hall"))))
+        self.assertEqual(3, len(rht.branches(("spots", "hall"))))
 
-        branches = {i[0].port: i for i in plot.branches(("spots", "hall"))}
+        branches = {i[0].port: i for i in rht.branches(("spots", "hall"))}
         self.assertEqual(
             set(i[1].path for i in branches.values()),
             {("spots", "bedroom", "door"), ("spots", "kitchen", "door"), ("spots", "stairs")}
         )
 
-        branches = {i[0].port: i for i in plot.branches(("spots", "stairs"))}
+        branches = {i[0].port: i for i in rht.branches(("spots", "stairs"))}
         self.assertEqual(set(i[1].path for i in branches.values()), {("spots", "hall")})
 
-    def test_linkage_route(self):
-        plot = Plotline.scan(self.texts[1])
-        r = plot.route(("spots", "kitchen"), ("spots", "bedroom"))
+    def test_rhtline_route(self):
+        rht = Plotline.scan(self.texts[1])
+        r = rht.route(("spots", "kitchen"), ("spots", "bedroom"))
         self.assertEqual(5, len(r), r)
         self.assertEqual(5, len(set(r)))
         self.assertEqual(
@@ -227,3 +269,7 @@ class PlotlineTests(unittest.TestCase):
              ("spots", "bedroom", "door"), ("spots", "bedroom")),
             r
         )
+
+    def test_rhtline_route(self):
+        rht = Plotline.scan(self.texts[2])
+        self.fail(str(rht.doc))
