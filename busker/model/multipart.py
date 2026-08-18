@@ -25,6 +25,7 @@ import io
 import json
 import logging
 import mimetypes
+import pprint
 import re
 
 from busker import __version__
@@ -151,7 +152,7 @@ class Multipart:
             self.data[path].append(payload)
             yield data
 
-    def dump(self):
+    def dump(self, safe=False):
         header = self.header
         for n, (k, v) in enumerate(self.data.items()):
             if n == 1: header.pop("busker", None)
@@ -160,8 +161,11 @@ class Multipart:
                     yield json.dumps(dict(header, type="text/x-python", path=k), sort_keys=False)
                     yield ast.unparse(i)
                 elif isinstance(i, (dict, list, UserDict, UserList)):
-                    yield json.dumps(dict(header, type="application/json", path=k), sort_keys=False)
-                    yield json.dumps(i, indent=0, sort_keys=False, default=self.coerce)
+                    yield json.dumps(dict(header, type="text/x-python", path=k), sort_keys=False)
+                    if safe:
+                        yield pprint.saferepr(i)
+                    else:
+                        yield pprint.pformat(i, compact=False, indent=1, sort_dicts=False, width=120)
                 else:
                     yield json.dumps(dict(header, type="text/plain", path=k), sort_keys=False)
                     yield i

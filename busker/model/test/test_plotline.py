@@ -179,11 +179,13 @@ class PlotlineTests(unittest.TestCase):
         }
         """).lstrip(),
         textwrap.dedent("""
-        {"mark": 127416676279376, "type": "application/json", "path": []}
+        {"mark": 127416676279376, "type": "text/x-python", "path": []}
         {
         "type": "context",
         "day": "Sunday",
-        "chord": ["A", "D", "E"]
+        "chord": ("A", "D", "E"),
+        "goods": {"eggs", "milk"},
+        "route": ["home", "shop", "home"],
         }
         {"mark": 127416676279376, "type": "application/json", "path": ["a"]}
         {
@@ -198,10 +200,12 @@ class PlotlineTests(unittest.TestCase):
         "type": "context",
         "day": "Monday"
         }
-        {"mark": 127416676279376, "type": "application/json", "path": ["a", 0, 1, 2]}
+        {"mark": 127416676279376, "type": "text/x-python", "path": ["a", 0, 1, 2]}
         {
         "type": "context",
-        "chord": ["C", "F", "G"]
+        "chord": ("C", "F", "G"),
+        "goods": {"tea", "biscuits", "milk"},
+        "route": ["work", "shop", "work", "home"],
         }
         {"mark": 127416676279376, "type": "application/json", "path": ["b"]}
         {
@@ -213,11 +217,13 @@ class PlotlineTests(unittest.TestCase):
         "type": "context",
         "day": "Tuesday"
         }
-        {"mark": 127416676279376, "type": "application/json", "path": ["b", 1]}
+        {"mark": 127416676279376, "type": "text/x-python", "path": ["b", 1]}
         {
         "type": "context",
         "day": "Wednesday",
-        "chord": ["C", "F", "G"]
+        "chord": ("C", "F", "G"),
+        "goods": {"corn flakes", "milk"},
+        "route": ["work", "shop", "work", "home"],
         }
         """).lstrip(),
     ]
@@ -242,7 +248,7 @@ class PlotlineTests(unittest.TestCase):
         self.assertIsInstance(rht.doc.data[()][1], Element)
         self.assertEqual(rht.doc.data[()][1].get("type"), rht.Type.CONTEXT.value)
 
-    def test_rhtline_mesh(self):
+    def test_plotline_mesh(self):
         rht = Plotline.scan(self.texts[1])
         count = Counter(
            e.get(k) for p, f in rht.doc.data.items() for e in f for k in ("port", "link")
@@ -252,7 +258,7 @@ class PlotlineTests(unittest.TestCase):
         mesh = list(rht.mesh)
         self.assertEqual(len(count), len(mesh), mesh)
 
-    def test_rhtline_branches(self):
+    def test_plotline_branches(self):
         rht = Plotline.scan(self.texts[1])
 
         self.assertEqual(3, len(rht.branches(("spots", "hall"))))
@@ -266,7 +272,7 @@ class PlotlineTests(unittest.TestCase):
         branches = {i[0].port: i for i in rht.branches(("spots", "stairs"))}
         self.assertEqual(set(i[1].path for i in branches.values()), {("spots", "hall")})
 
-    def test_rhtline_route(self):
+    def test_plotline_route(self):
         rht = Plotline.scan(self.texts[1])
         r = rht.route(("spots", "kitchen"), ("spots", "bedroom"))
         self.assertEqual(5, len(r), r)
