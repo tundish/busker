@@ -222,7 +222,7 @@ class PlotlineTests(unittest.TestCase):
         "type": "context",
         "day": "Wednesday",
         "chord": ("C", "F", "G"),
-        "goods": {"corn flakes", "milk"},
+        "goods": {"crumpets", "milk"},
         "route": ["work", "shop", "work", "home"],
         }
         """).lstrip(),
@@ -284,6 +284,10 @@ class PlotlineTests(unittest.TestCase):
             r
         )
 
-    def test_rhtline_route(self):
+    def test_plotline_context(self):
         rht = Plotline.scan(self.texts[2])
-        self.fail(str(rht.doc))
+
+        path = ()
+        with self.subTest(path=path):
+            rv = list(rht.context(path))
+            self.fail(rv)

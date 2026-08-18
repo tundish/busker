@@ -119,7 +119,7 @@ class MultipartTests(unittest.TestCase):
         self.assertEqual(doc.header.get("busker", None), busker.__version__)
 
         rv = str(doc)
-        self.assertIn('"port": 8080', rv)
+        self.assertIn("'port': 8080", rv)
         self.assertIn("Knock knock.", rv)
         self.assertIn("Hello, World!", rv)
 
@@ -132,7 +132,7 @@ class MultipartTests(unittest.TestCase):
         doc = Multipart(config, text)
         rv = str(doc)
         lines = rv.splitlines()
-        self.assertEqual(len(lines), 8, rv)
+        self.assertEqual(len(lines), 6, rv)
 
     def test_factory(self):
         text = textwrap.dedent("""

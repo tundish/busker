@@ -140,6 +140,16 @@ class Plotline:
         """
         return {(a, b) for a, b in self.mesh if a.path == path}
 
+    def context(self, path: tuple) -> Generator[UserDict]:
+        """
+        Generates a chain of path context.
+
+        Compatible with collections.ChainMap.
+
+        """
+        return
+        yield
+
     def route(self, start: tuple, end: tuple) -> list[tuple]:
         """
         Return a list containing the shortest route between the spots `start` and `end`.
