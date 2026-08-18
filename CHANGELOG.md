@@ -1,6 +1,11 @@
 History
 =======
 
+0.29.0
+------
+
+* Settled on .rht (Resource HyperTree) as preferred file suffix.
+
 0.28.0
 ------
 
