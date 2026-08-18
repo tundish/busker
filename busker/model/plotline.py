@@ -140,13 +140,47 @@ class Plotline:
         """
         return {(a, b) for a, b in self.mesh if a.path == path}
 
-    def context(self, path: tuple) -> Generator[UserDict]:
+    def context(self, path: tuple) -> UserDict:
         """
-        Generates a chain of path context.
+        Returns a context, merged by path.
 
-        Compatible with collections.ChainMap.
+        # Source - https://stackoverflow.com/a/52099238
+        # Posted by djpinne, modified by community. See post 'Timeline' for change history
+        # Retrieved 2026-08-18, License - CC BY-SA 4.0
+
+           stack = [(d,u)]
+           while stack:
+              d,u = stack.pop(0)
+              for k,v in u.items():
+                 if not isinstance(v, collections.Mapping):
+                    # u[k] is not a dict, nothing to merge, so just set it,
+                    # regardless if d[k] *was* a dict
+                    d[k] = v
+
+                else:
+                    # note: u[k] is a dict
+                    if k not in d:
+                        # add new key into d
+                        d[k] = v
+                    elif not isinstance(d[k], collections.Mapping):
+                        # d[k] is not a dict, so just set it to u[k],
+                        # overriding whatever it was
+                        d[k] = v
+                    else:
+                        # both d[k] and u[k] are dicts, push them on the stack
+                        # to merge
+                        stack.append((d[k], v))
 
         """
+        rv = dict()
+        levels = [path[0: n] for n in range(len(path) + 1)]
+        for level in levels:
+            frame = self.doc.data[level]
+            for elem in frame:
+                print(f"{level=} {elem=}")
+            stack = [(rv, )]
+            while stack:
+                d, u = stack.pop(0)
         return
         yield
 

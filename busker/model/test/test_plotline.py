@@ -287,7 +287,7 @@ class PlotlineTests(unittest.TestCase):
     def test_plotline_context(self):
         rht = Plotline.scan(self.texts[2])
 
-        path = ()
+        path = ("a", 0, 1, 2)
         with self.subTest(path=path):
             rv = list(rht.context(path))
             self.fail(rv)
