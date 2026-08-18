@@ -39,7 +39,7 @@ class PlotlineTests(unittest.TestCase):
         "step": 2,
         "score": 0
         }
-        {"mark": 2863490869328, "type": "application/json"}
+        {"mark": 2863490869328, "type": "text/x-python"}
         {
         "type": "context",
         "world": [
@@ -233,6 +233,14 @@ class PlotlineTests(unittest.TestCase):
                 for elem in frame:
                     self.assertIsInstance(elem, (Element, ast.Module, UserString))
                     self.assertEqual(elem.parent, frame)
+
+    def test_scan_context(self):
+        rht = Plotline.scan(self.texts[0])
+        self.assertIsInstance(rht.doc.data[()][0], Element)
+        self.assertEqual(rht.doc.data[()][0].get("type"), rht.Type.CONTEXT.value)
+
+        self.assertIsInstance(rht.doc.data[()][1], Element)
+        self.assertEqual(rht.doc.data[()][1].get("type"), rht.Type.CONTEXT.value)
 
     def test_rhtline_mesh(self):
         rht = Plotline.scan(self.texts[1])

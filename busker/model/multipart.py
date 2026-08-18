@@ -116,10 +116,23 @@ class Multipart:
             if data.get("type") in code_types:
                 try:
                     path = self.sep.join([str(i) for i in data.get("path", self.path)])
-                    data["payload"] = payload = ast.parse(payload, filename=path, mode="exec")
-                except (ValueError, SyntaxError) as err:
-                    self.logger.error(f"Invalid Code. Pos: {d.end()}", exc_info=True)
+                except ValueError as err:
+                    self.logger.error(f"Invalid Path. Pos: {d.end()}", exc_info=True)
                     return
+
+                try:
+                    payload = ast.literal_eval(payload)
+                    if type(payload) in self.factory:
+                        payload = self.factory[type(payload)](payload)
+                    data["payload"] = payload
+                except (SyntaxError, ValueError) as err:
+                    self.logger.debug(f"Invalid Literal. Pos: {d.end()}", exc_info=True)
+
+                    try:
+                        data["payload"] = payload = ast.parse(payload, filename=path, mode="exec")
+                    except SyntaxError as err:
+                        self.logger.error(f"Invalid Code. Pos: {d.end()}", exc_info=True)
+                        return
 
             elif data.get("type") in data_types:
                 try:
