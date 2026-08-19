@@ -40,8 +40,27 @@ from collections.abc import Generator
 from collections.abc import Mapping
 from collections.abc import MutableSequence
 from collections.abc import Set
+import itertools
 
 from busker.model.multipart import Multipart
+
+
+class Chain(ChainMap):
+    "Variant of ChainMap that allows direct updates to inner scopes"
+
+    def __setitem__(self, key, value):
+        for mapping in self.maps:
+            if key in mapping:
+                mapping[key] = value
+                return
+        self.maps[0][key] = value
+
+    def __delitem__(self, key):
+        for mapping in self.maps:
+            if key in mapping:
+                del mapping[key]
+                return
+        raise KeyError(key)
 
 
 class Frame(UserList):
@@ -101,11 +120,12 @@ class Plotline:
         return cls(doc)
 
     @staticmethod
-    def merge(body: dict, food: dict):
-        stack = [(body, food)]
+    def merge(body: dict, item: dict):
+        print(f"{body=}")
+        stack = [(body, item)]
         while stack:
-            body, food = stack.pop(0)
-            for k, v in food.items():
+            body, item = stack.pop(0)
+            for k, v in item.items():
                 if isinstance(v, Set):
                     try:
                         body[k] = body[k].union(v)
@@ -125,9 +145,13 @@ class Plotline:
                         continue
 
                 if not isinstance(v, Mapping) or k not in body:
-                    body[k] = v
+                    try:
+                        body[k] = v
+                    except TypeError:
+                        print(f"{stack=} {v=}")
                 elif isinstance(body[k], Mapping):
                     stack.append((body[k], v))
+        return body
 
     def __init__(self, doc: Multipart):
         self.doc = doc
@@ -173,18 +197,11 @@ class Plotline:
         return {(a, b) for a, b in self.mesh if a.path == path}
 
     def context(self, path: tuple) -> UserDict:
-        rv = dict()
         levels = [path[0: n] for n in range(len(path) + 1)]
-        for level in levels:
-            frame = self.doc.data.get(level, [])
-            for elem in frame:
-                print(f"{level=} {elem=}")
-
-            stack = [(rv, )]
-            while stack:
-                d, u = stack.pop(0)
-        return
-        yield
+        frames = [self.doc.data.get(level, []) for level in levels]
+        chains = [Chain(*(i for i in frame if i.type == self.Type.CONTEXT.value)) for frame in reversed(frames)]
+        chains = [next(i for i in frame if i.type == self.Type.CONTEXT.value) for frame in reversed(frames)]
+        return list(itertools.accumulate(chains, self.merge))
 
     def route(self, start: tuple, end: tuple) -> list[tuple]:
         """

@@ -289,5 +289,5 @@ class PlotlineTests(unittest.TestCase):
 
         path = ("a", 0, 1, 2)
         with self.subTest(path=path):
-            rv = list(rht.context(path))
+            rv = rht.context(path)
             self.fail(rv)
