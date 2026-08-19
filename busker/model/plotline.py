@@ -37,6 +37,9 @@ from collections import UserDict
 from collections import UserList
 from collections import UserString
 from collections.abc import Generator
+from collections.abc import Mapping
+from collections.abc import MutableSequence
+from collections.abc import Set
 
 from busker.model.multipart import Multipart
 
@@ -97,6 +100,35 @@ class Plotline:
             frame.refresh()
         return cls(doc)
 
+    @staticmethod
+    def merge(body: dict, food: dict):
+        stack = [(body, food)]
+        while stack:
+            body, food = stack.pop(0)
+            for k, v in food.items():
+                if isinstance(v, Set):
+                    try:
+                        body[k] = body[k].union(v)
+                    except AttributeError:
+                        v = list(v)
+                    except KeyError:
+                        body[k] = v
+                        continue
+
+                if isinstance(v, MutableSequence):
+                    try:
+                        body[k].extend(v)
+                    except AttributeError:
+                        v = tuple(v)
+                    except KeyError:
+                        body[k] = v
+                        continue
+
+                if not isinstance(v, Mapping) or k not in body:
+                    body[k] = v
+                elif isinstance(body[k], Mapping):
+                    stack.append((body[k], v))
+
     def __init__(self, doc: Multipart):
         self.doc = doc
         self.routes = {}
@@ -141,43 +173,13 @@ class Plotline:
         return {(a, b) for a, b in self.mesh if a.path == path}
 
     def context(self, path: tuple) -> UserDict:
-        """
-        Returns a context, merged by path.
-
-        # Source - https://stackoverflow.com/a/52099238
-        # Posted by djpinne, modified by community. See post 'Timeline' for change history
-        # Retrieved 2026-08-18, License - CC BY-SA 4.0
-
-           stack = [(d,u)]
-           while stack:
-              d,u = stack.pop(0)
-              for k,v in u.items():
-                 if not isinstance(v, collections.Mapping):
-                    # u[k] is not a dict, nothing to merge, so just set it,
-                    # regardless if d[k] *was* a dict
-                    d[k] = v
-
-                else:
-                    # note: u[k] is a dict
-                    if k not in d:
-                        # add new key into d
-                        d[k] = v
-                    elif not isinstance(d[k], collections.Mapping):
-                        # d[k] is not a dict, so just set it to u[k],
-                        # overriding whatever it was
-                        d[k] = v
-                    else:
-                        # both d[k] and u[k] are dicts, push them on the stack
-                        # to merge
-                        stack.append((d[k], v))
-
-        """
         rv = dict()
         levels = [path[0: n] for n in range(len(path) + 1)]
         for level in levels:
-            frame = self.doc.data[level]
+            frame = self.doc.data.get(level, [])
             for elem in frame:
                 print(f"{level=} {elem=}")
+
             stack = [(rv, )]
             while stack:
                 d, u = stack.pop(0)
