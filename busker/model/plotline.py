@@ -89,6 +89,12 @@ class Plotline:
 
     @staticmethod
     def merge(body: dict, item: dict):
+        """
+        Merge a new item into the context body.
+        Chains are built from the leaf up toward the root.
+        Consequently ordered sequences are built first in, last out.
+
+        """
         stack = [(body, item)]
         while stack:
             body, item = stack.pop(0)
@@ -104,6 +110,7 @@ class Plotline:
 
                 if isinstance(v, MutableSequence):
                     try:
+                        # FILO
                         v.extend(body[k])
                         body[k] = v
                     except AttributeError:
