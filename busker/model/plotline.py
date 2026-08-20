@@ -132,10 +132,10 @@ class Plotline:
     @property
     def mesh(self) -> Generator[tuple]:
         """
-        Generate the topological mesh of linked paths
+        Generate the topological mesh of linked paths.
 
         Each item is a tuple representing an arc from one path to another, if ports are open.
-        Turn value, when known, is the second element of the tuple.
+        Spin and Cost values are given defaults if not defined.
 
         """
         linkage_elements = {
