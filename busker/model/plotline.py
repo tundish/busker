@@ -104,7 +104,8 @@ class Plotline:
 
                 if isinstance(v, MutableSequence):
                     try:
-                        body[k].extend(v)
+                        v.extend(body[k])
+                        body[k] = v
                     except AttributeError:
                         v = tuple(v)
                     except KeyError:
