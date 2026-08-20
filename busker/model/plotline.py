@@ -30,7 +30,6 @@
 
 import enum
 from collections import ChainMap
-from collections import ChainMap
 from collections import defaultdict
 from collections import namedtuple
 from collections import UserDict
@@ -43,40 +42,9 @@ from collections.abc import Set
 import itertools
 
 from busker.model.multipart import Multipart
-
-
-class Chain(ChainMap):
-    "Variant of ChainMap that allows direct updates to inner scopes"
-
-    def __setitem__(self, key, value):
-        for mapping in self.maps:
-            if key in mapping:
-                mapping[key] = value
-                return
-        self.maps[0][key] = value
-
-    def __delitem__(self, key):
-        for mapping in self.maps:
-            if key in mapping:
-                del mapping[key]
-                return
-        raise KeyError(key)
-
-
-class Frame(UserList):
-    def refresh(self):
-        for obj in self.data:
-            try:
-                obj.refresh(parent=self)
-            except AttributeError:
-                pass
-        return self
-
-
-class Element(UserDict):
-    def refresh(self, parent=None):
-        self.parent = parent
-        return self
+from busker.model.types import Chain
+from busker.model.types import Element
+from busker.model.types import Frame
 
 
 class Plotline:
@@ -121,7 +89,6 @@ class Plotline:
 
     @staticmethod
     def merge(body: dict, item: dict):
-        print(f"{body=}")
         stack = [(body, item)]
         while stack:
             body, item = stack.pop(0)
@@ -144,11 +111,8 @@ class Plotline:
                         body[k] = v
                         continue
 
-                if not isinstance(v, Mapping) or k not in body:
-                    try:
-                        body[k] = v
-                    except TypeError:
-                        print(f"{stack=} {v=}")
+                if k not in body:
+                    body[k] = v
                 elif isinstance(body[k], Mapping):
                     stack.append((body[k], v))
         return body
@@ -158,7 +122,7 @@ class Plotline:
         self.routes = {}
 
     @property
-    def mesh(self) -> Generator:
+    def mesh(self) -> Generator[tuple]:
         """
         Generate the topological mesh of linked paths
 
@@ -196,12 +160,12 @@ class Plotline:
         """
         return {(a, b) for a, b in self.mesh if a.path == path}
 
-    def context(self, path: tuple) -> UserDict:
+    def context(self, path: tuple) -> Chain:
         levels = [path[0: n] for n in range(len(path) + 1)]
         frames = [self.doc.data.get(level, []) for level in levels]
         chains = [Chain(*(i for i in frame if i.type == self.Type.CONTEXT.value)) for frame in reversed(frames)]
-        chains = [next(i for i in frame if i.type == self.Type.CONTEXT.value) for frame in reversed(frames)]
-        return list(itertools.accumulate(chains, self.merge))
+        rv = list(itertools.accumulate(chains, self.merge))
+        return rv[-1] if rv else {}
 
     def route(self, start: tuple, end: tuple) -> list[tuple]:
         """

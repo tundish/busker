@@ -24,9 +24,10 @@ import textwrap
 import unittest
 
 from busker.model.multipart import Multipart
-from busker.model.plotline import Element
-from busker.model.plotline import Frame
 from busker.model.plotline import Plotline
+from busker.model.types import Chain
+from busker.model.types import Element
+from busker.model.types import Frame
 
 
 class PlotlineTests(unittest.TestCase):
@@ -290,4 +291,8 @@ class PlotlineTests(unittest.TestCase):
         path = ("a", 0, 1, 2)
         with self.subTest(path=path):
             rv = rht.context(path)
-            self.fail(rv)
+            self.assertIsInstance(rv, Chain)
+            self.assertEqual(rv["type"], rht.Type.CONTEXT.value)
+            self.assertEqual(rv["chord"], ("C", "F", "G"))
+            self.assertEqual(rv["goods"], {"tea", "biscuits", "eggs", "milk"})
+            self.assertEqual(rv["route"], ["home", "shop", "home", "work", "shop", "work", "home"], rv)
