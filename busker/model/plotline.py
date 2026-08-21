@@ -163,7 +163,13 @@ class Plotline:
 
     @property
     def journal(self) -> dict:
-        return
+        rv = node = dict()
+        for path, frame in self.doc.data.items():
+            for n, key in enumerate(path or (None,)):
+                if n + 1 < len(path) and key not in node:
+                    node[key] = dict()
+                    node = node[key]
+                print(f"{key=} {node=} {path=} {frame=}")
 
     def branches(self, path: tuple) -> set[tuple, tuple]:
         """
