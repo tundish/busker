@@ -161,6 +161,10 @@ class Plotline:
                 ),
             )
 
+    @property
+    def journal(self) -> dict:
+        return
+
     def branches(self, path: tuple) -> set[tuple, tuple]:
         """
         Returns a set of the permitted exits from the supplied path.
