@@ -180,17 +180,17 @@ class PlotlineTests(unittest.TestCase):
         }
         """).lstrip(),
         textwrap.dedent("""
-        {"mark": 127416676279376, "type": "text/x-python", "path": []}
+        {"mark": 127416676279376, "type": "application/json", "path": []}
+        {
+        "type": "context"
+        }
+        {"mark": 127416676279376, "type": "text/x-python", "path": ["a"]}
         {
         "type": "context",
         "day": "Sunday",
         "chord": ("A", "D", "E"),
         "goods": {"eggs", "milk"},
         "route": ["home", "shop", "home"],
-        }
-        {"mark": 127416676279376, "type": "application/json", "path": ["a"]}
-        {
-        "type": "context"
         }
         {"mark": 127416676279376, "type": "application/json", "path": ["a", 0]}
         {
@@ -294,7 +294,7 @@ class PlotlineTests(unittest.TestCase):
             self.assertIsInstance(rv, Chain)
             self.assertTrue(isinstance(i, Element) for i in rv.maps)
             self.assertEqual(rv["type"], rht.Type.CONTEXT.value)
-            self.assertEqual(rv["chord"], ("C", "F", "G"))
+            self.assertEqual(rv["chord"], ("C", "F", "G"), rht.doc.data)
             self.assertEqual(rv["goods"], {"tea", "biscuits", "eggs", "milk"})
             self.assertEqual(rv["route"], ["home", "shop", "home", "work", "shop", "work", "home"], rv)
 
@@ -302,4 +302,4 @@ class PlotlineTests(unittest.TestCase):
         rht = Plotline.scan(self.texts[2])
         rv = rht.journal
         self.assertIsInstance(rv, dict)
-        self.assertEqual((None, "a", "b"), tuple(rv))
+        self.assertEqual(("a", "b"), tuple(rv))

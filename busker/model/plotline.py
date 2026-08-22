@@ -181,6 +181,7 @@ class Plotline:
     def context(self, path: tuple) -> Chain:
         levels = [path[0: n] for n in range(len(path) + 1)]
         frames = [self.doc.data.get(level, []) for level in levels]
+        print(f"{frames=}")
         chains = [Chain(*(i for i in frame if i.type == self.Type.CONTEXT.value)) for frame in reversed(frames)]
         rv = list(itertools.accumulate(chains, self.merge))
         return rv[-1] if rv else {}
