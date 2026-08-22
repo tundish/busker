@@ -164,19 +164,25 @@ class Plotline:
     @property
     def journal(self) -> dict:
         rv = dict()
+        done = dict()
         paths = list(self.doc.data)
         for path in paths:
             node = rv
             for n, key in enumerate(path):
-                pos = path[:n + 1]
-                if pos in self.doc.data:
+                pos = tuple(path[:n + 1])
+                if pos in done:
+                    node = done[pos]
+                    print(f"Done {pos=} {node=}")
+                    continue
+
+                try:
                     frame = self.doc.data[pos]
                     node[key] = Chain(*(i for i in frame if i.type == self.Type.CONTEXT.value))
-                else:
+                except KeyError:
                     node[key] = Chain()
 
-                if pos != path:
-                    node = node[key].new_child()
+                node = node[key].new_child()
+                done[pos] = node
                 print(f"{key=} {pos=} {node=}")
         return rv
 

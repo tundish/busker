@@ -304,7 +304,7 @@ class PlotlineTests(unittest.TestCase):
         rv = rht.journal
         self.assertIsInstance(rv, dict)
         self.assertEqual(("a", "b"), tuple(rv), rv)
-        self.assertIn(0, rv["a"])
+        self.assertIn(0, rv["a"], rv)
         self.assertIn(1, rv["a"][0])
         self.assertIn(2, rv["a"][1])
         self.fail(rv)
