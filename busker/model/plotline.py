@@ -163,13 +163,12 @@ class Plotline:
 
     @property
     def journal(self) -> dict:
-        rv = node = dict()
-        for path, frame in self.doc.data.items():
-            for n, key in enumerate(path or (None,)):
-                if n + 1 < len(path) and key not in node:
-                    node[key] = dict()
-                    node = node[key]
-                print(f"{key=} {node=} {path=} {frame=}")
+        rv = dict()
+        paths = list(self.doc.data)
+        for path in paths:
+            context = self.context(path)
+            print(f"{context=}")
+        return rv
 
     def branches(self, path: tuple) -> set[tuple, tuple]:
         """
@@ -181,8 +180,10 @@ class Plotline:
     def context(self, path: tuple) -> Chain:
         levels = [path[0: n] for n in range(len(path) + 1)]
         frames = [self.doc.data.get(level, []) for level in levels]
-        print(f"{frames=}")
-        chains = [Chain(*(i for i in frame if i.type == self.Type.CONTEXT.value)) for frame in reversed(frames)]
+        chains = [
+            Chain(*(i for i in frame if i.type == self.Type.CONTEXT.value))
+            for frame in reversed(frames)
+        ]
         rv = list(itertools.accumulate(chains, self.merge))
         return rv[-1] if rv else {}
 
