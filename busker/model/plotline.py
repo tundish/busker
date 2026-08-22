@@ -95,7 +95,7 @@ class Plotline:
         Consequently ordered sequences are built first in, last out.
 
         """
-        stack = [(body, item)]
+        stack = [(body.copy(), item.copy())]
         while stack:
             body, item = stack.pop(0)
             for k, v in item.items():
@@ -111,8 +111,7 @@ class Plotline:
                 if isinstance(v, MutableSequence):
                     try:
                         # FILO
-                        v.extend(body[k])
-                        body[k] = v
+                        body[k] = v.copy() + body[k]
                     except AttributeError:
                         v = tuple(v)
                     except KeyError:
@@ -122,7 +121,7 @@ class Plotline:
                 if k not in body:
                     body[k] = v
                 elif isinstance(body[k], Mapping):
-                    stack.append((body[k], v))
+                    stack.append((body[k].copy(), v.copy()))
         return body
 
     def __init__(self, doc: Multipart):
@@ -167,7 +166,7 @@ class Plotline:
         paths = list(self.doc.data)
         for path in paths:
             context = self.context(path)
-            print(f"{context=}")
+            print(f"{path=} {context=}")
         return rv
 
     def branches(self, path: tuple) -> set[tuple, tuple]:

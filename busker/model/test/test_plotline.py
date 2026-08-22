@@ -289,14 +289,15 @@ class PlotlineTests(unittest.TestCase):
         rht = Plotline.scan(self.texts[2])
 
         path = ("a", 0, 1, 2)
-        with self.subTest(path=path):
-            rv = rht.context(path)
-            self.assertIsInstance(rv, Chain)
-            self.assertTrue(isinstance(i, Element) for i in rv.maps)
-            self.assertEqual(rv["type"], rht.Type.CONTEXT.value)
-            self.assertEqual(rv["chord"], ("C", "F", "G"), rht.doc.data)
-            self.assertEqual(rv["goods"], {"tea", "biscuits", "eggs", "milk"})
-            self.assertEqual(rv["route"], ["home", "shop", "home", "work", "shop", "work", "home"], rv)
+        for n in range(3):
+            with self.subTest(path=path, n=n):
+                rv = rht.context(path)
+                self.assertIsInstance(rv, Chain)
+                self.assertTrue(isinstance(i, Element) for i in rv.maps)
+                self.assertEqual(rv["type"], rht.Type.CONTEXT.value)
+                self.assertEqual(rv["chord"], ("C", "F", "G"), rht.doc.data)
+                self.assertEqual(rv["goods"], {"tea", "biscuits", "eggs", "milk"})
+                self.assertEqual(rv["route"], ["home", "shop", "home", "work", "shop", "work", "home"], rv)
 
     def test_plotline_journal(self):
         rht = Plotline.scan(self.texts[2])
