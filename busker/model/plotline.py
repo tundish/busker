@@ -163,12 +163,12 @@ class Plotline:
 
     @property
     def journal(self) -> dict:
-        rv = node = dict()
+        rv = dict()
         paths = list(self.doc.data)
         for path in paths:
+            node = rv
             for n, key in enumerate(path):
                 pos = path[:n + 1]
-                print(f"{key=} {pos=} {node=}")
                 if pos in self.doc.data:
                     frame = self.doc.data[pos]
                     node[key] = Chain(*(i for i in frame if i.type == self.Type.CONTEXT.value))
@@ -177,6 +177,7 @@ class Plotline:
 
                 if pos != path:
                     node = node[key].new_child()
+                print(f"{key=} {pos=} {node=}")
         return rv
 
     def branches(self, path: tuple) -> set[tuple, tuple]:
