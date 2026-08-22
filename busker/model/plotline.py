@@ -163,6 +163,7 @@ class Plotline:
 
     @property
     def journal(self) -> dict:
+        "Expand the document into a nested tree of frames"
         rv = dict()
         done = dict()
         paths = list(self.doc.data)
@@ -172,7 +173,6 @@ class Plotline:
                 pos = tuple(path[:n + 1])
                 if pos in done:
                     node = done[pos]
-                    print(f"Done {pos=} {node=}")
                     continue
 
                 try:
@@ -181,9 +181,8 @@ class Plotline:
                 except KeyError:
                     node[key] = Chain()
 
-                node = node[key].new_child()
-                done[pos] = node
-                print(f"{key=} {pos=} {node=}")
+                node[key] = node[key].new_child()
+                done[pos] = node[key]
         return rv
 
     def branches(self, path: tuple) -> set[tuple, tuple]:

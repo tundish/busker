@@ -306,5 +306,5 @@ class PlotlineTests(unittest.TestCase):
         self.assertEqual(("a", "b"), tuple(rv), rv)
         self.assertIn(0, rv["a"], rv)
         self.assertIn(1, rv["a"][0])
-        self.assertIn(2, rv["a"][1])
-        self.fail(rv)
+        self.assertIn(2, rv["a"][0][1])
+        self.assertEqual(rv["a"][0][1][2]["goods"], {"tea", "biscuits", "milk"})
