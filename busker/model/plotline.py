@@ -40,6 +40,7 @@ from collections.abc import Mapping
 from collections.abc import MutableSequence
 from collections.abc import Set
 import itertools
+import operator
 
 from busker.model.multipart import Multipart
 from busker.model.types import Chain
@@ -90,7 +91,7 @@ class Plotline:
     @staticmethod
     def merge(body: dict, item: dict):
         """
-        Merge a new item into the context body.
+        Merge a new item (by copy) into the context body.
         Chains are built from the leaf up toward the root.
         Consequently ordered sequences are built first in, last out.
 
@@ -121,7 +122,7 @@ class Plotline:
                 if k not in body:
                     body[k] = v
                 elif isinstance(body[k], Mapping):
-                    stack.append((body[k].copy(), v.copy()))
+                    stack.append((body[k].copy(), v))
         return body
 
     def __init__(self, doc: Multipart):
@@ -162,11 +163,20 @@ class Plotline:
 
     @property
     def journal(self) -> dict:
-        rv = dict()
+        rv = node = dict()
         paths = list(self.doc.data)
         for path in paths:
-            context = self.context(path)
-            print(f"{path=} {context=}")
+            for n, key in enumerate(path):
+                pos = path[:n + 1]
+                print(f"{key=} {pos=} {node=}")
+                if pos in self.doc.data:
+                    frame = self.doc.data[pos]
+                    node[key] = Chain(*(i for i in frame if i.type == self.Type.CONTEXT.value))
+                else:
+                    node[key] = Chain()
+
+                if pos != path:
+                    node = node[key].new_child()
         return rv
 
     def branches(self, path: tuple) -> set[tuple, tuple]:
