@@ -308,3 +308,4 @@ class PlotlineTests(unittest.TestCase):
         self.assertIn(1, rv["a"][0])
         self.assertIn(2, rv["a"][0][1])
         self.assertEqual(rv["a"][0][1][2]["goods"], {"tea", "biscuits", "milk"})
+        self.assertIs(rv["a"][0][1][2].maps[1], rht.doc.data[("a", 0, 1, 2)][0])
