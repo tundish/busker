@@ -15,38 +15,18 @@
 # You should have received a copy of the GNU General Public License along with busker.
 # If not, see <https://www.gnu.org/licenses/>.
 
-
-# TODO: Paths identify nodes (stage) or edges (story) depending on content.
-# Both nodes and edges have ports which connect them.
-
 # Stage: Python code (world entity query model)
 # Story: Speech      (scene drama directives model)
 
-# Marking: The current active location(s) in the Multipart.
-# Context: A ChainMap of UserDict along the reverse path to the root.
-# Linkage: Associations between separate locations in the Multipart.
-# Actions: Declarations of commands which modify context and expedite marking.
-# Content: Dialogue, Effects and Multimedia driven from Speech cues.
-
-import enum
-from collections import ChainMap
-from collections import defaultdict
-from collections import namedtuple
-from collections import UserDict
-from collections import UserList
-from collections import UserString
-from collections.abc import Generator
 from collections.abc import Mapping
 from collections.abc import MutableSequence
 from collections.abc import Set
 import itertools
-import operator
 
-from busker.model.multipart import Multipart
+import jsonpath
+
 from busker.model.plotline import Plotline
 from busker.model.types import Chain
-from busker.model.types import Element
-from busker.model.types import Frame
 
 
 class Journal(Plotline):
@@ -92,8 +72,12 @@ class Journal(Plotline):
                     stack.append((body[k].copy(), v))
         return body
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.env = jsonpath.JSONPathEnvironment()
+
     @property
-    def journal(self) -> dict:
+    def tree(self) -> dict:
         "Expand the document into a nested tree of frames"
         rv = dict()
         done = dict()
@@ -117,6 +101,7 @@ class Journal(Plotline):
         return rv
 
     def context(self, path: tuple) -> Chain:
+        "Build a view of the document as seen from the supplied path"
         levels = [path[0: n] for n in range(len(path) + 1)]
         frames = [self.doc.data.get(level, []) for level in levels]
         chains = [
@@ -126,38 +111,5 @@ class Journal(Plotline):
         rv = list(itertools.accumulate(chains, self.merge))
         return rv[-1] if rv else {}
 
-    def route(self, start: tuple, end: tuple) -> list[tuple]:
-        """
-        Return a list containing the shortest route between the spots `start` and `end`.
-        The endpoints are included in the output.
-
-        """
-        if (start, end) in self.routes:
-            return self.routes[(start, end)][0]
-
-        proven = set()
-        incomplete = [[start]]
-
-        topology = defaultdict(set)
-        for a, b in self.mesh:
-            topology[a.path].add(b.path)
-
-        n = len(topology)
-        d = 1
-        while n >= 0 or not proven:
-            options = []
-            for candidate in incomplete:
-                if candidate[-1] == end:
-                    proven.add(tuple(candidate))
-                else:
-                    hops = topology[candidate[-1]]
-                    d = len(hops)
-                    for hop in hops:
-                        if hop not in candidate:
-                            options.append(candidate.copy())
-                            options[-1].append(hop)
-            incomplete = options
-            n = n - d
-
-        rv = self.routes[(start, end)] = sorted(proven, key=len) if proven else []
-        return rv[0]
+    def search(self, query: str, data: dict) -> list:
+        return []

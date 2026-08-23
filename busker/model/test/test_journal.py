@@ -66,7 +66,7 @@ class JournalTests(unittest.TestCase):
 
     def test_journal(self):
         rht = Journal.scan(PlotlineTests.texts[2])
-        rv = rht.journal
+        rv = rht.tree
         self.assertIsInstance(rv, dict)
         self.assertEqual(("a", "b"), tuple(rv), rv)
         self.assertIn(0, rv["a"], rv)
@@ -74,3 +74,14 @@ class JournalTests(unittest.TestCase):
         self.assertIn(2, rv["a"][0][1])
         self.assertEqual(rv["a"][0][1][2]["goods"], {"tea", "biscuits", "milk"})
         self.assertIs(rv["a"][0][1][2].maps[1], rht.doc.data[("a", 0, 1, 2)][0])
+
+    def test_search_context(self):
+        rht = Journal.scan(PlotlineTests.texts[2])
+        context = rht.context(("b", 1))
+        print(context)
+        self.assertIsInstance(context.maps[0].parent, Frame)
+        self.assertEqual(context.maps[0].type.value, rht.Type.CONTEXT.value)
+
+        rv = rht.search("$['day']", context)
+        self.assertIsInstance(rv, list)
+

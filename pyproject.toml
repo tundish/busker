@@ -20,7 +20,9 @@ classifiers = [
     "Programming Language :: Python :: 3 :: Only",
     "Development Status :: 4 - Beta",
 ]
+
 dependencies = [
+"python-jsonpath",
 ]
 
 [project.optional-dependencies]
