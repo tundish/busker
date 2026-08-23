@@ -75,7 +75,7 @@ class JournalTests(unittest.TestCase):
         self.assertEqual(rv["a"][0][1][2]["goods"], {"tea", "biscuits", "milk"})
         self.assertIs(rv["a"][0][1][2].maps[1], rht.doc.data[("a", 0, 1, 2)][0])
 
-    def test_search_context(self):
+    def test_search_context_key(self):
         rht = Journal.scan(PlotlineTests.texts[2])
         context = rht.context(("b", 1))
         print(context)
@@ -83,5 +83,4 @@ class JournalTests(unittest.TestCase):
         self.assertEqual(context.maps[0].type.value, rht.Type.CONTEXT.value)
 
         rv = rht.search("$['day']", context)
-        self.assertIsInstance(rv, list)
-
+        self.assertEqual(rv, ["Wednesday"])

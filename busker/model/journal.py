@@ -111,5 +111,5 @@ class Journal(Plotline):
         rv = list(itertools.accumulate(chains, self.merge))
         return rv[-1] if rv else {}
 
-    def search(self, query: str, data: dict) -> list:
-        return []
+    def search(self, query: str, data: dict, **kwargs) -> list:
+        return self.env.findall(query, data, **kwargs)
