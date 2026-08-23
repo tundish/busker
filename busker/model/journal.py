@@ -28,6 +28,7 @@ import jsonpath
 
 from busker.model.plotline import Plotline
 from busker.model.types import Chain
+from busker.model.types import ElementType
 
 
 class MonkeyPatch:
@@ -113,7 +114,7 @@ class Journal(Plotline):
 
                 try:
                     frame = self.doc.data[pos]
-                    node[key] = Chain(*(i for i in frame if i.type == self.Type.CONTEXT.value))
+                    node[key] = Chain(*(i for i in frame if i.type == ElementType.CONTEXT.value))
                 except KeyError:
                     node[key] = Chain()
 
@@ -126,11 +127,20 @@ class Journal(Plotline):
         levels = [path[0: n] for n in range(len(path) + 1)]
         frames = [self.doc.data.get(level, []) for level in levels]
         chains = [
-            Chain(*(i for i in frame if i.type == self.Type.CONTEXT.value))
+            Chain(*(i for i in frame if getattr(i, "type", None) == ElementType.CONTEXT.value))
             for frame in reversed(frames)
         ]
         rv = list(itertools.accumulate(chains, self.merge))
         return rv[-1] if rv else {}
 
     def search(self, query: str, data: dict, **kwargs) -> list:
+        return self.env.findall(query, data, **kwargs)
+
+    def actions(self, path: tuple) -> dict:
+        frames = self.doc.data.get(path, [])
+        return frames
+        chains = [
+            Chain(*(i for i in frame if i.type == ElementType.CONTEXT.value))
+            for frame in reversed(frames)
+        ]
         return self.env.findall(query, data, **kwargs)

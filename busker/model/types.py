@@ -19,6 +19,15 @@ from collections import ChainMap
 from collections import UserDict
 from collections import UserList
 from collections import UserString
+import enum
+
+
+class ElementType(enum.StrEnum):
+    ACTIONS = enum.auto()
+    CONTENT = enum.auto()
+    CONTEXT = enum.auto()
+    LINKAGE = enum.auto()
+    MARKING = enum.auto()
 
 
 class Chain(ChainMap):
@@ -50,8 +59,12 @@ class Frame(UserList):
 
 
 class Element(UserDict):
+
+    @property
+    def action(self):
+        if self.data.get("type") != ElementType.ACTIONS.value:
+            return
+
     def refresh(self, parent=None):
         self.parent = parent
         return self
-
-

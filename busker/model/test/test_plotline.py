@@ -27,6 +27,7 @@ from busker.model.multipart import Multipart
 from busker.model.plotline import Plotline
 from busker.model.types import Chain
 from busker.model.types import Element
+from busker.model.types import ElementType
 from busker.model.types import Frame
 
 
@@ -245,7 +246,7 @@ class PlotlineTests(unittest.TestCase):
         rht = Plotline.scan(self.texts[1])
         count = Counter(
            e.get(k) for p, f in rht.doc.data.items() for e in f for k in ("port", "link")
-           if e.get("type") == rht.Type.LINKAGE.value
+           if e.get("type") == ElementType.LINKAGE.value
         )
         self.assertTrue(all(v == 2 for v in count.values()))
         mesh = list(rht.mesh)

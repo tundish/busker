@@ -45,6 +45,7 @@ import operator
 from busker.model.multipart import Multipart
 from busker.model.types import Chain
 from busker.model.types import Element
+from busker.model.types import ElementType
 from busker.model.types import Frame
 
 
@@ -53,13 +54,6 @@ class Plotline:
     Implements a Resource HyperTree (.rht).
 
     """
-
-    class Type(enum.StrEnum):
-        ACTIONS = enum.auto()
-        CONTENT = enum.auto()
-        CONTEXT = enum.auto()
-        LINKAGE = enum.auto()
-        MARKING = enum.auto()
 
     Point = namedtuple(
         "Point", ["path", "port", "spin", "cost"], defaults=[0, 0]
@@ -78,7 +72,7 @@ class Plotline:
             frame.path = p
             for n, obj in enumerate(frame.copy()):
                 try:
-                    typ = cls.Type[obj["type"].upper()]
+                    typ = ElementType[obj["type"].upper()]
                     frame[n] = Element(obj.data)
                     frame[n].type = typ
                 except (AttributeError, TypeError):
@@ -105,7 +99,7 @@ class Plotline:
             elem.get("port"): elem
             for frame in self.doc.data.values()
             for elem in frame
-            if elem.type == self.Type.LINKAGE
+            if elem.type == ElementType.LINKAGE
         }
 
         for port, elem in linkage_elements.items():

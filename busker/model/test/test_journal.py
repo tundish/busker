@@ -24,6 +24,7 @@ from busker.model.journal import Journal
 from busker.model.plotline import Plotline
 from busker.model.types import Chain
 from busker.model.types import Element
+from busker.model.types import ElementType
 from busker.model.types import Frame
 
 from busker.model.test.test_plotline import PlotlineTests
@@ -46,10 +47,10 @@ class JournalTests(unittest.TestCase):
     def test_scan_context(self):
         rht = Journal.scan(PlotlineTests.texts[0])
         self.assertIsInstance(rht.doc.data[()][0], Element)
-        self.assertEqual(rht.doc.data[()][0].get("type"), rht.Type.CONTEXT.value)
+        self.assertEqual(rht.doc.data[()][0].get("type"), ElementType.CONTEXT.value)
 
         self.assertIsInstance(rht.doc.data[()][1], Element)
-        self.assertEqual(rht.doc.data[()][1].get("type"), rht.Type.CONTEXT.value)
+        self.assertEqual(rht.doc.data[()][1].get("type"), ElementType.CONTEXT.value)
 
     def test_journal_context(self):
         rht = Journal.scan(PlotlineTests.texts[2])
@@ -60,7 +61,7 @@ class JournalTests(unittest.TestCase):
                 rv = rht.context(path)
                 self.assertIsInstance(rv, Chain)
                 self.assertTrue(isinstance(i, Element) for i in rv.maps)
-                self.assertEqual(rv["type"], rht.Type.CONTEXT.value)
+                self.assertEqual(rv["type"], ElementType.CONTEXT.value)
                 self.assertEqual(rv["chord"], ("C", "F", "G"), rht.doc.data)
                 self.assertEqual(rv["goods"], {"tea", "biscuits", "eggs", "milk"})
                 self.assertEqual(rv["route"], ["home", "shop", "home", "work", "shop", "work", "home"], rv)
@@ -87,7 +88,7 @@ class JournalTests(unittest.TestCase):
     def test_search_context_attribute(self):
         rht = Journal.scan(PlotlineTests.texts[2])
         context = rht.context(("b", 1))
-        self.assertEqual(context.maps[0].type.value, rht.Type.CONTEXT.value)
+        self.assertEqual(context.maps[0].type.value, ElementType.CONTEXT.value)
 
         rv = rht.search("$.maps[0].type.value", context)
         self.assertEqual(rv, ["context"])
@@ -115,4 +116,5 @@ class JournalTests(unittest.TestCase):
         """)
         text = PlotlineTests.texts[2] + action_text
         rht = Journal.scan(text)
-        self.fail(rht.doc)
+        rv = rht.actions(path=())
+        self.fail(rht.doc.data)
