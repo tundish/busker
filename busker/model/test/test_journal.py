@@ -18,6 +18,7 @@
 import ast
 from collections import UserString
 import logging
+import platform
 import textwrap
 import unittest
 
@@ -94,6 +95,7 @@ class JournalTests(unittest.TestCase):
         rv = rht.search("$.maps[0].type.value", context)
         self.assertEqual(rv, ["context"])
 
+    @unittest.skipIf(platform.python_version() < "3.13", "new eval semantics")
     def test_compile_exec_action(self):
         action_text = textwrap.dedent("""
         {"mark": 127416676279376, "type": "application/json", "path": []}
