@@ -17,6 +17,7 @@
 
 import ast
 from collections import UserString
+import logging
 import textwrap
 import unittest
 
@@ -93,7 +94,7 @@ class JournalTests(unittest.TestCase):
         rv = rht.search("$.maps[0].type.value", context)
         self.assertEqual(rv, ["context"])
 
-    def test_search_context_action(self):
+    def test_compile_exec_action(self):
         action_text = textwrap.dedent("""
         {"mark": 127416676279376, "type": "application/json", "path": []}
         {
@@ -109,14 +110,16 @@ class JournalTests(unittest.TestCase):
         ]
         }
         {"mark": 127416676279376, "type": "text/x-python"}
-
-        def fn(context: dict, goods: str, place: str, **kwargs):
-            context["score"] += 1
-
+        context = journal.context(path)
+        context["goods"].remove(goods)
+        logging.getLogger(format(path)).debug(
+            f"Removed goods '{goods}' from context '{path}'"
+        )
         """)
         text = PlotlineTests.texts[2] + action_text
         rht = Journal.scan(text)
-        actions = rht.actions(path=("b", 1))
+        path = ("b", 1)
+        actions = rht.actions(path)
         self.assertIsInstance(actions, dict)
         rv = actions.get("Drop off milk at work")
         self.assertIsInstance(rv, tuple)
@@ -125,3 +128,14 @@ class JournalTests(unittest.TestCase):
         self.assertEqual(rv[0], rht.doc.data[()][-2])
         self.assertEqual(rv[0].action, rht.doc.data[()][-1])
         self.assertEqual(rv[1], dict(goods="milk", place="work"))
+
+        self.assertEqual(rht.context(path).get("goods", None), {"crumpets", "milk"})
+        code = compile(rv[0].action, format(path), mode="exec")
+        l = dict(rv[1], journal=rht, path=path)
+        g = dict(logging=logging)
+        with self.assertLogs(format(path), logging.DEBUG) as check:
+            exec(code, locals=l, globals=g)
+
+        self.assertTrue(check.output)
+        self.assertIn("Removed goods 'milk' from context", check.output[0])
+        self.assertEqual(rht.context(path).get("goods", None), {"crumpets"})

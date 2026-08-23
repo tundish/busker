@@ -165,7 +165,10 @@ class Journal(Plotline):
 
         rv = dict()
         for element in elements:
-            results = {k: self.search(v, context) for k, v in element.get("params", {}).items()}
+            results = {
+                k: self.search(v, context)
+                for k, v in element.get("params", {}).items()
+            }
             products = set(itertools.product(*results.values()))
             for term in element.get("terms", []):
                 for product in products:
