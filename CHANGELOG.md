@@ -1,6 +1,11 @@
 History
 =======
 
+0.31.0
+------
+
+* First implementation of Journal class.
+
 0.29.0
 ------
 
