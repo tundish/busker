@@ -78,9 +78,15 @@ class JournalTests(unittest.TestCase):
     def test_search_context_key(self):
         rht = Journal.scan(PlotlineTests.texts[2])
         context = rht.context(("b", 1))
-        print(context)
         self.assertIsInstance(context.maps[0].parent, Frame)
-        self.assertEqual(context.maps[0].type.value, rht.Type.CONTEXT.value)
 
         rv = rht.search("$['day']", context)
         self.assertEqual(rv, ["Wednesday"])
+
+    def test_search_context_attribute(self):
+        rht = Journal.scan(PlotlineTests.texts[2])
+        context = rht.context(("b", 1))
+        self.assertEqual(context.maps[0].type.value, rht.Type.CONTEXT.value)
+
+        rv = rht.search("$.maps[0].type.value", context)
+        self.assertEqual(rv, ["context"])

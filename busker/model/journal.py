@@ -21,12 +21,32 @@
 from collections.abc import Mapping
 from collections.abc import MutableSequence
 from collections.abc import Set
+import contextlib
 import itertools
 
 import jsonpath
 
 from busker.model.plotline import Plotline
 from busker.model.types import Chain
+
+
+class MonkeyPatch:
+    """
+    Modifications to the python-jsonpath library to allow attribute access semantics.
+
+    """
+
+    def _resolve(self, node):
+        if self.token.kind == jsonpath.token.TOKEN_NAME and hasattr(node.obj, self.name):
+            match = node.new_child(getattr(node.obj, self.name), self.name)
+            node.add_child(match)
+            yield match
+
+        if isinstance(node.obj, Mapping):
+            with contextlib.suppress(KeyError):
+                match = node.new_child(self.env.getitem(node.obj, self.name), self.name)
+                node.add_child(match)
+                yield match
 
 
 class Journal(Plotline):
@@ -74,6 +94,7 @@ class Journal(Plotline):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        jsonpath.selectors.NameSelector.resolve = MonkeyPatch._resolve
         self.env = jsonpath.JSONPathEnvironment()
 
     @property
