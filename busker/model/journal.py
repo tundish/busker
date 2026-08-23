@@ -43,93 +43,88 @@ import itertools
 import operator
 
 from busker.model.multipart import Multipart
+from busker.model.plotline import Plotline
 from busker.model.types import Chain
 from busker.model.types import Element
 from busker.model.types import Frame
 
 
-class Plotline:
+class Journal(Plotline):
     """
-    Implements a Resource HyperTree (.rht).
+    Access to Resource HyperTree (.rht) data.
 
     """
 
-    class Type(enum.StrEnum):
-        ACTIONS = enum.auto()
-        CONTENT = enum.auto()
-        CONTEXT = enum.auto()
-        LINKAGE = enum.auto()
-        MARKING = enum.auto()
-
-    Point = namedtuple(
-        "Point", ["path", "port", "spin", "cost"], defaults=[0, 0]
-    )
-
-    @classmethod
-    def scan(cls, text: str):
+    @staticmethod
+    def merge(body: dict, item: dict):
         """
-        Read through the text and assemble a Multipart document.
-        Decorate each frame with its path, and each Element with its type.
+        Merge a new item (by copy) into the context body.
+        Chains are built from the leaf up toward the root.
+        Consequently ordered sequences are built first in, last out.
 
         """
-        doc = Multipart(text=text, factory={dict: UserDict, list: UserList, str: UserString})
-        for p in list(doc.data):
-            frame = doc.data[p] = Frame(doc.data[p].data)
-            frame.path = p
-            for n, obj in enumerate(frame.copy()):
-                try:
-                    typ = cls.Type[obj["type"].upper()]
-                    frame[n] = Element(obj.data)
-                    frame[n].type = typ
-                except (AttributeError, TypeError):
-                    pass
-                finally:
-                    frame[n].parent = frame
-            frame.refresh()
-        return cls(doc)
+        stack = [(body.copy(), item.copy())]
+        while stack:
+            body, item = stack.pop(0)
+            for k, v in item.items():
+                if isinstance(v, Set):
+                    try:
+                        body[k] = body[k].union(v)
+                    except AttributeError:
+                        v = list(v)
+                    except KeyError:
+                        body[k] = v
+                        continue
 
-    def __init__(self, doc: Multipart):
-        self.doc = doc
-        self.routes = {}
+                if isinstance(v, MutableSequence):
+                    try:
+                        # FILO
+                        body[k] = v.copy() + body[k]
+                    except AttributeError:
+                        v = tuple(v)
+                    except KeyError:
+                        body[k] = v
+                        continue
+
+                if k not in body:
+                    body[k] = v
+                elif isinstance(body[k], Mapping):
+                    stack.append((body[k].copy(), v))
+        return body
 
     @property
-    def mesh(self) -> Generator[tuple]:
-        """
-        Generate the topological mesh of linked paths.
+    def journal(self) -> dict:
+        "Expand the document into a nested tree of frames"
+        rv = dict()
+        done = dict()
+        paths = list(self.doc.data)
+        for path in paths:
+            node = rv
+            for n, key in enumerate(path):
+                pos = tuple(path[:n + 1])
+                if pos in done:
+                    node = done[pos]
+                    continue
 
-        Each item is a tuple representing an arc from one path to another, if ports are open.
-        Spin and Cost values are given defaults if not defined.
+                try:
+                    frame = self.doc.data[pos]
+                    node[key] = Chain(*(i for i in frame if i.type == self.Type.CONTEXT.value))
+                except KeyError:
+                    node[key] = Chain()
 
-        """
-        linkage_elements = {
-            elem.get("port"): elem
-            for frame in self.doc.data.values()
-            for elem in frame
-            if elem.type == self.Type.LINKAGE
-        }
+                node[key] = node[key].new_child()
+                done[pos] = node[key]
+        return rv
 
-        for port, elem in linkage_elements.items():
-            twin = linkage_elements[elem["link"]]
-            if not elem.get("open", True):
-                continue
-
-            yield (
-                self.Point(
-                    elem.parent.path, elem["port"],
-                    tuple(elem.get("spin", [0, 1])), elem.get("cost", 0)
-                ),
-                self.Point(
-                    twin.parent.path, twin["port"],
-                    tuple(twin.get("spin", [0, 1])), twin.get("cost", 0)
-                ),
-            )
-
-    def branches(self, path: tuple) -> set[tuple, tuple]:
-        """
-        Returns a set of the permitted exits from the supplied path.
-
-        """
-        return {(a, b) for a, b in self.mesh if a.path == path}
+    def context(self, path: tuple) -> Chain:
+        levels = [path[0: n] for n in range(len(path) + 1)]
+        frames = [self.doc.data.get(level, []) for level in levels]
+        chains = [
+            Chain(*(i for i in frame if i.type == self.Type.CONTEXT.value))
+            for frame in reversed(frames)
+        ]
+        rv = list(itertools.accumulate(chains, self.merge))
+        return rv[-1] if rv else {}
 
     def route(self, start: tuple, end: tuple) -> list[tuple]:
         """

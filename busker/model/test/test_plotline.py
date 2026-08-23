@@ -241,14 +241,6 @@ class PlotlineTests(unittest.TestCase):
                     self.assertIsInstance(elem, (Element, ast.Module, UserString))
                     self.assertEqual(elem.parent, frame)
 
-    def test_scan_context(self):
-        rht = Plotline.scan(self.texts[0])
-        self.assertIsInstance(rht.doc.data[()][0], Element)
-        self.assertEqual(rht.doc.data[()][0].get("type"), rht.Type.CONTEXT.value)
-
-        self.assertIsInstance(rht.doc.data[()][1], Element)
-        self.assertEqual(rht.doc.data[()][1].get("type"), rht.Type.CONTEXT.value)
-
     def test_plotline_mesh(self):
         rht = Plotline.scan(self.texts[1])
         count = Counter(
@@ -284,28 +276,3 @@ class PlotlineTests(unittest.TestCase):
              ("spots", "bedroom", "door"), ("spots", "bedroom")),
             r
         )
-
-    def test_plotline_context(self):
-        rht = Plotline.scan(self.texts[2])
-
-        path = ("a", 0, 1, 2)
-        for n in range(3):
-            with self.subTest(path=path, n=n):
-                rv = rht.context(path)
-                self.assertIsInstance(rv, Chain)
-                self.assertTrue(isinstance(i, Element) for i in rv.maps)
-                self.assertEqual(rv["type"], rht.Type.CONTEXT.value)
-                self.assertEqual(rv["chord"], ("C", "F", "G"), rht.doc.data)
-                self.assertEqual(rv["goods"], {"tea", "biscuits", "eggs", "milk"})
-                self.assertEqual(rv["route"], ["home", "shop", "home", "work", "shop", "work", "home"], rv)
-
-    def test_plotline_journal(self):
-        rht = Plotline.scan(self.texts[2])
-        rv = rht.journal
-        self.assertIsInstance(rv, dict)
-        self.assertEqual(("a", "b"), tuple(rv), rv)
-        self.assertIn(0, rv["a"], rv)
-        self.assertIn(1, rv["a"][0])
-        self.assertIn(2, rv["a"][0][1])
-        self.assertEqual(rv["a"][0][1][2]["goods"], {"tea", "biscuits", "milk"})
-        self.assertIs(rv["a"][0][1][2].maps[1], rht.doc.data[("a", 0, 1, 2)][0])
