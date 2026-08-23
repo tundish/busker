@@ -17,6 +17,7 @@
 
 import ast
 from collections import UserString
+import textwrap
 import unittest
 
 from busker.model.journal import Journal
@@ -90,3 +91,28 @@ class JournalTests(unittest.TestCase):
 
         rv = rht.search("$.maps[0].type.value", context)
         self.assertEqual(rv, ["context"])
+
+    def test_search_context_action(self):
+        action_text = textwrap.dedent("""
+        {"mark": 127416676279376, "type": "application/json", "path": []}
+        {
+        "type": "actions",
+        "description": "Carry shopping",
+        "params": {
+            "goods": "$['goods'][*]",
+            "place": "$['route'][*]"
+        },
+        "terms": [
+            "Carry {goods} {place}",
+            "Drop {goods} off at {place}"
+        ]
+        }
+        {"mark": 127416676279376, "type": "text/x-python"}
+
+        def fn(context: dict, goods: str, place: str, **kwargs):
+            context["score"] += 1
+
+        """)
+        text = PlotlineTests.texts[2] + action_text
+        rht = Journal.scan(text)
+        self.fail(rht.doc)
