@@ -15,6 +15,7 @@
 # You should have received a copy of the GNU General Public License along with busker.
 # If not, see <https://www.gnu.org/licenses/>.
 
+import ast
 from collections import ChainMap
 from collections import UserDict
 from collections import UserList
@@ -64,6 +65,19 @@ class Element(UserDict):
     def action(self):
         if self.data.get("type") != ElementType.ACTIONS.value:
             return
+
+        try:
+            pos = self.parent.index(self)
+        except ValueError:
+            return
+
+        try:
+            rv = self.parent[pos + 1]
+        except IndexError:
+            return
+
+        if isinstance(rv, ast.AST):
+            return rv
 
     def refresh(self, parent=None):
         self.parent = parent

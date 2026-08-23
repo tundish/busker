@@ -116,5 +116,6 @@ class JournalTests(unittest.TestCase):
         """)
         text = PlotlineTests.texts[2] + action_text
         rht = Journal.scan(text)
-        rv = rht.actions(path=())
-        self.fail(rht.doc.data)
+        rv = rht.actions(path=("b", 1))
+        print(rht.doc.data)
+        self.fail(rv)

@@ -20,6 +20,7 @@
 
 from collections.abc import Mapping
 from collections.abc import MutableSequence
+from collections.abc import Sequence
 from collections.abc import Set
 import contextlib
 import itertools
@@ -28,16 +29,19 @@ import jsonpath
 
 from busker.model.plotline import Plotline
 from busker.model.types import Chain
+from busker.model.types import Element
 from busker.model.types import ElementType
 
 
-class MonkeyPatch:
+class JournalEnvironment(jsonpath.JSONPathEnvironment):
     """
-    Modifications to the python-jsonpath library to allow attribute access semantics.
+    Modifications to the python-jsonpath library.
+    * allow attribute access semantics.
+    * allow wildcards to apply to sets.
 
     """
 
-    def _resolve(self, node):
+    def _resolve_name(self, node):
         if self.token.kind == jsonpath.token.TOKEN_NAME and hasattr(node.obj, self.name):
             match = node.new_child(getattr(node.obj, self.name), self.name)
             node.add_child(match)
@@ -46,6 +50,19 @@ class MonkeyPatch:
         if isinstance(node.obj, Mapping):
             with contextlib.suppress(KeyError):
                 match = node.new_child(self.env.getitem(node.obj, self.name), self.name)
+                node.add_child(match)
+                yield match
+
+    def _resolve_wildcard(self, node):
+        if isinstance(node.obj, Mapping):
+            for key, val in node.obj.items():
+                match = node.new_child(val, key)
+                node.add_child(match)
+                yield match
+
+        elif isinstance(node.obj, (Set, Sequence)) and not isinstance(node.obj, str):
+            for i, val in enumerate(node.obj):
+                match = node.new_child(val, i)
                 node.add_child(match)
                 yield match
 
@@ -95,8 +112,9 @@ class Journal(Plotline):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        jsonpath.selectors.NameSelector.resolve = MonkeyPatch._resolve
-        self.env = jsonpath.JSONPathEnvironment()
+        jsonpath.selectors.NameSelector.resolve = JournalEnvironment._resolve_name
+        jsonpath.selectors.WildcardSelector.resolve = JournalEnvironment._resolve_wildcard
+        self.env = JournalEnvironment()
 
     @property
     def tree(self) -> dict:
@@ -137,8 +155,17 @@ class Journal(Plotline):
         return self.env.findall(query, data, **kwargs)
 
     def actions(self, path: tuple) -> dict:
-        frames = self.doc.data.get(path, [])
-        return frames
+        levels = [path[0: n] for n in range(len(path) + 1)]
+        frames = [self.doc.data.get(level, []) for level in levels]
+        elements = [
+            i for frame in frames for i in frame
+            if isinstance(i, Element) and i.action
+        ]
+        context = self.context(path)
+        for element in elements:
+            results = {k: self.search(v, context) for k, v in element.get("params", {}).items()}
+        print(f"{results=}")
+        return self.context(path)
         chains = [
             Chain(*(i for i in frame if i.type == ElementType.CONTEXT.value))
             for frame in reversed(frames)
