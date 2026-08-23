@@ -162,12 +162,14 @@ class Journal(Plotline):
             if isinstance(i, Element) and i.action
         ]
         context = self.context(path)
+
+        rv = dict()
         for element in elements:
             results = {k: self.search(v, context) for k, v in element.get("params", {}).items()}
-        print(f"{results=}")
-        return self.context(path)
-        chains = [
-            Chain(*(i for i in frame if i.type == ElementType.CONTEXT.value))
-            for frame in reversed(frames)
-        ]
-        return self.env.findall(query, data, **kwargs)
+            products = set(itertools.product(*results.values()))
+            for term in element.get("terms", []):
+                for product in products:
+                    kwargs = dict(zip(element["params"], product))
+                    phrase = term.format(**kwargs)
+                    rv[phrase] = (element, kwargs)
+        return rv

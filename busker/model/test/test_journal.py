@@ -105,7 +105,7 @@ class JournalTests(unittest.TestCase):
         },
         "terms": [
             "Carry {goods} {place}",
-            "Drop {goods} off at {place}"
+            "Drop off {goods} at {place}"
         ]
         }
         {"mark": 127416676279376, "type": "text/x-python"}
@@ -116,6 +116,12 @@ class JournalTests(unittest.TestCase):
         """)
         text = PlotlineTests.texts[2] + action_text
         rht = Journal.scan(text)
-        rv = rht.actions(path=("b", 1))
-        print(rht.doc.data)
-        self.fail(rv)
+        actions = rht.actions(path=("b", 1))
+        self.assertIsInstance(actions, dict)
+        rv = actions.get("Drop off milk at work")
+        self.assertIsInstance(rv, tuple)
+        self.assertEqual(len(rv), 2)
+        self.assertIsInstance(rv[0], Element)
+        self.assertEqual(rv[0], rht.doc.data[()][-2])
+        self.assertEqual(rv[0].action, rht.doc.data[()][-1])
+        self.assertEqual(rv[1], dict(goods="milk", place="work"))
