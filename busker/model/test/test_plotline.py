@@ -152,8 +152,7 @@ class PlotlineTests(unittest.TestCase):
         "port": 20260813201422,
         "link": 20260813201319,
         "spin": [5, 8],
-        "cost": 0,
-        "open": true
+        "cost": 0
         }
         {"mark": 127416676279376, "type": "application/json", "path": ["spots", "kitchen", "door"]}
         {
@@ -161,8 +160,7 @@ class PlotlineTests(unittest.TestCase):
         "port": 20260813191208,
         "link": 20260813191107,
         "spin": [1, 8],
-        "cost": 0,
-        "open": true
+        "cost": Infinity
         }
         {"mark": 127416676279376, "type": "application/json", "path": ["spots", "kitchen"]}
         {
@@ -176,8 +174,7 @@ class PlotlineTests(unittest.TestCase):
         "port": 20260813192820,
         "link": 20260813202041,
         "spin": [1, 2],
-        "cost": 3,
-        "open": true
+        "cost": 3
         }
         """).lstrip(),
         textwrap.dedent("""
@@ -250,7 +247,7 @@ class PlotlineTests(unittest.TestCase):
         )
         self.assertTrue(all(v == 2 for v in count.values()))
         mesh = list(rht.mesh)
-        self.assertEqual(len(count), len(mesh), mesh)
+        self.assertEqual(len(count), len(mesh) + 1, mesh)  # Kitchen door is stuck
 
     def test_plotline_branches(self):
         rht = Plotline.scan(self.texts[1])

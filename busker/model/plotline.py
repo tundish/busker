@@ -40,6 +40,7 @@ from collections.abc import Mapping
 from collections.abc import MutableSequence
 from collections.abc import Set
 import itertools
+import math
 import operator
 
 from busker.model.multipart import Multipart
@@ -91,7 +92,7 @@ class Plotline:
         """
         Generate the topological mesh of linked paths.
 
-        Each item is a tuple representing an arc from one path to another, if ports are open.
+        Each item is a tuple representing an arc from one path to another.
         Spin and Cost values are given defaults if not defined.
 
         """
@@ -103,10 +104,11 @@ class Plotline:
         }
 
         for port, elem in linkage_elements.items():
-            twin = linkage_elements[elem["link"]]
-            if not elem.get("open", True):
+            cost = elem.get("cost", 0)
+            if not math.isfinite(cost):
                 continue
 
+            twin = linkage_elements[elem["link"]]
             yield (
                 self.Point(
                     elem.parent.path, elem["port"],
