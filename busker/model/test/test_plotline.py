@@ -55,7 +55,7 @@ class PlotlineTests(unittest.TestCase):
             "params": {
                 "entity": "$[*]['description']"
             },
-            "phrases": [
+            "terms": [
                 "Inspect {entity}"
             ]
         }
