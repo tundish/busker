@@ -128,11 +128,11 @@ class JournalTests(unittest.TestCase):
         self.assertEqual(len(rv), 2)
         self.assertIsInstance(rv[0], Element)
         self.assertEqual(rv[0], rht.doc.data[()][-2])
-        self.assertEqual(rv[0].action, rht.doc.data[()][-1])
+        self.assertEqual(rv[0].handler, rht.doc.data[()][-1])
         self.assertEqual(rv[1], dict(goods="milk", place="work"))
 
         self.assertEqual(rht.context(path).get("goods", None), {"crumpets", "milk"})
-        code = compile(rv[0].action, format(path), mode="exec")
+        code = compile(rv[0].handler, format(path), mode="exec")
         l = dict(rv[1], journal=rht, path=path)
         g = dict(logging=logging)
         with self.assertLogs(format(path), logging.DEBUG) as check:

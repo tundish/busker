@@ -159,7 +159,7 @@ class Journal(Plotline):
         frames = [self.doc.data.get(level, []) for level in levels]
         elements = [
             i for frame in frames for i in frame
-            if isinstance(i, Element) and i.action
+            if isinstance(i, Element) and i.handler
         ]
         context = self.context(path)
 

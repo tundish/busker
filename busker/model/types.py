@@ -65,7 +65,7 @@ class Frame(UserList):
 class Element(UserDict):
 
     @property
-    def action(self):
+    def handler(self):
         if self.data.get("type") != ElementType.HANDLER.value:
             return
 
