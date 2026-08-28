@@ -51,18 +51,17 @@ class PlotlineTests(unittest.TestCase):
         }
         {"mark": 2863490869328, "type": "application/json"}
         {
-            "type": "actions",
+            "type": "handler",
             "params": {
-                "marker": "$['marker']",
-                "place": "$[*]['description']"
+                "entity": "$[*]['description']"
             },
             "phrases": [
-                "Go {place}"
+                "Inspect {entity}"
             ]
         }
         {"mark": 2863490869328, "type": "text/x-python"}
 
-        def fn(context: dict, place: str, marker: dict, **kwargs):
+        def fn(context: dict, marker: dict, **kwargs):
             context["score"] += 1
 
         {"mark": 2863490869328, "type": "application/json", "path": ["a"]}

@@ -40,6 +40,7 @@ from collections.abc import Mapping
 from collections.abc import MutableSequence
 from collections.abc import Set
 import itertools
+import logging
 import math
 import operator
 
@@ -67,6 +68,7 @@ class Plotline:
         Decorate each frame with its path, and each Element with its type.
 
         """
+        logger = logging.getLogger(cls.__name__.lower())
         doc = Multipart(text=text, factory={dict: UserDict, list: UserList, str: UserString})
         for p in list(doc.data):
             frame = doc.data[p] = Frame(doc.data[p].data)
@@ -76,6 +78,12 @@ class Plotline:
                     typ = ElementType[obj["type"].upper()]
                     frame[n] = Element(obj.data)
                     frame[n].type = typ
+                except KeyError:
+                    if "type" in obj:
+                        logger.error(f"Unknown resource type: {obj['type']}")
+                    else:
+                        logger.error(f"Type value missing: path {p} item {n}")
+                    return
                 except (AttributeError, TypeError):
                     pass
                 finally:

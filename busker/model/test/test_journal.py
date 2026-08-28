@@ -100,7 +100,7 @@ class JournalTests(unittest.TestCase):
         action_text = textwrap.dedent("""
         {"mark": 127416676279376, "type": "application/json", "path": []}
         {
-        "type": "actions",
+        "type": "handler",
         "description": "Carry shopping",
         "params": {
             "goods": "$['goods'][*]",

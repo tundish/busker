@@ -24,11 +24,14 @@ import enum
 
 
 class ElementType(enum.StrEnum):
-    ACTIONS = enum.auto()
     CONTENT = enum.auto()
     CONTEXT = enum.auto()
+    FIXTURE = enum.auto()
+    HANDLER = enum.auto()
     LINKAGE = enum.auto()
     MARKING = enum.auto()
+    MONITOR = enum.auto()
+    TRIGGER = enum.auto()
 
 
 class Chain(ChainMap):
@@ -63,7 +66,7 @@ class Element(UserDict):
 
     @property
     def action(self):
-        if self.data.get("type") != ElementType.ACTIONS.value:
+        if self.data.get("type") != ElementType.HANDLER.value:
             return
 
         try:
