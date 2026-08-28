@@ -72,7 +72,11 @@ class PlotlineTests(unittest.TestCase):
         {"mark": 2863490869328, "type": "application/json", "path": ["a"]}
         {
         "type": "marking",
-        "rank": 0
+        "name": "stage",
+        "path": ["a", "b"],
+        "face": [0, 1],
+        "span": 12,
+        "tick": 0
         }
         {"mark": 2863490869328, "type": "application/json", "path": ["a"]}
         {
