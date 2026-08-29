@@ -17,17 +17,65 @@
 
 import argparse
 import cmd
+import logging
+import pathlib
 import sys
 
 
 class Console(cmd.Cmd):
-    pass
 
+    def __init__(self):
+        self.logger = logging.getLogger("engine")
+        super().__init__(self)
+
+    def precmd(self, line):
+        self.logger.info(f"{line=}")
+        return line
+
+
+plugin_classes = [
+    "busker.engine.base:Engine",
+]
+
+
+def main(args):
+    console = Console()
+    console.cmdloop(intro="Type help for more instructions.")
+    return 0
+
+
+def parser():
+    rv = argparse.ArgumentParser(usage=__doc__, fromfile_prefix_chars="=")
+    rv.convert_arg_line_to_args = lambda x: x.split()
+    rv.add_argument(
+        "--input",
+        type=pathlib.Path, default=None,
+        help=f"Specify .rht file"
+    )
+    rv.add_argument(
+        "--plugin", action="append",
+        help=f"Specify plugin list {plugin_classes}"
+    )
+    rv.add_argument(
+        "--debug", action="store_true", default=False,
+        help=f"Display debug logs"
+    )
+    return rv
 
 
 def run():
-    console = Console()
-    console.cmdloop(intro="Type help for more instructions.")
+    p = parser()
+    args = p.parse_args()
+    level = logging.DEBUG if args.debug else logging.INFO
+    logging.basicConfig(
+        format="{asctime}| {levelname:>8}| {name:<18} | {message}",
+        datefmt="",
+        style="{",
+        stream=sys.stderr,
+        level=level,
+    )
+    rv = main(args)
+    sys.exit(rv)
 
 
 if __name__ == "__main__":
