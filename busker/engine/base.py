@@ -24,4 +24,9 @@ class Engine:
     def __init__(self, rht: Journal = None):
         self.rht = rht
 
+    def put(self, msg):
+        pass
 
+    def step(self, msg):
+        # run
+        pass

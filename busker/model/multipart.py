@@ -21,6 +21,7 @@ from collections.abc import MutableMapping
 from collections import defaultdict
 from collections import UserDict
 from collections import UserList
+from collections import UserString
 import io
 import json
 import logging
@@ -69,7 +70,7 @@ class Multipart:
             raise TypeError(obj)
 
     def __str__(self):
-        return "\n".join(self.dump())
+        return "\n".join(str(i) if isinstance(i, UserString) else i for i in self.dump())
 
     def feed(
         self, text: str, header_length=255,

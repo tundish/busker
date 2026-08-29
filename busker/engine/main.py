@@ -61,7 +61,6 @@ class Console(cmd.Cmd):
     def do_file(self, line: str):
         "Read or feed the file"
         cmd = list(self.parse(line))
-        self.logger.debug(f"{cmd=}")
         if len(cmd) == 0:
             self.logger.info(f"File input: {self.args.input}")
             return
@@ -72,9 +71,28 @@ class Console(cmd.Cmd):
             self.logger.warning(f"Bad syntax: {cmd}")
 
         if cmd[0].lower() == "feed":
-            self.engine.rht = Journal.scan(text)
-            self.logger.info(f"Engine feed: {self.args.input}")
-            self.logger.debug(f"\n{self.engine.rht}")
+            try:
+                self.engine.rht = Journal.scan(text)
+                self.logger.info(f"Engine feed: {self.args.input}")
+                self.logger.debug(f"\n{self.engine.rht.doc}")
+            except Exception as err:
+                self.logger.error(err, exc_info=True)
+
+    def do_path(self, line: str):
+        "View paths"
+        cmd = list(self.parse(line))
+        try:
+            lookup = {format(k): v for k, v in self.engine.rht.doc.data.items()}
+        except AttributeError:
+            self.logger.error("'file feed' required.")
+            return
+
+        if len(cmd) == 0:
+            self.logger.debug(self.engine.rht.doc.data)
+            self.logger.info("\n".join(lookup))
+        else:
+            pass
+            return
 
     def do_quit(self, line: str):
         "Quit the program"
