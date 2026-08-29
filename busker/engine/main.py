@@ -19,18 +19,31 @@ import argparse
 import cmd
 import logging
 import pathlib
+import readline
 import sys
 
 
 class Console(cmd.Cmd):
+    intro = "Type 'help' for more instructions."
+    prompt = "> "
 
-    def __init__(self):
+    def parse(line: str):
+        return line
+
+    def preloop(self):
         self.logger = logging.getLogger("engine")
-        super().__init__(self)
 
     def precmd(self, line):
-        self.logger.info(f"{line=}")
+        self.logger.debug(f"{line=}")
         return line
+
+    def default(self, line):
+        self.logger.warning(f"Unknown syntax: '{line}'")
+        self.stdout.write("")
+
+    def do_quit(self, *args):
+        "Quit the program"
+        return True
 
 
 plugin_classes = [
@@ -40,7 +53,7 @@ plugin_classes = [
 
 def main(args):
     console = Console()
-    console.cmdloop(intro="Type help for more instructions.")
+    console.cmdloop()
     return 0
 
 
