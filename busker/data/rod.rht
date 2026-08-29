@@ -41,5 +41,15 @@
 {
 "type": "context",
 "entities": [
+    {
+        "names": [],
+        "states": {
+            "exit": (),
+            "home": (),
+            "into": (),
+            "spot": (),
+        },
+        "tags": {},
+    },
 ],
 }
