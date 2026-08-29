@@ -1,3 +1,39 @@
 {"seal": 20260829125737, "busker": "0.25.0", "type": "text/plain"}
 # https://www.ifwiki.org/Road_of_Darkness
 # https://asterfialla.com/blog/road-of-darkness
+{"seal": 20260829125737, "type": "application/json", "path": ["stage", "forest", "crossroads", "south"]}
+{
+"type": "linkage",
+"port": 20260829173009,
+"link": 20260829173041
+}
+{"seal": 20260829125737, "type": "application/json", "path": ["stage", "forest", "crossroads", "south"]}
+{
+"type": "linkage",
+"port": 20260829173153,
+"link": 20260829173200
+}
+{"seal": 20260829125737, "type": "application/json", "path": ["stage", "forest", "crossroads", "south"]}
+{
+"type": "linkage",
+"port": 20260829173414,
+"link": 20260829173419
+}
+{"seal": 20260829125737, "type": "application/json", "path": ["stage", "forest", "crossroads", "east"]}
+{
+"type": "linkage",
+"port": 20260829173041,
+"link": 20260829173009
+}
+{"seal": 20260829125737, "type": "application/json", "path": ["stage", "forest", "crossroads", "west"]}
+{
+"type": "linkage",
+"port": 20260829173200,
+"link": 20260829173153
+}
+{"seal": 20260829125737, "type": "application/json", "path": ["stage", "forest", "crossroads", "north"]}
+{
+"type": "linkage",
+"port": 20260829173419,
+"link": 20260829173414
+}
