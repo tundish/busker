@@ -22,26 +22,61 @@ import pathlib
 import readline
 import sys
 
+from busker.engine.base import Engine
+from busker.model.journal import Journal
+
 
 class Console(cmd.Cmd):
     intro = "Type 'help' for more instructions."
     prompt = "> "
 
+    @staticmethod
     def parse(line: str):
-        return line
+        for word in line.split():
+            word = word.strip()
+            if not word: continue
+
+            if word.isdigit():
+                yield float(word)
+            else:
+                yield word
+
+    def __init__(self, args: argparse.Namespace):
+        super().__init__(self)
+        self.logger = logging.getLogger("console")
+        self.args = args
+        self.engine = Engine()
 
     def preloop(self):
-        self.logger = logging.getLogger("engine")
+        pass
 
     def precmd(self, line):
         self.logger.debug(f"{line=}")
         return line
 
-    def default(self, line):
+    def default(self, line: str):
         self.logger.warning(f"Unknown syntax: '{line}'")
         self.stdout.write("")
 
-    def do_quit(self, *args):
+    def do_file(self, line: str):
+        "Read or feed the file"
+        cmd = list(self.parse(line))
+        self.logger.debug(f"{cmd=}")
+        if len(cmd) == 0:
+            self.logger.info(f"File input: {self.args.input}")
+            return
+        elif cmd[0].lower() in ("feed", "read"):
+            text = self.args.input.read_text()
+            self.logger.debug(f"\n{text}")
+        else:
+            self.logger.warning(f"Bad syntax: {cmd}")
+
+        if cmd[0].lower() == "feed":
+            self.engine.rht = Journal.scan(text)
+            self.logger.info(f"Engine feed: {self.args.input}")
+            self.logger.debug(f"\n{self.engine.rht}")
+
+    def do_quit(self, line: str):
         "Quit the program"
         return True
 
@@ -52,7 +87,7 @@ plugin_classes = [
 
 
 def main(args):
-    console = Console()
+    console = Console(args)
     console.cmdloop()
     return 0
 
@@ -61,7 +96,7 @@ def parser():
     rv = argparse.ArgumentParser(usage=__doc__, fromfile_prefix_chars="=")
     rv.convert_arg_line_to_args = lambda x: x.split()
     rv.add_argument(
-        "--input",
+        "input",
         type=pathlib.Path, default=None,
         help=f"Specify .rht file"
     )

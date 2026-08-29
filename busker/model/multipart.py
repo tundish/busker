@@ -41,6 +41,7 @@ class Multipart:
     ):
         self.logger = logging.getLogger("busker.multipart")
         self.mark_regex = re.compile(r"^\{.+?\}$", re.MULTILINE)
+        self.seal = id(self)
         self.path = path or tuple()
         self.sep = sep
 
@@ -56,9 +57,9 @@ class Multipart:
     @property
     def header(self):
         if self.path is None:
-            return dict(seal=id(self), busker=__version__)
+            return dict(seal=self.seal, busker=__version__)
         else:
-            return dict(seal=id(self), busker=__version__, path=self.path[:])
+            return dict(seal=self.seal, busker=__version__, path=self.path[:])
 
     @staticmethod
     def coerce(obj: object):
@@ -90,7 +91,9 @@ class Multipart:
             return
 
         seal = header.get("seal")
-        if not seal:
+        if seal:
+            self.seal = seal
+        else:
             self.logger.error(f"No seal found. Pos: {pos}")
             return
 

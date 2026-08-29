@@ -16,7 +16,12 @@
 # If not, see <https://www.gnu.org/licenses/>.
 
 
+from busker.model.journal import Journal
+
+
 class Engine:
-    pass
+
+    def __init__(self, rht: Journal = None):
+        self.rht = rht
 
 
