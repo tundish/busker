@@ -56,9 +56,9 @@ class Multipart:
     @property
     def header(self):
         if self.path is None:
-            return dict(mark=id(self), busker=__version__)
+            return dict(seal=id(self), busker=__version__)
         else:
-            return dict(mark=id(self), busker=__version__, path=self.path[:])
+            return dict(seal=id(self), busker=__version__, path=self.path[:])
 
     @staticmethod
     def coerce(obj: object):
@@ -89,9 +89,9 @@ class Multipart:
             self.logger.error(f"Invalid Header. Pos: {pos}")
             return
 
-        mark = header.get("mark")
-        if not mark:
-            self.logger.error(f"No mark found. Pos: {pos}")
+        seal = header.get("seal")
+        if not seal:
+            self.logger.error(f"No seal found. Pos: {pos}")
             return
 
         for n, d in enumerate(delimiters):
@@ -105,7 +105,7 @@ class Multipart:
                 self.logger.error(f"Invalid Delimiter. Pos: {pos}")
                 return
 
-            if data.get("mark") != mark:
+            if data.get("seal") != seal:
                 self.logger.error(f"Mark mismatch. Pos: {pos}")
                 return
 

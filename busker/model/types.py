@@ -24,6 +24,7 @@ import enum
 
 
 class ElementType(enum.StrEnum):
+    COMMENT = enum.auto()
     CONTENT = enum.auto()
     CONTEXT = enum.auto()
     FIXTURE = enum.auto()

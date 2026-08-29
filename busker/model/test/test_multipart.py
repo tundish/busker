@@ -53,15 +53,15 @@ class MultipartTests(unittest.TestCase):
 
     def test_feed(self):
         text = textwrap.dedent("""
-        {"mark": 2863490869328, "busker": "0.25.0", "type": "application/json"}
+        {"seal": 2863490869328, "busker": "0.25.0", "type": "application/json"}
         {
         "port": 8080
         }
-        {"mark": 2863490869328, "busker": "0.25.0", "type": "text/plain", "path": ["a", "b", "c"]}
+        {"seal": 2863490869328, "busker": "0.25.0", "type": "text/plain", "path": ["a", "b", "c"]}
 
         <A> Knock knock.
         <B> Who's there?
-        {"mark": 2863490869328, "busker": "0.25.0", "type": "text/x-python"}
+        {"seal": 2863490869328, "busker": "0.25.0", "type": "text/x-python"}
         print("Hello, World!")
         """).lstrip()
         doc = Multipart()
@@ -74,26 +74,26 @@ class MultipartTests(unittest.TestCase):
     def test_feed_reject(self):
         for n, text in enumerate([
             textwrap.dedent("""
-            {"mark": 2863490869328, "busker": "0.25.0", "type": "application/json"}
+            {"seal": 2863490869328, "busker": "0.25.0", "type": "application/json"}
             """),  # Leading whitespace
             textwrap.dedent("""
-            {{"mark": 2863490869328, "busker": "0.25.0", "type": "application/json"}
+            {{"seal": 2863490869328, "busker": "0.25.0", "type": "application/json"}
             """).lstrip(),
             textwrap.dedent("""
-            {"mark": 2863490869328, "busker": "0.25.0", "type": "application/json"}}
+            {"seal": 2863490869328, "busker": "0.25.0", "type": "application/json"}}
             """).lstrip(),
             textwrap.dedent("""
-            {"mark": 2863490869328, "busker": "0.25.0", "type": "application/json"}
+            {"seal": 2863490869328, "busker": "0.25.0", "type": "application/json"}
             {
             "port": 8080
             }
-            {"mark": "2863490869328", "busker": "0.25.0", "type": "text/plain"}
+            {"seal": "2863490869328", "busker": "0.25.0", "type": "text/plain"}
 
             <A> Knock knock.
             <B> Who's there?
-            """).lstrip(),  # Mismatched mark
+            """).lstrip(),  # Mismatched seal
             textwrap.dedent("""
-            {"mark": 2863490869328, "busker": "0.25.0", "type": "application/json"}
+            {"seal": 2863490869328, "busker": "0.25.0", "type": "application/json"}
             {
             "port": 8080,  # This is not valid JSON
             }
@@ -115,7 +115,7 @@ class MultipartTests(unittest.TestCase):
         code = ast.parse("print('Hello, World!')")
         doc = Multipart(config, text, code)
         self.assertIsInstance(doc.header, dict)
-        self.assertTrue(doc.header.get("mark", None))
+        self.assertTrue(doc.header.get("seal", None))
         self.assertEqual(doc.header.get("busker", None), busker.__version__)
 
         rv = str(doc)
@@ -136,27 +136,27 @@ class MultipartTests(unittest.TestCase):
 
     def test_factory(self):
         text = textwrap.dedent("""
-        {"mark": 2863490869328, "type": "application/json"}
+        {"seal": 2863490869328, "type": "application/json"}
         {
         "rank": 0
         }
-        {"mark": 2863490869328, "type": "application/json", "path": ["a"]}
+        {"seal": 2863490869328, "type": "application/json", "path": ["a"]}
         {
         "rank": 0
         }
-        {"mark": 2863490869328, "type": "application/json", "path": ["a"]}
+        {"seal": 2863490869328, "type": "application/json", "path": ["a"]}
         {
         "rank": 1
         }
-        {"mark": 2863490869328, "type": "application/json", "path": ["a", "b"]}
+        {"seal": 2863490869328, "type": "application/json", "path": ["a", "b"]}
         {
         "rank": 0
         }
-        {"mark": 2863490869328, "type": "application/json", "path": ["a", "b"]}
+        {"seal": 2863490869328, "type": "application/json", "path": ["a", "b"]}
         {
         "rank": 1
         }
-        {"mark": 2863490869328, "type": "text/plain", "path": ["a", "b"]}
+        {"seal": 2863490869328, "type": "text/plain", "path": ["a", "b"]}
         Yesterday, upon the stair...
         """).lstrip()
         doc = Multipart(text=text)

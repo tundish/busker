@@ -35,13 +35,13 @@ class PlotlineTests(unittest.TestCase):
 
     texts = [
         textwrap.dedent("""
-        {"mark": 2863490869328, "type": "application/json"}
+        {"seal": 2863490869328, "type": "application/json"}
         {
         "type": "context",
         "step": 2,
         "score": 0
         }
-        {"mark": 2863490869328, "type": "text/x-python"}
+        {"seal": 2863490869328, "type": "text/x-python"}
         {
         "type": "context",
         "world": [
@@ -49,7 +49,7 @@ class PlotlineTests(unittest.TestCase):
             {"outside": {"spot": 2}}
         ]
         }
-        {"mark": 2863490869328, "type": "application/json"}
+        {"seal": 2863490869328, "type": "application/json"}
         {
             "type": "handler",
             "params": {
@@ -59,17 +59,17 @@ class PlotlineTests(unittest.TestCase):
                 "Inspect {entity}"
             ]
         }
-        {"mark": 2863490869328, "type": "text/x-python"}
+        {"seal": 2863490869328, "type": "text/x-python"}
 
         def fn(context: dict, **kwargs):
             context["score"] += 1
 
-        {"mark": 2863490869328, "type": "application/json", "path": ["a"]}
+        {"seal": 2863490869328, "type": "application/json", "path": ["a"]}
         {
         "type": "context",
         "description": "outside"
         }
-        {"mark": 2863490869328, "type": "application/json", "path": ["a"]}
+        {"seal": 2863490869328, "type": "application/json", "path": ["a"]}
         {
         "type": "marking",
         "name": "stage",
@@ -78,78 +78,78 @@ class PlotlineTests(unittest.TestCase):
         "span": 12,
         "tick": 0
         }
-        {"mark": 2863490869328, "type": "application/json", "path": ["a"]}
+        {"seal": 2863490869328, "type": "application/json", "path": ["a"]}
         {
         "type": "context",
         "rank": 1
         }
-        {"mark": 2863490869328, "type": "application/json", "path": ["a", "b"]}
+        {"seal": 2863490869328, "type": "application/json", "path": ["a", "b"]}
         {
         "type": "context",
         "description": "inside"
         }
-        {"mark": 2863490869328, "type": "application/json", "path": ["a", "b"]}
+        {"seal": 2863490869328, "type": "application/json", "path": ["a", "b"]}
         {
         "type": "content",
         "status": "draft"
         }
-        {"mark": 2863490869328, "type": "text/plain", "path": ["a", "b"]}
+        {"seal": 2863490869328, "type": "text/plain", "path": ["a", "b"]}
         Yesterday, upon the stair
 
-        {"mark": 2863490869328, "type": "text/plain", "path": ["a", "b"]}
+        {"seal": 2863490869328, "type": "text/plain", "path": ["a", "b"]}
         I met a man who wasn't there.
 
-        {"mark": 2863490869328, "type": "text/plain", "path": ["a", "b"]}
+        {"seal": 2863490869328, "type": "text/plain", "path": ["a", "b"]}
         He wasn't there again today,
 
-        {"mark": 2863490869328, "type": "text/plain", "path": ["a", "b"]}
+        {"seal": 2863490869328, "type": "text/plain", "path": ["a", "b"]}
         I wish that man would go away!
 
         """).lstrip(),
         textwrap.dedent("""
-        {"mark": 127416676279376, "type": "application/json", "path": []}
+        {"seal": 127416676279376, "type": "application/json", "path": []}
         {
         "type": "marking",
         "path": ["spots", "bedroom"],
         "pose": 0
         }
-        {"mark": 127416676279376, "type": "application/json", "path": ["spots", "bedroom"]}
+        {"seal": 127416676279376, "type": "application/json", "path": ["spots", "bedroom"]}
         {
         "type": "linkage",
         "port": 20260813190453,
         "link": 20260813190710
         }
-        {"mark": 127416676279376, "type": "application/json", "path": ["spots", "bedroom", "door"]}
+        {"seal": 127416676279376, "type": "application/json", "path": ["spots", "bedroom", "door"]}
         {
         "type": "linkage",
         "port": 20260813190710,
         "link": 20260813190453
         }
-        {"mark": 127416676279376, "type": "application/json", "path": ["spots", "bedroom", "door"]}
+        {"seal": 127416676279376, "type": "application/json", "path": ["spots", "bedroom", "door"]}
         {
         "type": "linkage",
         "port": 20260813201044,
         "link": 20260813190851
         }
-        {"mark": 127416676279376, "type": "application/json", "path": ["spots", "hall"]}
+        {"seal": 127416676279376, "type": "application/json", "path": ["spots", "hall"]}
         {
         "type": "linkage",
         "port": 20260813190851,
         "link": 20260813201044
         }
-        {"mark": 127416676279376, "type": "application/json", "path": ["spots", "hall"]}
+        {"seal": 127416676279376, "type": "application/json", "path": ["spots", "hall"]}
         {
         "type": "linkage",
         "port": 20260813201319,
         "link": 20260813201422
         }
-        {"mark": 127416676279376, "type": "application/json", "path": ["spots", "hall"]}
+        {"seal": 127416676279376, "type": "application/json", "path": ["spots", "hall"]}
         {
         "type": "linkage",
         "port": 20260813202041,
         "link": 20260813192820
         }
-        {"mark": 127416676279376, "type": "application/json", "path": ["spots", "kitchen", "door"]}
+        {"seal": 127416676279376, "type": "application/json", "path": ["spots", "kitchen", "door"]}
         {
         "type": "linkage",
         "port": 20260813201422,
@@ -157,7 +157,7 @@ class PlotlineTests(unittest.TestCase):
         "spin": [5, 8],
         "cost": 0
         }
-        {"mark": 127416676279376, "type": "application/json", "path": ["spots", "kitchen", "door"]}
+        {"seal": 127416676279376, "type": "application/json", "path": ["spots", "kitchen", "door"]}
         {
         "type": "linkage",
         "port": 20260813191208,
@@ -165,13 +165,13 @@ class PlotlineTests(unittest.TestCase):
         "spin": [1, 8],
         "cost": Infinity
         }
-        {"mark": 127416676279376, "type": "application/json", "path": ["spots", "kitchen"]}
+        {"seal": 127416676279376, "type": "application/json", "path": ["spots", "kitchen"]}
         {
         "type": "linkage",
         "port": 20260813191107,
         "link": 20260813191208
         }
-        {"mark": 127416676279376, "type": "application/json", "path": ["spots", "stairs"]}
+        {"seal": 127416676279376, "type": "application/json", "path": ["spots", "stairs"]}
         {
         "type": "linkage",
         "port": 20260813192820,
@@ -181,11 +181,11 @@ class PlotlineTests(unittest.TestCase):
         }
         """).lstrip(),
         textwrap.dedent("""
-        {"mark": 127416676279376, "type": "application/json", "path": []}
+        {"seal": 127416676279376, "type": "application/json", "path": []}
         {
         "type": "context"
         }
-        {"mark": 127416676279376, "type": "text/x-python", "path": ["a"]}
+        {"seal": 127416676279376, "type": "text/x-python", "path": ["a"]}
         {
         "type": "context",
         "day": "Sunday",
@@ -193,33 +193,33 @@ class PlotlineTests(unittest.TestCase):
         "goods": {"eggs", "milk"},
         "route": ["home", "shop", "home"],
         }
-        {"mark": 127416676279376, "type": "application/json", "path": ["a", 0]}
+        {"seal": 127416676279376, "type": "application/json", "path": ["a", 0]}
         {
         "type": "context"
         }
-        {"mark": 127416676279376, "type": "application/json", "path": ["a", 0, 1]}
+        {"seal": 127416676279376, "type": "application/json", "path": ["a", 0, 1]}
         {
         "type": "context",
         "day": "Monday"
         }
-        {"mark": 127416676279376, "type": "text/x-python", "path": ["a", 0, 1, 2]}
+        {"seal": 127416676279376, "type": "text/x-python", "path": ["a", 0, 1, 2]}
         {
         "type": "context",
         "chord": ("C", "F", "G"),
         "goods": {"tea", "biscuits", "milk"},
         "route": ["work", "shop", "work", "home"],
         }
-        {"mark": 127416676279376, "type": "application/json", "path": ["b"]}
+        {"seal": 127416676279376, "type": "application/json", "path": ["b"]}
         {
         "type": "context",
         "day": "Monday"
         }
-        {"mark": 127416676279376, "type": "application/json", "path": ["b", 0]}
+        {"seal": 127416676279376, "type": "application/json", "path": ["b", 0]}
         {
         "type": "context",
         "day": "Tuesday"
         }
-        {"mark": 127416676279376, "type": "text/x-python", "path": ["b", 1]}
+        {"seal": 127416676279376, "type": "text/x-python", "path": ["b", 1]}
         {
         "type": "context",
         "day": "Wednesday",

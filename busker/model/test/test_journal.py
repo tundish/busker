@@ -98,7 +98,7 @@ class JournalTests(unittest.TestCase):
     @unittest.skipIf(platform.python_version() < "3.13", "new eval semantics")
     def test_compile_exec_action(self):
         action_text = textwrap.dedent("""
-        {"mark": 127416676279376, "type": "application/json", "path": []}
+        {"seal": 127416676279376, "type": "application/json", "path": []}
         {
         "type": "handler",
         "description": "Carry shopping",
@@ -111,7 +111,7 @@ class JournalTests(unittest.TestCase):
             "Drop off {goods} at {place}"
         ]
         }
-        {"mark": 127416676279376, "type": "text/x-python"}
+        {"seal": 127416676279376, "type": "text/x-python"}
         context = journal.context(path)
         context["goods"].remove(goods)
         logging.getLogger(format(path)).debug(
