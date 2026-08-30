@@ -92,16 +92,7 @@ letters in their names.
 "name": "world",
 "path": ["world", "forest", "crossroads", "centre"],
 "face": [0, 1],
-"span": float("inf"),
-"tick": 0
-}
-{"seal": 20260829125737, "type": "application/json", "path": ["world"]}
-{
-"type": "marking",
-"name": "world",
-"path": ["world", "forest", "crossroads", "centre"],
-"face": [0, 1],
-"span": Infinity,
+"span": None,
 "tick": 0
 }
 {"seal": 20260829125737, "type": "text/x-python", "path": ["story"]}

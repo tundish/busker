@@ -67,8 +67,8 @@ class Multipart:
 
     def feed(
         self, text: str, header_length=255,
-        code_types=("application/x-python-code", "application/x-python", "application/python"),
-        data_types=("application/json", "text/json", "text/python", "text/x-python")
+        code_types=set(("application/x-python-code", "application/x-python", "application/python", "code/python")),
+        data_types=set(("application/json", "text/json", "data/json", "text/python", "text/x-python", "data/python"))
     ) -> Generator[dict]:
         delimiters = list(self.mark_regex.finditer(text))
         if not delimiters:
@@ -151,10 +151,10 @@ class Multipart:
             if n == 1: header.pop("busker", None)
             for i in v:
                 if isinstance(i, ast.AST):
-                    yield json.dumps(dict(header, type="text/x-python", path=k), sort_keys=False)
+                    yield json.dumps(dict(header, type="code/python", path=k), sort_keys=False)
                     yield ast.unparse(i)
                 elif isinstance(i, (dict, list, UserDict, UserList)):
-                    yield json.dumps(dict(header, type="text/x-python", path=k), sort_keys=False)
+                    yield json.dumps(dict(header, type="data/python", path=k), sort_keys=False)
                     if safe:
                         yield pprint.saferepr(i)
                     else:
