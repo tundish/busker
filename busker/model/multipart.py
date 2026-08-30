@@ -110,7 +110,7 @@ class Multipart:
                 return
 
             if data.get("seal") != seal:
-                self.logger.error(f"Mark mismatch. Pos: {pos}")
+                self.logger.error(f"Seal mismatch. Pos: {pos}")
                 return
 
             if len(delimiters) - n > 1:
