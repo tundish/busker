@@ -16,6 +16,7 @@
 # If not, see <https://www.gnu.org/licenses/>.
 
 
+import sched
 from busker.model.journal import Journal
 
 
@@ -23,10 +24,18 @@ class Engine:
 
     def __init__(self, rht: Journal = None):
         self.rht = rht
+        self.scheduler = sched.scheduler()
 
-    def put(self, *args):
-        pass
+    def put(self, *args, delay=0, **kwargs):
+        callback = lambda x: x
+        return [
+            self.scheduler.enter(
+                delay, n, callback, argument=(arg,), kwargs=kwargs
+            )
+            for n, arg in enumerate(args)
+        ]
 
-    def step(self, msg):
+    def step(self, **kwargs):
         # run
+        return self.rht.marking
         pass

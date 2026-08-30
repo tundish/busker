@@ -140,6 +140,14 @@ class Journal(Plotline):
                 done[pos] = node[key]
         return rv
 
+    @property
+    def marking(self):
+        return [
+            element for frame in self.doc.data.values()
+            for element in frame
+            if getattr(element, "type", None) == ElementType.MARKING.value
+        ]
+
     def context(self, path: tuple) -> Chain:
         "Build a view of the document as seen from the supplied path"
         levels = [path[0: n] for n in range(len(path) + 1)]

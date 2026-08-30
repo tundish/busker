@@ -56,7 +56,10 @@ class Console(cmd.Cmd):
 
     def default(self, line: str):
         cmds = [i.strip() for i in line.split(";")]
-        self.engine.put(*cmds)
+        events = self.engine.put(*cmds)
+        self.logger.debug(f"{events=}")
+        done = self.engine.step()
+        self.logger.debug(f"{done=}")
         self.stdout.write("")
 
     def do_file(self, line: str):
