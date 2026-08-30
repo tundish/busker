@@ -24,25 +24,33 @@ class Engine:
 
     def __init__(self, rht: Journal = None):
         self.rht = rht
-        self.scheduler = sched.scheduler()
+        self.clocks = dict(self.set_clocks(rht))
+
+    @staticmethod
+    def set_clocks(rht):
+        for marker in rht.marking:
+            marker.scheduler = sched.scheduler()
+            yield marker["name"], marker
+
+    def cmd(self, arg: str, **kwargs):
+        for marker in self.rht.marking:
+            actions = self.rht.actions(tuple(marker["path"]))
+            print(f"{actions=}")
 
     def put(self, *args, delay=0, **kwargs):
-        callback = lambda x: x
         return [
-            self.scheduler.enter(
-                delay, n, callback, argument=(arg,), kwargs=kwargs
+            marker.scheduler.enter(
+                delay, n, self.cmd, argument=(arg,), kwargs=kwargs
             )
             for n, arg in enumerate(args)
+            for marker in self.clocks.values()
         ]
 
     def step(self, **kwargs):
-        # run
-        """
-        delta = 0
-        then = time.time()
-        while delta is not None:
-            await asyncio.sleep(delta)
-            delta = scheduler.run(blocking=False)
-        """
-        return self.rht.marking
-        pass
+        import time
+        for marker in self.clocks.values():
+            delta = 0
+            then = time.time()
+            while delta is not None:
+                time.sleep(delta)
+                delta = marker.scheduler.run(blocking=False)

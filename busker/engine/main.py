@@ -45,7 +45,7 @@ class Console(cmd.Cmd):
         super().__init__(self)
         self.logger = logging.getLogger("console")
         self.args = args
-        self.engine = Engine()
+        self.engine = None
 
     def preloop(self):
         self.onecmd("file feed")
@@ -76,7 +76,7 @@ class Console(cmd.Cmd):
 
         if cmd[0].lower() == "feed":
             try:
-                self.engine.rht = Journal.scan(text)
+                self.engine = Engine(Journal.scan(text))
                 self.logger.info(f"Engine feed: {self.args.input}")
                 self.logger.debug(f"\n{self.engine.rht.doc}")
             except Exception as err:
