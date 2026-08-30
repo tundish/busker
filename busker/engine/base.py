@@ -25,6 +25,9 @@ class Engine:
 
     ignored_words = ("a", "an", "any", "her", "his", "my", "some", "the", "their")
 
+    class Exclamation(Exception):
+        pass
+
     def __init__(self, rht: Journal = None):
         self.logger = logging.getLogger(self.__class__.__name__)
         self.rht = rht
@@ -55,8 +58,21 @@ class Engine:
     def cmd(self, text: str, marker: dict, precision=0.95, **kwargs):
         actions = self.rht.actions(marker.parent.path)
         matches = self.match_text_to_phrases(text, actions)
+        if not matches:
+            self.logger.debug(f"No match for text '{text}'")
+            return
+        self.logger.info(f"Selecting first of matches {matches}")
+        element, kwargs = actions[matches[0]]
 
-        self.logger.debug(f"{marker.parent.path=}")
+        code = compile(element.handler, format(marker.parent.path), mode="exec")
+        l = dict(kwargs, journal=self.rht, path=marker.parent.path)
+        g = dict(logging=logging, Exclamation=self.Exclamation)
+        try:
+            exec(code, locals=l, globals=g)
+        except self.Exclamation as report:
+            self.logger.info(report)
+        except Exception as err:
+            self.logger.warning(err, exc_info=True)
         # Advance tick
 
     def put(self, *args, delay=0, **kwargs):

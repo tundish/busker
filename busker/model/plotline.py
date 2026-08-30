@@ -15,19 +15,6 @@
 # You should have received a copy of the GNU General Public License along with busker.
 # If not, see <https://www.gnu.org/licenses/>.
 
-
-# TODO: Paths identify nodes (stage) or edges (story) depending on content.
-# Both nodes and edges have ports which connect them.
-
-# Stage: Python code (world entity query model)
-# Story: Speech      (scene drama directives model)
-
-# Marking: The current active location(s) in the Multipart.
-# Context: A ChainMap of UserDict along the reverse path to the root.
-# Linkage: Associations between separate locations in the Multipart.
-# Actions: Declarations of commands which modify context and expedite marking.
-# Content: Dialogue, Effects and Multimedia driven from Speech cues.
-
 import enum
 from collections import ChainMap
 from collections import defaultdict
@@ -84,7 +71,9 @@ class Plotline:
                     else:
                         logger.error(f"Type value missing: path {p} item {n}")
                     return
-                except (AttributeError, TypeError):
+                except AttributeError as err:
+                    pass
+                except TypeError as err:
                     pass
                 finally:
                     frame[n].parent = frame

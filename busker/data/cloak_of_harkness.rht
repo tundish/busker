@@ -41,12 +41,14 @@ letters in their names.
 ]
 }
 {"seal": 20260829125737, "type": "application/x-python", "path": ["world"]}
+# Move the marker to a new path
+logger = logging.getLogger(format(path))
+logger.info(f"{heading=}")
+branches = journal.branches(path)
 context = journal.context(path)
-context["goods"].remove(goods)
-logging.getLogger(format(path)).debug(
-    f"Removed goods '{goods}' from context '{path}'"
-)
-raise Exception("All done!")
+logger.debug(branches)
+raise Exclamation("All done!")
+
 {"seal": 20260829125737, "type": "text/x-python", "path": ["world", "forest", "crossroads", "centre"]}
 {
 "type": "linkage",
