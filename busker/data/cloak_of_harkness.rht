@@ -1,4 +1,4 @@
-{"seal": 20260829125737, "busker": "0.25.0", "type": "text/plain"}
+{"seal": 20260829125737, "busker": "0.31.0", "type": "text/plain"}
 
 The sequence begins with the player standing on Harkness Island (44.8334, -75.31602) facing North.
 A location to the West is a metal bridge across the weir, off the island. The high gate is securely locked.
@@ -22,6 +22,25 @@ If the player drops the cloak at any location, there is no attack. This is the w
 The game provides an inventory of all the random items collected at the camp fire. Points are allocated according to the
 letters in their names.
 
+{"seal": 20260829125737, "type": "application/json", "path": ["world"]}
+{
+"type": "handler",
+"description": "Carry shopping",
+"params": {
+    "goods": "$['goods'][*]",
+    "place": "$['route'][*]"
+},
+"terms": [
+    "Carry {goods} {place}",
+    "Drop off {goods} at {place}"
+]
+}
+{"seal": 20260829125737, "type": "application/x-python"}
+context = journal.context(path)
+context["goods"].remove(goods)
+logging.getLogger(format(path)).debug(
+    f"Removed goods '{goods}' from context '{path}'"
+)
 {"seal": 20260829125737, "type": "text/x-python", "path": ["world", "forest", "crossroads", "centre"]}
 {
 "type": "linkage",

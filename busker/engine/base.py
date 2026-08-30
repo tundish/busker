@@ -32,15 +32,14 @@ class Engine:
             marker.scheduler = sched.scheduler()
             yield marker["name"], marker
 
-    def cmd(self, arg: str, **kwargs):
-        for marker in self.rht.marking:
-            actions = self.rht.actions(tuple(marker["path"]))
-            print(f"{actions=}")
+    def cmd(self, arg: str, marker: dict, **kwargs):
+        actions = self.rht.actions(tuple(marker["path"]))
+        print(f"{actions=}")
 
     def put(self, *args, delay=0, **kwargs):
         return [
             marker.scheduler.enter(
-                delay, n, self.cmd, argument=(arg,), kwargs=kwargs
+                delay, n, self.cmd, argument=(arg, marker), kwargs=kwargs
             )
             for n, arg in enumerate(args)
             for marker in self.clocks.values()
