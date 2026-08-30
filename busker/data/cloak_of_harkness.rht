@@ -45,8 +45,9 @@ letters in their names.
 logger = logging.getLogger(format(marker.parent.path))
 logger.info(f"{heading=}")
 branches = journal.branches(tuple(marker["path"]))
+options = {pair[0].spin: pair for pair in branches}
 context = journal.context(marker.parent.path)
-logger.debug(f"{branches=}")
+logger.debug(f"{options=}")
 raise Exclamation("All done!")
 
 {"seal": 20260829125737, "type": "text/x-python", "path": ["world", "forest", "crossroads", "centre"]}
