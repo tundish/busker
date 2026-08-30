@@ -9,10 +9,11 @@ On going North we meet a character sheltering under a tree. He is wearing a long
 Conversation with the character reveals that he is waiting for workers to open the gate but that this might take hours.
 At one point the locals had a spare key but it has been lost.
 
-The sun regularly appears and when it does the stranger takes off the cloak. When clouds appear he puts it on again.
+The sun regularly appears and when it does the stranger takes off the cloak. When clouds return he puts it on again.
 Here is the opportunity to take the cloak. He seems not to mind.
 
 On wearing the cloak at the campfire, the leaf litter brushes away to reveal a key.
+This can be used to open the gate and escape the island.
 There are two endings. If the player still wears the cloak the stranger appears and attacks. The player awakes with no
 cloak and no key.
 
@@ -49,31 +50,41 @@ letters in their names.
 {
 "type": "linkage",
 "port": 20260829173041,
-"link": 20260829173009
+"link": 20260829173009,
+"spin": [3, 4],
+"cost": 0
 }
 {"seal": 20260829125737, "type": "application/json", "path": ["world", "forest", "crossroads", "west"]}
 {
 "type": "linkage",
 "port": 20260829173200,
-"link": 20260829173153
+"link": 20260829173153,
+"spin": [1, 4],
+"cost": 0
 }
 {"seal": 20260829125737, "type": "application/json", "path": ["world", "forest", "crossroads", "west"]}
 {
 "type": "linkage",
 "port": 20260830120040,
-"link": 20260830120047
+"link": 20260830120047,
+"spin": [3, 4],
+"cost": 0
 }
 {"seal": 20260829125737, "type": "application/json", "path": ["world", "river", "bridge"]}
 {
 "type": "linkage",
 "port": 20260830120047,
-"link": 20260830120040
+"link": 20260830120040,
+"spin": [1, 4],
+"cost": 0
 }
 {"seal": 20260829125737, "type": "application/json", "path": ["world", "forest", "crossroads", "north"]}
 {
 "type": "linkage",
 "port": 20260829173419,
-"link": 20260829173414
+"link": 20260829173414,
+"spin": [1, 2],
+"cost": 0
 }
 {"seal": 20260829125737, "type": "application/json", "path": ["world"]}
 {

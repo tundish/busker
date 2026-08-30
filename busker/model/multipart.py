@@ -58,9 +58,9 @@ class Multipart:
     @property
     def header(self):
         if self.path is None:
-            return dict(seal=self.seal, busker=__version__)
+            return dict(seal=self.seal, type=None, busker=__version__)
         else:
-            return dict(seal=self.seal, busker=__version__, path=self.path[:])
+            return dict(seal=self.seal, type=None, busker=__version__, path=self.path[:])
 
     @staticmethod
     def coerce(obj: object):
