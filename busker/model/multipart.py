@@ -62,13 +62,6 @@ class Multipart:
         else:
             return dict(seal=self.seal, type=None, busker=__version__, path=self.path[:])
 
-    @staticmethod
-    def coerce(obj: object):
-        if isinstance(obj, MutableMapping):
-            return dict(obj)
-        else:
-            raise TypeError(obj)
-
     def __str__(self):
         return "\n".join(str(i) if isinstance(i, UserString) else i for i in self.dump())
 
@@ -132,12 +125,15 @@ class Multipart:
                     data["payload"] = payload
                 except (SyntaxError, ValueError) as err:
                     self.logger.debug(f"Invalid Literal. Pos: {d.end()}", exc_info=True)
+                    self.logger.debug(f"Attempting to parse as expression")
 
                     try:
                         data["payload"] = payload = ast.parse(payload, filename=path, mode="exec")
                     except SyntaxError as err:
                         self.logger.error(f"Invalid Code. Pos: {d.end()}", exc_info=True)
                         return
+                    else:
+                        self.logger.debug(f"Expression valid")
 
             elif data.get("type") in data_types:
                 try:

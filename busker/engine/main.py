@@ -55,7 +55,8 @@ class Console(cmd.Cmd):
         return line
 
     def default(self, line: str):
-        self.logger.warning(f"Unknown syntax: '{line}'")
+        cmds = [i.strip() for i in line.split(";")]
+        self.engine.put(*cmds)
         self.stdout.write("")
 
     def do_file(self, line: str):
