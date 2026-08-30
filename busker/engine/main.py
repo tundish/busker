@@ -48,7 +48,7 @@ class Console(cmd.Cmd):
         self.engine = Engine()
 
     def preloop(self):
-        pass
+        self.onecmd("file feed")
 
     def precmd(self, line):
         self.logger.debug(f"{line=}")
