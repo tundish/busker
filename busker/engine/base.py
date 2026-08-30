@@ -33,8 +33,10 @@ class Engine:
             yield marker["name"], marker
 
     def cmd(self, arg: str, marker: dict, **kwargs):
-        actions = self.rht.actions(tuple(marker["path"]))
+        print(f"{marker.parent.path=}")
+        actions = self.rht.actions(marker.parent.path)
         print(f"{actions=}")
+        # Advance tick
 
     def put(self, *args, delay=0, **kwargs):
         return [

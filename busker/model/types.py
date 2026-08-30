@@ -21,6 +21,7 @@ from collections import UserDict
 from collections import UserList
 from collections import UserString
 import enum
+import warnings
 
 
 class ElementType(enum.StrEnum):
@@ -67,6 +68,7 @@ class Element(UserDict):
 
     @property
     def handler(self):
+        rv = None
         if self.data.get("type") != ElementType.HANDLER.value:
             return
 
@@ -78,10 +80,14 @@ class Element(UserDict):
         try:
             rv = self.parent[pos + 1]
         except IndexError:
+            warnings.warn(f"Expecting element at path {self.parent.path} after pos: {pos}")
             return
 
-        if isinstance(rv, ast.AST):
-            return rv
+        if not isinstance(rv, ast.AST):
+            warnings.warn(f"Expecting code at path {self.parent.path} after pos: {pos}")
+            return
+
+        return rv
 
     def refresh(self, parent=None):
         self.parent = parent

@@ -22,25 +22,31 @@ If the player drops the cloak at any location, there is no attack. This is the w
 The game provides an inventory of all the random items collected at the camp fire. Points are allocated according to the
 letters in their names.
 
+{"seal": 20260829125737, "type": "data/python", "path": ["world"]}
+{
+"type": "context",
+"compass": [
+    ("north", (0, 1))
+]
+}
 {"seal": 20260829125737, "type": "application/json", "path": ["world"]}
 {
 "type": "handler",
-"description": "Carry shopping",
+"description": "Travel",
 "params": {
-    "goods": "$['goods'][*]",
-    "place": "$['route'][*]"
+    "heading": "$['compass'][*]"
 },
 "terms": [
-    "Carry {goods} {place}",
-    "Drop off {goods} at {place}"
+    "{heading[0]}", "Go {heading[0]}"
 ]
 }
-{"seal": 20260829125737, "type": "application/x-python"}
+{"seal": 20260829125737, "type": "application/x-python", "path": ["world"]}
 context = journal.context(path)
 context["goods"].remove(goods)
 logging.getLogger(format(path)).debug(
     f"Removed goods '{goods}' from context '{path}'"
 )
+raise Exception("All done!")
 {"seal": 20260829125737, "type": "text/x-python", "path": ["world", "forest", "crossroads", "centre"]}
 {
 "type": "linkage",
