@@ -1,6 +1,26 @@
 {"seal": 20260829125737, "busker": "0.25.0", "type": "text/plain"}
-# https://www.ifwiki.org/Road_of_Darkness
-# https://asterfialla.com/blog/road-of-darkness
+
+The sequence begins with the player standing on Harkness Island (44.8334, -75.31602) facing North.
+A location to the West is a metal bridge across the weir, off the island. The high gate is securely locked.
+To the East is a patch of ground covered with leaves and other litter.
+At this location inspection of objects reveals evidence of a camp fire and the back story to a party.
+
+On going North we meet a character sheltering under a tree. He is wearing a long cloak.
+Conversation with the character reveals that he is waiting for workers to open the gate but that this might take hours.
+At one point the locals had a spare key but it has been lost.
+
+The sun regularly appears and when it does the stranger takes off the cloak. When clouds appear he puts it on again.
+Here is the opportunity to take the cloak. He seems not to mind.
+
+On wearing the cloak at the campfire, the leaf litter brushes away to reveal a key.
+There are two endings. If the player still wears the cloak the stranger appears and attacks. The player awakes with no
+cloak and no key.
+
+If the player drops the cloak at any location, there is no attack. This is the winning ending.
+
+The game provides an inventory of all the random items collected at the camp fire. Points are allocated according to the
+letters in their names.
+
 {"seal": 20260829125737, "type": "application/json", "path": ["world", "forest", "crossroads", "south"]}
 {
 "type": "linkage",
