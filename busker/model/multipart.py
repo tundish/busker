@@ -67,8 +67,8 @@ class Multipart:
 
     def feed(
         self, text: str, header_length=255,
-        code_types=("text/x-python", ),
-        data_types=("application/json", )
+        code_types=("application/x-python-code", "application/x-python", "application/python"),
+        data_types=("application/json", "text/json", "text/python", "text/x-python")
     ) -> Generator[dict]:
         delimiters = list(self.mark_regex.finditer(text))
         if not delimiters:
@@ -119,28 +119,21 @@ class Multipart:
                     return
 
                 try:
-                    payload = ast.literal_eval(payload)
+                    data["payload"] = payload = ast.parse(payload, filename=path, mode="exec")
+                except SyntaxError as err:
+                    self.logger.error(f"Invalid Code. Pos: {d.end()}", exc_info=True)
+                    return
+
+            elif data.get("type") in data_types:
+                parser = ast.literal_eval if "python" in data["type"] else json.loads
+                try:
+                    payload = parser(payload)
                     if type(payload) in self.factory:
                         payload = self.factory[type(payload)](payload)
                     data["payload"] = payload
                 except (SyntaxError, ValueError) as err:
-                    self.logger.debug(f"Invalid Literal. Pos: {d.end()}", exc_info=True)
-                    self.logger.debug(f"Attempting to parse as expression")
-
-                    try:
-                        data["payload"] = payload = ast.parse(payload, filename=path, mode="exec")
-                    except SyntaxError as err:
-                        self.logger.error(f"Invalid Code. Pos: {d.end()}", exc_info=True)
-                        return
-                    else:
-                        self.logger.debug(f"Expression valid")
-
-            elif data.get("type") in data_types:
-                try:
-                    payload = json.loads(payload)
-                    if type(payload) in self.factory:
-                        payload = self.factory[type(payload)](payload)
-                    data["payload"] = payload
+                    self.logger.error(f"Invalid Literal. Pos: {d.end()}", exc_info=True)
+                    return
                 except json.JSONDecodeError:
                     self.logger.error(f"Invalid Data. Pos: {d.end()}", exc_info=True)
                     return

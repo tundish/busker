@@ -111,7 +111,7 @@ class JournalTests(unittest.TestCase):
             "Drop off {goods} at {place}"
         ]
         }
-        {"seal": 127416676279376, "type": "text/x-python"}
+        {"seal": 127416676279376, "type": "application/x-python"}
         context = journal.context(path)
         context["goods"].remove(goods)
         logging.getLogger(format(path)).debug(

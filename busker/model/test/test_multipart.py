@@ -61,7 +61,7 @@ class MultipartTests(unittest.TestCase):
 
         <A> Knock knock.
         <B> Who's there?
-        {"seal": 2863490869328, "busker": "0.25.0", "type": "text/x-python"}
+        {"seal": 2863490869328, "busker": "0.25.0", "type": "application/x-python"}
         print("Hello, World!")
         """).lstrip()
         doc = Multipart()

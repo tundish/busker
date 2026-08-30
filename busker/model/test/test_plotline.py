@@ -59,7 +59,7 @@ class PlotlineTests(unittest.TestCase):
                 "Inspect {entity}"
             ]
         }
-        {"seal": 2863490869328, "type": "text/x-python"}
+        {"seal": 2863490869328, "type": "application/x-python"}
 
         def fn(context: dict, **kwargs):
             context["score"] += 1

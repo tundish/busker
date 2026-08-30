@@ -37,5 +37,12 @@ class Engine:
 
     def step(self, **kwargs):
         # run
+        """
+        delta = 0
+        then = time.time()
+        while delta is not None:
+            await asyncio.sleep(delta)
+            delta = scheduler.run(blocking=False)
+        """
         return self.rht.marking
         pass
