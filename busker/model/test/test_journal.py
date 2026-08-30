@@ -123,7 +123,7 @@ class JournalTests(unittest.TestCase):
         path = ("b", 1)
         actions = rht.actions(path)
         self.assertIsInstance(actions, dict)
-        rv = actions.get("Drop off milk at work")
+        rv = actions.get("drop off milk at work")
         self.assertIsInstance(rv, tuple)
         self.assertEqual(len(rv), 2)
         self.assertIsInstance(rv[0], Element)

@@ -182,5 +182,5 @@ class Journal(Plotline):
                 for product in products:
                     kwargs = dict(zip(element["params"], product))
                     phrase = term.format(**kwargs)
-                    rv[phrase] = (element, kwargs)
+                    rv[phrase.lower()] = (element, kwargs)
         return rv

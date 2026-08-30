@@ -15,16 +15,36 @@
 # You should have received a copy of the GNU General Public License along with busker.
 # If not, see <https://www.gnu.org/licenses/>.
 
-
+import difflib
+import logging
 import sched
 from busker.model.journal import Journal
 
 
 class Engine:
 
+    ignored_words = ("a", "an", "any", "her", "his", "my", "some", "the", "their")
+
     def __init__(self, rht: Journal = None):
+        self.logger = logging.getLogger(self.__class__.__name__)
         self.rht = rht
         self.clocks = dict(self.set_clocks(rht))
+
+    @staticmethod
+    def split_to_words(text: str, preserver=".", discard=None):
+        discard = discard or set()
+        return [
+            i.strip()
+            for i in text.rstrip(preserver).lower().split()
+            if i not in discard or text.endswith(preserver)
+        ]
+
+    def match_text_to_phrases(self, text: str, phrases: list[str], precision=0.95):
+        words = self.split_to_words(text, discard=self.ignored_words)
+        print(f"{words=}")
+        return difflib.get_close_matches(
+            " ".join(words), phrases, cutoff=precision
+        ) or difflib.get_close_matches(text.strip(), phrases, cutoff=precision)
 
     @staticmethod
     def set_clocks(rht):
@@ -32,10 +52,11 @@ class Engine:
             marker.scheduler = sched.scheduler()
             yield marker["name"], marker
 
-    def cmd(self, arg: str, marker: dict, **kwargs):
-        print(f"{marker.parent.path=}")
+    def cmd(self, text: str, marker: dict, precision=0.95, **kwargs):
         actions = self.rht.actions(marker.parent.path)
-        print(f"{actions=}")
+        matches = self.match_text_to_phrases(text, actions)
+
+        self.logger.debug(f"{marker.parent.path=}")
         # Advance tick
 
     def put(self, *args, delay=0, **kwargs):
