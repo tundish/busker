@@ -22,7 +22,7 @@ If the player drops the cloak at any location, there is no attack. This is the w
 The game provides an inventory of all the random items collected at the camp fire. Points are allocated according to the
 letters in their names.
 
-{"seal": 20260829125737, "type": "application/json", "path": ["world", "forest", "crossroads", "centre"]}
+{"seal": 20260829125737, "type": "text/x-python", "path": ["world", "forest", "crossroads", "centre"]}
 {
 "type": "linkage",
 "port": 20260829173009,
@@ -30,7 +30,7 @@ letters in their names.
 "spin": [1, 4],
 "cost": 0
 }
-{"seal": 20260829125737, "type": "application/json", "path": ["world", "forest", "crossroads", "centre"]}
+{"seal": 20260829125737, "type": "text/x-python", "path": ["world", "forest", "crossroads", "centre"]}
 {
 "type": "linkage",
 "port": 20260829173153,
@@ -38,7 +38,7 @@ letters in their names.
 "spin": [3, 4],
 "cost": 0
 }
-{"seal": 20260829125737, "type": "application/json", "path": ["world", "forest", "crossroads", "centre"]}
+{"seal": 20260829125737, "type": "text/x-python", "path": ["world", "forest", "crossroads", "centre"]}
 {
 "type": "linkage",
 "port": 20260829173414,
@@ -46,7 +46,7 @@ letters in their names.
 "spin": [0, 1],
 "cost": 0
 }
-{"seal": 20260829125737, "type": "application/json", "path": ["world", "forest", "crossroads", "east"]}
+{"seal": 20260829125737, "type": "text/x-python", "path": ["world", "forest", "crossroads", "east"]}
 {
 "type": "linkage",
 "port": 20260829173041,
@@ -54,7 +54,7 @@ letters in their names.
 "spin": [3, 4],
 "cost": 0
 }
-{"seal": 20260829125737, "type": "application/json", "path": ["world", "forest", "crossroads", "west"]}
+{"seal": 20260829125737, "type": "text/x-python", "path": ["world", "forest", "crossroads", "west"]}
 {
 "type": "linkage",
 "port": 20260829173200,
@@ -62,7 +62,7 @@ letters in their names.
 "spin": [1, 4],
 "cost": 0
 }
-{"seal": 20260829125737, "type": "application/json", "path": ["world", "forest", "crossroads", "west"]}
+{"seal": 20260829125737, "type": "text/x-python", "path": ["world", "forest", "crossroads", "west"]}
 {
 "type": "linkage",
 "port": 20260830120040,
@@ -70,7 +70,7 @@ letters in their names.
 "spin": [3, 4],
 "cost": 0
 }
-{"seal": 20260829125737, "type": "application/json", "path": ["world", "river", "bridge"]}
+{"seal": 20260829125737, "type": "text/x-python", "path": ["world", "river", "bridge"]}
 {
 "type": "linkage",
 "port": 20260830120047,
@@ -78,7 +78,7 @@ letters in their names.
 "spin": [1, 4],
 "cost": 0
 }
-{"seal": 20260829125737, "type": "application/json", "path": ["world", "forest", "crossroads", "north"]}
+{"seal": 20260829125737, "type": "text/x-python", "path": ["world", "forest", "crossroads", "north"]}
 {
 "type": "linkage",
 "port": 20260829173419,
@@ -86,16 +86,16 @@ letters in their names.
 "spin": [1, 2],
 "cost": 0
 }
-{"seal": 20260829125737, "type": "application/json", "path": ["world"]}
+{"seal": 20260829125737, "type": "text/x-python", "path": ["world"]}
 {
 "type": "marking",
 "name": "world",
 "path": ["world", "forest", "crossroads", "centre"],
 "face": [0, 1],
-"span": 1,
+"span": float("inf"),
 "tick": 0
 }
-{"seal": 20260829125737, "type": "application/json", "path": ["story"]}
+{"seal": 20260829125737, "type": "text/x-python", "path": ["story"]}
 {
 "type": "marking",
 "name": "story",
