@@ -65,7 +65,7 @@ class Engine:
         element, kwargs = actions[matches[0]]
 
         code = compile(element.handler, format(marker.parent.path), mode="exec")
-        l = dict(kwargs, journal=self.rht, path=marker.parent.path)
+        l = dict(kwargs, journal=self.rht, marker=marker)
         g = dict(logging=logging, Exclamation=self.Exclamation)
         try:
             exec(code, locals=l, globals=g)

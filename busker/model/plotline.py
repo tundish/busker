@@ -62,21 +62,27 @@ class Plotline:
             frame.path = p
             for n, obj in enumerate(frame.copy()):
                 try:
-                    typ = ElementType[obj["type"].upper()]
                     frame[n] = Element(obj.data)
-                    frame[n].type = typ
+                except AttributeError:
+                    logger.debug(f"Not a data element: {obj}")
+                    continue
+                except ValueError:
+                    logger.debug(f"Not a data element: {obj}")
+                    if isinstance(obj, UserString):
+                        frame[n].type = ElementType.CONTENT
+                    continue
+                finally:
+                    frame[n].parent = frame
+
+                try:
+                    frame[n].type = ElementType[obj["type"].upper()]
                 except KeyError:
                     if "type" in obj:
                         logger.error(f"Unknown resource type: {obj['type']}")
                     else:
                         logger.error(f"Type value missing: path {p} item {n}")
                     return
-                except AttributeError as err:
-                    pass
-                except TypeError as err:
-                    pass
-                finally:
-                    frame[n].parent = frame
+
             frame.refresh()
         return cls(doc)
 
@@ -97,7 +103,7 @@ class Plotline:
             elem.get("port"): elem
             for frame in self.doc.data.values()
             for elem in frame
-            if elem.type == ElementType.LINKAGE
+            if getattr(elem, "type", None) == ElementType.LINKAGE
         }
 
         for port, elem in linkage_elements.items():

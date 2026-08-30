@@ -42,11 +42,11 @@ letters in their names.
 }
 {"seal": 20260829125737, "type": "application/x-python", "path": ["world"]}
 # Move the marker to a new path
-logger = logging.getLogger(format(path))
+logger = logging.getLogger(format(marker.parent.path))
 logger.info(f"{heading=}")
-branches = journal.branches(path)
-context = journal.context(path)
-logger.debug(branches)
+branches = journal.branches(tuple(marker["path"]))
+context = journal.context(marker.parent.path)
+logger.debug(f"{branches=}")
 raise Exclamation("All done!")
 
 {"seal": 20260829125737, "type": "text/x-python", "path": ["world", "forest", "crossroads", "centre"]}
