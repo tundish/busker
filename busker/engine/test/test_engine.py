@@ -1,0 +1,49 @@
+#!/usr/bin/env python
+#   encoding: utf-8
+
+# Copyright (C) 2026 D E Haynes
+# This file is part of busker.
+
+# Busker is free software: you can redistribute it and/or modify it under the terms of the
+# GNU General Public License as published by the Free Software Foundation, either version 3 of the License,
+# or (at your option) any later version.
+#
+# Busker is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even
+# the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# See the GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along with busker.
+# If not, see <https://www.gnu.org/licenses/>.
+
+import ast
+from collections import UserString
+import importlib.resources
+import logging
+import platform
+import textwrap
+import unittest
+
+from busker.engine.base import Engine
+from busker.model.journal import Journal
+from busker.model.plotline import Plotline
+from busker.model.types import Chain
+from busker.model.types import Element
+from busker.model.types import ElementType
+from busker.model.types import Frame
+
+from busker.model.test.test_plotline import PlotlineTests
+
+
+class EngineTests(unittest.TestCase):
+
+    def setUp(self):
+        self.text = importlib.resources.read_text("busker.data", "cloak_of_harkness.rht")
+        self.fail(self.text)
+
+    def test_scan_context(self):
+        rht = Journal.scan(PlotlineTests.texts[0])
+        self.assertIsInstance(rht.doc.data[()][0], Element)
+        self.assertEqual(rht.doc.data[()][0].get("type"), ElementType.CONTEXT.value)
+
+        self.assertIsInstance(rht.doc.data[()][1], Element)
+        self.assertEqual(rht.doc.data[()][1].get("type"), ElementType.CONTEXT.value)
