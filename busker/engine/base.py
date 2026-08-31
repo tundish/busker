@@ -25,7 +25,23 @@ from busker.model.journal import Journal
 # https://anyio.readthedocs.io/en/stable/why.html
 # https://four.htmx.org/
 # https://www.youtube.com/watch?v=lASLZ9TgXyc
+# https://vorpus.org/blog/some-thoughts-on-asynchronous-api-design-in-a-post-asyncawait-world/
 
+"""
+def some_sync_generator(path):
+    with open(path) as ...:
+        yield ...
+
+# DON'T do this
+for obj in some_sync_generator(path):
+    ...
+
+# DO do this
+from contextlib import closing
+with closing(some_sync_generator(path)) as tmp:
+    for obj in tmp:
+
+"""
 
 class Engine:
 
