@@ -20,6 +20,12 @@ import logging
 import sched
 from busker.model.journal import Journal
 
+# https://python-patterns.guide/
+# https://streamkap.com/resources-and-guides/streaming-api-design-patterns
+# https://anyio.readthedocs.io/en/stable/why.html
+# https://four.htmx.org/
+# https://www.youtube.com/watch?v=lASLZ9TgXyc
+
 
 class Engine:
 

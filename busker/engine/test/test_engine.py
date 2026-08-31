@@ -38,12 +38,9 @@ class EngineTests(unittest.TestCase):
 
     def setUp(self):
         self.text = importlib.resources.read_text("busker.data", "cloak_of_harkness.rht")
-        self.fail(self.text)
+        self.engine = Engine(Journal.scan(self.text))
 
-    def test_scan_context(self):
-        rht = Journal.scan(PlotlineTests.texts[0])
-        self.assertIsInstance(rht.doc.data[()][0], Element)
-        self.assertEqual(rht.doc.data[()][0].get("type"), ElementType.CONTEXT.value)
-
-        self.assertIsInstance(rht.doc.data[()][1], Element)
-        self.assertEqual(rht.doc.data[()][1].get("type"), ElementType.CONTEXT.value)
+    def test_world_marker(self):
+        events = self.engine.put("go north")
+        done = self.engine.step()
+        self.fail(done)
