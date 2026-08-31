@@ -5,7 +5,7 @@ name = "busker"
 dynamic = ["version"]
 description = "A utility for testing Balladeer projects."
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.13"
 license = "GPL-3.0-or-later"
 keywords = ["interactive fiction", "balladeer"]
 authors = [
@@ -55,8 +55,11 @@ packages = [
 ]
 
 [tool.setuptools.package-data]
+"busker.data" = [
+    "*.rht",
+]
 "busker.test" = [
-    "*/*.toml",
+    "*.rht",
 ]
 
 [tool.setuptools.dynamic]
