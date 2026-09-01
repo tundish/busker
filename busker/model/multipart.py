@@ -32,6 +32,12 @@ import re
 from busker import __version__
 
 
+# TODO: Refactor to
+#   Backends, eg .rht, .db
+#   Inspector eg: jsonpath search
+#   Lenses eg: Navigation, Perception, etc.
+#   Run Procedures against Marker
+
 class Multipart:
 
     def __init__(
