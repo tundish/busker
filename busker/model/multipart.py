@@ -37,14 +37,13 @@ class Multipart:
     def __init__(
         self, *args,
         text: str = None,
-        path: tuple = None, sep=".",
+        path: tuple = None,
         factory: dict= None,
     ):
         self.logger = logging.getLogger("busker.multipart")
         self.mark_regex = re.compile(r"^\{.+?\}$", re.MULTILINE)
         self.seal = id(self)
         self.path = path or tuple()
-        self.sep = sep
 
         self.factory = {dict: dict, list: list, str: str}
         self.factory.update(factory or {})
@@ -113,7 +112,7 @@ class Multipart:
 
             if data.get("type") in code_types:
                 try:
-                    path = self.sep.join([str(i) for i in data.get("path", self.path)])
+                    path = format(data.get("path", self.path))
                 except ValueError as err:
                     self.logger.error(f"Invalid Path. Pos: {d.end()}", exc_info=True)
                     return
