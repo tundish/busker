@@ -23,6 +23,7 @@ from collections.abc import MutableSequence
 from collections.abc import Sequence
 from collections.abc import Set
 import contextlib
+import functools
 import itertools
 
 import jsonpath
@@ -156,8 +157,7 @@ class Journal(Plotline):
             Chain(*(i for i in frame if getattr(i, "type", None) == ElementType.CONTEXT.value))
             for frame in reversed(frames)
         ]
-        rv = list(itertools.accumulate(chains, self.merge))
-        return rv[-1] if rv else {}
+        return functools.reduce(self.merge, chains)
 
     def search(self, query: str, data: dict, **kwargs) -> list:
         return self.env.findall(query, data, **kwargs)
