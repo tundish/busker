@@ -16,8 +16,11 @@
 # If not, see <https://www.gnu.org/licenses/>.
 
 import ast
+from collections import UserDict
+from collections import UserList
 from collections import UserString
 import logging
+import pathlib
 import platform
 import textwrap
 import unittest
@@ -36,11 +39,12 @@ from busker.model.test.test_plotline import PlotlineTests
 class JournalTests(unittest.TestCase):
 
     def setUp(self):
-        self.adapter = Multipart(factory={dict: UserDict, list: UserList, str: UserString})
+        self.adaptor = Multipart(factory={dict: UserDict, list: UserList, str: UserString})
 
     def test_model(self):
-        rht = Journal.model(PlotlineTests.texts[0])
-        for path, frame in rht.doc.data.items():
+        self.adaptor.scan(PlotlineTests.texts[0])
+        journal = Journal(self.adaptor, uri=pathlib.Path("test.rht"))
+        for path, frame in journal.model.data.items():
             with self.subTest(frame=frame, path=path):
                 self.assertIsInstance(frame, Frame)
                 self.assertIsInstance(frame.path, tuple)

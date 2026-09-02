@@ -65,6 +65,7 @@ class MultipartTests(unittest.TestCase):
         print("Hello, World!")
         """).lstrip()
         doc = Multipart()
+        # adapter = Multipart(factory={dict: UserDict, list: UserList, str: UserString})
         bits = list(doc.scan(text))
         self.assertEqual(len(bits), 3, bits)
         self.assertIsInstance(doc.data[()][0], dict)

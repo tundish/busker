@@ -42,7 +42,7 @@ class EngineTests(unittest.TestCase):
     def setUp(self):
         with importlib.resources.path("busker.data", "cloak_of_harkness.rht") as path:
             adapter = Multipart(factory={dict: UserDict, list: UserList, str: UserString})
-            journal = Journal(adapter, path=path)
+            journal = Journal(adapter, uri=path)
             self.engine = Engine(journal)
             print(journal.model)
 

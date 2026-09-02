@@ -185,12 +185,12 @@ class Syntax(Lens):
 
 class Journal:
 
-    def __init__(self, *args, path: pathlib.Path | str = None):
+    def __init__(self, *args, uri: pathlib.Path | str = None):
         self.registry = {
             cls: [arg for arg in args if isinstance(arg, cls)]
             for cls in (Adaptor, Selector, Lens)
         }
-        self.path = path
+        self.uri = uri
         self._scan = list()
 
     def attach(self, component: Adaptor | Selector | Lens):
@@ -202,7 +202,7 @@ class Journal:
     @property
     def adaptor(self):
         return next(
-            (i for i in self.registry.get(Adaptor, []) if self.path.suffix in i.backend.value),
+            (i for i in self.registry.get(Adaptor, []) if self.uri.suffix in i.backend.value),
             None
         )
 

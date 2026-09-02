@@ -76,12 +76,16 @@ class Multipart(Adaptor):
     def __str__(self):
         return "\n".join(str(i) if isinstance(i, UserString) else i for i in self.dump())
 
+    def load(self, uri: str | pathlib.Path):
+        return uri.read_text()
+
     def scan(
-        self, header_length=255,
+        self,
+        text: str,
+        header_length=255,
         code_types=set(("application/x-python-code", "application/x-python", "application/python", "code/python")),
         data_types=set(("application/json", "text/json", "data/json", "text/python", "text/x-python", "data/python"))
     ) -> Generator[dict]:
-        text = self.path.read_text()
         delimiters = list(self.mark_regex.finditer(text))
         if not delimiters:
             self.logger.error("No delimiters found")
