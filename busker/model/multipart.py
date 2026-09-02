@@ -38,6 +38,13 @@ from busker import __version__
 #   Lenses eg: Navigation, Perception, etc.
 #   Run Procedures against Marker
 
+# Build:
+# Select backend based on input format
+# Feed / scan into memory
+# Switch backend if necessary
+# Backend offers choice of Finders?
+
+
 class Multipart:
 
     def __init__(
