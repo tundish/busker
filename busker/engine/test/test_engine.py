@@ -44,7 +44,6 @@ class EngineTests(unittest.TestCase):
             adapter = Multipart(factory={dict: UserDict, list: UserList, str: UserString})
             journal = Journal(adapter, uri=path)
             self.engine = Engine(journal)
-            print(journal.model)
 
     def test_world_marker(self):
         events = self.engine.put("go north")

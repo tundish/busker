@@ -253,3 +253,8 @@ class Journal:
 
             frame.refresh()
         return data
+
+    def scan(self, **kwargs):
+        adaptor = self.adaptor
+        data = adaptor.load(self.uri)
+        return list(adaptor.scan(data, **kwargs))
