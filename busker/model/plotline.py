@@ -49,43 +49,6 @@ class Plotline(Lens):
         "Point", ["path", "port", "spin", "cost"], defaults=[0, 0]
     )
 
-    @classmethod
-    def model(cls, adapter: Adapter):
-        """
-        Read through the text and assemble a Multipart document.
-        Decorate each frame with its path, and each Element with its type.
-
-        """
-        logger = logging.getLogger(cls.__name__.lower())
-        doc = Multipart(factory={dict: UserDict, list: UserList, str: UserString})
-        for p in list(doc.data):
-            frame = doc.data[p] = Frame(doc.data[p].data)
-            frame.path = p
-            for n, obj in enumerate(frame.copy()):
-                try:
-                    frame[n] = Element(obj.data)
-                except AttributeError:
-                    logger.debug(f"Not a data element: {obj}")
-                    continue
-                except ValueError:
-                    logger.debug(f"Not a data element: {obj}")
-                    if isinstance(obj, UserString):
-                        frame[n].type = ElementType.CONTENT
-                    continue
-                finally:
-                    frame[n].parent = frame
-
-                try:
-                    frame[n].type = ElementType[obj["type"].upper()]
-                except KeyError:
-                    if "type" in obj:
-                        logger.error(f"Unknown resource type: {obj['type']}")
-                    else:
-                        logger.error(f"Type value missing: path {p} item {n}")
-                    return
-
-            frame.refresh()
-        return cls(doc)
 
     def __init__(self, doc: Multipart):
         self.doc = doc

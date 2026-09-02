@@ -25,6 +25,8 @@ from collections.abc import Set
 import contextlib
 import functools
 import itertools
+import logging
+import pathlib
 
 import jsonpath
 
@@ -32,6 +34,7 @@ from busker.model.types import Adaptor
 from busker.model.types import Chain
 from busker.model.types import Element
 from busker.model.types import ElementType
+from busker.model.types import Frame
 from busker.model.types import Lens
 from busker.model.types import Selector
 
@@ -143,14 +146,6 @@ class Syntax(Lens):
                 done[pos] = node[key]
         return rv
 
-    @property
-    def marking(self):
-        return [
-            element for frame in self.doc.data.values()
-            for element in frame
-            if getattr(element, "type", None) == ElementType.MARKING.value
-        ]
-
     def context(self, path: tuple) -> Chain:
         "Build a view of the document as seen from the supplied path"
         levels = [path[0: n] for n in range(len(path) + 1)]
@@ -190,12 +185,13 @@ class Syntax(Lens):
 
 class Journal:
 
-    def __init__(self, *args, model=None):
+    def __init__(self, *args, path: pathlib.Path | str = None):
         self.registry = {
             cls: [arg for arg in args if isinstance(arg, cls)]
             for cls in (Adaptor, Selector, Lens)
         }
-        self.model = model
+        self.path = path
+        self._scan = list()
 
     def attach(self, component: Adaptor | Selector | Lens):
         raise NotImplementedError
@@ -203,5 +199,54 @@ class Journal:
     def remove(self, component: Adaptor | Selector | Lens):
         raise NotImplementedError
 
-    def marking(self) -> list:
-        raise NotImplementedError
+    @property
+    def adaptor(self):
+        return next(
+            (i for i in self.registry.get(Adaptor, []) if self.path.suffix in i.backend.value),
+            None
+        )
+
+    @property
+    def marking(self):
+        return [
+            element for frame in self.adaptor.data.values()
+            for element in frame
+            if getattr(element, "type", None) == ElementType.MARKING.value
+        ]
+
+    @property
+    def model(self):
+        """
+        Decorate each frame with its path, and each Element with its type.
+
+        """
+        logger = logging.getLogger(self.__class__.__name__.lower())
+        data = self.adaptor.data
+        for p in list(data):
+            frame = data[p] = Frame(data[p].data)
+            frame.path = p
+            for n, obj in enumerate(frame.copy()):
+                try:
+                    frame[n] = Element(obj.data)
+                except AttributeError:
+                    logger.debug(f"Not a data element: {obj}")
+                    continue
+                except ValueError:
+                    logger.debug(f"Not a data element: {obj}")
+                    if isinstance(obj, UserString):
+                        frame[n].type = ElementType.CONTENT
+                    continue
+                finally:
+                    frame[n].parent = frame
+
+                try:
+                    frame[n].type = ElementType[obj["type"].upper()]
+                except KeyError:
+                    if "type" in obj:
+                        logger.error(f"Unknown resource type: {obj['type']}")
+                    else:
+                        logger.error(f"Type value missing: path {p} item {n}")
+                    return
+
+            frame.refresh()
+        return data

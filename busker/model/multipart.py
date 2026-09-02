@@ -31,6 +31,7 @@ import re
 
 from busker import __version__
 from busker.model.types import Adaptor
+from busker.model.types import BackendType
 
 
 # TODO: Refactor to
@@ -54,6 +55,7 @@ class Multipart(Adaptor):
         factory: dict= None,
     ):
         self.logger = logging.getLogger("busker.multipart")
+        self.backend = BackendType.RHT_TXT
         self.mark_regex = re.compile(r"^\{.+?\}$", re.MULTILINE)
         self.seal = id(self)
         self.path = path or tuple()

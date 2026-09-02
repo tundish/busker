@@ -50,10 +50,10 @@ class Engine:
     class Exclamation(Exception):
         pass
 
-    def __init__(self, rht: Journal = None):
+    def __init__(self, journal: Journal = None):
         self.logger = logging.getLogger(self.__class__.__name__)
-        self.rht = rht
-        self.clocks = dict(self.set_clocks(rht))
+        self.journal = journal
+        self.clocks = dict(self.set_clocks(journal))
 
     @staticmethod
     def split_to_words(text: str, preserver=".", discard=None):
@@ -72,8 +72,8 @@ class Engine:
         ) or difflib.get_close_matches(text.strip(), phrases, cutoff=precision)
 
     @staticmethod
-    def set_clocks(rht):
-        for marker in rht.marking:
+    def set_clocks(journal):
+        for marker in journal.marking:
             marker.scheduler = sched.scheduler()
             yield marker["name"], marker
 
