@@ -36,9 +36,10 @@ from busker.model.types import Chain
 from busker.model.types import Element
 from busker.model.types import ElementType
 from busker.model.types import Frame
+from busker.model.types import Lens
 
 
-class Plotline:
+class Plotline(Lens):
     """
     Implements a Resource HyperTree (.rht).
 
@@ -49,14 +50,14 @@ class Plotline:
     )
 
     @classmethod
-    def model(cls, text: str):
+    def model(cls, adapter: Adapter):
         """
         Read through the text and assemble a Multipart document.
         Decorate each frame with its path, and each Element with its type.
 
         """
         logger = logging.getLogger(cls.__name__.lower())
-        doc = Multipart(text=text, factory={dict: UserDict, list: UserList, str: UserString})
+        doc = Multipart(factory={dict: UserDict, list: UserList, str: UserString})
         for p in list(doc.data):
             frame = doc.data[p] = Frame(doc.data[p].data)
             frame.path = p

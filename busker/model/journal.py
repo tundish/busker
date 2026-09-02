@@ -28,10 +28,12 @@ import itertools
 
 import jsonpath
 
-from busker.model.plotline import Plotline
+from busker.model.types import Adaptor
 from busker.model.types import Chain
 from busker.model.types import Element
 from busker.model.types import ElementType
+from busker.model.types import Lens
+from busker.model.types import Selector
 
 
 class JournalEnvironment(jsonpath.JSONPathEnvironment):
@@ -68,7 +70,7 @@ class JournalEnvironment(jsonpath.JSONPathEnvironment):
                 yield match
 
 
-class Journal(Plotline):
+class Syntax(Lens):
     """
     Access to Resource HyperTree (.rht) data.
 
@@ -184,3 +186,22 @@ class Journal(Plotline):
                     phrase = term.format(**kwargs)
                     rv[phrase.lower()] = (element, kwargs)
         return rv
+
+
+class Journal:
+
+    def __init__(self, *args, model=None):
+        self.registry = {
+            cls: [arg for arg in args if isinstance(arg, cls)]
+            for cls in (Adaptor, Selector, Lens)
+        }
+        self.model = model
+
+    def attach(self, component: Adaptor | Selector | Lens):
+        raise NotImplementedError
+
+    def remove(self, component: Adaptor | Selector | Lens):
+        raise NotImplementedError
+
+    def marking(self) -> list:
+        raise NotImplementedError

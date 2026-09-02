@@ -16,6 +16,8 @@
 # If not, see <https://www.gnu.org/licenses/>.
 
 import ast
+from collections import UserDict
+from collections import UserList
 from collections import UserString
 import importlib.resources
 import logging
@@ -25,6 +27,7 @@ import unittest
 
 from busker.engine.base import Engine
 from busker.model.journal import Journal
+from busker.model.multipart import Multipart
 from busker.model.plotline import Plotline
 from busker.model.types import Chain
 from busker.model.types import Element
@@ -37,8 +40,11 @@ from busker.model.test.test_plotline import PlotlineTests
 class EngineTests(unittest.TestCase):
 
     def setUp(self):
-        self.text = importlib.resources.read_text("busker.data", "cloak_of_harkness.rht")
-        self.engine = Engine(Journal.model(self.text))
+        with importlib.resources.path("busker.data", "cloak_of_harkness.rht") as path:
+            adapter = Multipart(factory={dict: UserDict, list: UserList, str: UserString})
+            journal = Journal(adapter)
+            journal.scan(path)
+            self.engine = Engine(journal)
 
     def test_world_marker(self):
         events = self.engine.put("go north")

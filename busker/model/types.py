@@ -20,7 +20,9 @@ from collections import ChainMap
 from collections import UserDict
 from collections import UserList
 from collections import UserString
+from collections.abc import Generator
 import enum
+import pathlib
 import warnings
 
 
@@ -41,11 +43,17 @@ class ElementType(enum.StrEnum):
     TRIGGER = enum.auto()
 
 
-class Adapter:
-    pass
+class Adaptor:
+    def scan(self, path: pathlib.Path | str):
+        raise NotImplementedError
 
 
 class Selector:
+    def search(self):
+        raise NotImplementedError
+
+
+class Lens:
     pass
 
 

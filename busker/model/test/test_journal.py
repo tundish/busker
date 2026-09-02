@@ -23,6 +23,7 @@ import textwrap
 import unittest
 
 from busker.model.journal import Journal
+from busker.model.multipart import Multipart
 from busker.model.plotline import Plotline
 from busker.model.types import Chain
 from busker.model.types import Element
@@ -33,6 +34,9 @@ from busker.model.test.test_plotline import PlotlineTests
 
 
 class JournalTests(unittest.TestCase):
+
+    def setUp(self):
+        self.adapter = Multipart(factory={dict: UserDict, list: UserList, str: UserString})
 
     def test_model(self):
         rht = Journal.model(PlotlineTests.texts[0])
@@ -119,7 +123,7 @@ class JournalTests(unittest.TestCase):
         )
         """)
         text = PlotlineTests.texts[2] + action_text
-        rht = Journal.model(text)
+        rht = Syntax.model(text)
         path = ("b", 1)
         actions = rht.actions(path)
         self.assertIsInstance(actions, dict)

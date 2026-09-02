@@ -30,6 +30,7 @@ import pprint
 import re
 
 from busker import __version__
+from busker.model.types import Adaptor
 
 
 # TODO: Refactor to
@@ -42,14 +43,13 @@ from busker import __version__
 # Select backend based on input format
 # Feed / scan into memory
 # Switch backend if necessary
-# Backend offers choice of Finders?
+# Backend offers choice of Selectors?
 
 
-class Multipart:
+class Multipart(Adaptor):
 
     def __init__(
         self, *args,
-        text: str = None,
         path: tuple = None,
         factory: dict= None,
     ):
@@ -64,9 +64,6 @@ class Multipart:
         self.data = defaultdict(self.factory[list])
         self.data[self.path].extend(args)
 
-        if text is not None:
-            list(self.scan(text))
-
     @property
     def header(self):
         if self.path is None:
@@ -78,10 +75,11 @@ class Multipart:
         return "\n".join(str(i) if isinstance(i, UserString) else i for i in self.dump())
 
     def scan(
-        self, text: str, header_length=255,
+        self, header_length=255,
         code_types=set(("application/x-python-code", "application/x-python", "application/python", "code/python")),
         data_types=set(("application/json", "text/json", "data/json", "text/python", "text/x-python", "data/python"))
     ) -> Generator[dict]:
+        text = self.path.read_text()
         delimiters = list(self.mark_regex.finditer(text))
         if not delimiters:
             self.logger.error("No delimiters found")
