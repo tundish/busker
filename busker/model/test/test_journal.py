@@ -42,9 +42,9 @@ class JournalTests(unittest.TestCase):
         self.adaptor = Multipart(factory={dict: UserDict, list: UserList, str: UserString})
 
     def test_model(self):
-        self.adaptor.scan(PlotlineTests.texts[0])
+        list(self.adaptor.scan(PlotlineTests.texts[0]))
         journal = Journal(self.adaptor, uri=pathlib.Path("test.rht"))
-        for path, frame in journal.model.data.items():
+        for path, frame in journal.model.items():
             with self.subTest(frame=frame, path=path):
                 self.assertIsInstance(frame, Frame)
                 self.assertIsInstance(frame.path, tuple)

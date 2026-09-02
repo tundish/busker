@@ -18,6 +18,9 @@
 # Stage: Python code (world entity query model)
 # Story: Speech      (scene drama directives model)
 
+from collections import UserDict
+from collections import UserList
+from collections import UserString
 from collections.abc import Mapping
 from collections.abc import MutableSequence
 from collections.abc import Sequence
