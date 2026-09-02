@@ -49,7 +49,7 @@ class Plotline:
     )
 
     @classmethod
-    def scan(cls, text: str):
+    def model(cls, text: str):
         """
         Read through the text and assemble a Multipart document.
         Decorate each frame with its path, and each Element with its type.

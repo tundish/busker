@@ -34,8 +34,8 @@ from busker.model.test.test_plotline import PlotlineTests
 
 class JournalTests(unittest.TestCase):
 
-    def test_scan(self):
-        rht = Journal.scan(PlotlineTests.texts[0])
+    def test_model(self):
+        rht = Journal.model(PlotlineTests.texts[0])
         for path, frame in rht.doc.data.items():
             with self.subTest(frame=frame, path=path):
                 self.assertIsInstance(frame, Frame)
@@ -46,8 +46,8 @@ class JournalTests(unittest.TestCase):
                     self.assertIsInstance(elem, (Element, ast.Module, UserString))
                     self.assertEqual(elem.parent, frame)
 
-    def test_scan_context(self):
-        rht = Journal.scan(PlotlineTests.texts[0])
+    def test_model_context(self):
+        rht = Journal.model(PlotlineTests.texts[0])
         self.assertIsInstance(rht.doc.data[()][0], Element)
         self.assertEqual(rht.doc.data[()][0].get("type"), ElementType.CONTEXT.value)
 
@@ -55,7 +55,7 @@ class JournalTests(unittest.TestCase):
         self.assertEqual(rht.doc.data[()][1].get("type"), ElementType.CONTEXT.value)
 
     def test_journal_context(self):
-        rht = Journal.scan(PlotlineTests.texts[2])
+        rht = Journal.model(PlotlineTests.texts[2])
 
         path = ("a", 0, 1, 2)
         for n in range(3):
@@ -69,7 +69,7 @@ class JournalTests(unittest.TestCase):
                 self.assertEqual(rv["route"], ["home", "shop", "home", "work", "shop", "work", "home"], rv)
 
     def test_journal(self):
-        rht = Journal.scan(PlotlineTests.texts[2])
+        rht = Journal.model(PlotlineTests.texts[2])
         rv = rht.tree
         self.assertIsInstance(rv, dict)
         self.assertEqual(("a", "b"), tuple(rv), rv)
@@ -80,7 +80,7 @@ class JournalTests(unittest.TestCase):
         self.assertIs(rv["a"][0][1][2].maps[1], rht.doc.data[("a", 0, 1, 2)][0])
 
     def test_search_context_key(self):
-        rht = Journal.scan(PlotlineTests.texts[2])
+        rht = Journal.model(PlotlineTests.texts[2])
         context = rht.context(("b", 1))
         self.assertIsInstance(context.maps[0].parent, Frame)
 
@@ -88,7 +88,7 @@ class JournalTests(unittest.TestCase):
         self.assertEqual(rv, ["Wednesday"])
 
     def test_search_context_attribute(self):
-        rht = Journal.scan(PlotlineTests.texts[2])
+        rht = Journal.model(PlotlineTests.texts[2])
         context = rht.context(("b", 1))
         self.assertEqual(context.maps[0].type.value, ElementType.CONTEXT.value)
 
@@ -119,7 +119,7 @@ class JournalTests(unittest.TestCase):
         )
         """)
         text = PlotlineTests.texts[2] + action_text
-        rht = Journal.scan(text)
+        rht = Journal.model(text)
         path = ("b", 1)
         actions = rht.actions(path)
         self.assertIsInstance(actions, dict)

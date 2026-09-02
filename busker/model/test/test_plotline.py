@@ -230,8 +230,8 @@ class PlotlineTests(unittest.TestCase):
         """).lstrip(),
     ]
 
-    def test_scan(self):
-        rht = Plotline.scan(self.texts[0])
+    def test_model(self):
+        rht = Plotline.model(self.texts[0])
         for path, frame in rht.doc.data.items():
             with self.subTest(frame=frame, path=path):
                 self.assertIsInstance(frame, Frame)
@@ -243,7 +243,7 @@ class PlotlineTests(unittest.TestCase):
                     self.assertEqual(elem.parent, frame)
 
     def test_plotline_mesh(self):
-        rht = Plotline.scan(self.texts[1])
+        rht = Plotline.model(self.texts[1])
         count = Counter(
            e.get(k) for p, f in rht.doc.data.items() for e in f for k in ("port", "link")
            if e.get("type") == ElementType.LINKAGE.value
@@ -253,7 +253,7 @@ class PlotlineTests(unittest.TestCase):
         self.assertEqual(len(count), len(mesh) + 1, mesh)  # Kitchen door is stuck
 
     def test_plotline_branches(self):
-        rht = Plotline.scan(self.texts[1])
+        rht = Plotline.model(self.texts[1])
 
         self.assertEqual(3, len(rht.branches(("spots", "hall"))))
 
@@ -267,7 +267,7 @@ class PlotlineTests(unittest.TestCase):
         self.assertEqual(set(i[1].path for i in branches.values()), {("spots", "hall")})
 
     def test_plotline_route(self):
-        rht = Plotline.scan(self.texts[1])
+        rht = Plotline.model(self.texts[1])
         r = rht.route(("spots", "kitchen"), ("spots", "bedroom"))
         self.assertEqual(5, len(r), r)
         self.assertEqual(5, len(set(r)))

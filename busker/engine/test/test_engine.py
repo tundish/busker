@@ -38,7 +38,7 @@ class EngineTests(unittest.TestCase):
 
     def setUp(self):
         self.text = importlib.resources.read_text("busker.data", "cloak_of_harkness.rht")
-        self.engine = Engine(Journal.scan(self.text))
+        self.engine = Engine(Journal.model(self.text))
 
     def test_world_marker(self):
         events = self.engine.put("go north")

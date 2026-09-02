@@ -24,6 +24,11 @@ import enum
 import warnings
 
 
+class BackendType(enum.Enum):
+    SQL3_DB = [".db"]
+    RHT_TXT = [".rht"]
+
+
 class ElementType(enum.StrEnum):
     COMMENT = enum.auto()
     CONTENT = enum.auto()
@@ -34,6 +39,14 @@ class ElementType(enum.StrEnum):
     MARKING = enum.auto()
     MONITOR = enum.auto()
     TRIGGER = enum.auto()
+
+
+class Adapter:
+    pass
+
+
+class Selector:
+    pass
 
 
 class Chain(ChainMap):
