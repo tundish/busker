@@ -79,6 +79,11 @@ class Multipart(Adaptor):
     def load(self, uri: str | pathlib.Path):
         return uri.read_text()
 
+    def save(self, uri: str | pathlib.Path):
+        text = str(self)
+        uri.write_text(text)
+        return text
+
     def scan(
         self,
         text: str,
