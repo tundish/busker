@@ -65,7 +65,7 @@ class MultipartTests(unittest.TestCase):
         print("Hello, World!")
         """).lstrip()
         doc = Multipart()
-        bits = list(doc.feed(text))
+        bits = list(doc.scan(text))
         self.assertEqual(len(bits), 3, bits)
         self.assertIsInstance(doc.data[()][0], dict)
         self.assertIsInstance(doc.data[("a", "b", "c")][0], str)
@@ -102,7 +102,7 @@ class MultipartTests(unittest.TestCase):
             with self.subTest(n=n, text=text):
                 doc = Multipart()
                 with self.assertLogs("busker.multipart", level="ERROR") as context:
-                    bits = list(doc.feed(text))
+                    bits = list(doc.scan(text))
                 self.assertIn("ERROR", "\n".join(context.output))
                 self.assertIn("Pos: ", "\n".join(context.output))
 

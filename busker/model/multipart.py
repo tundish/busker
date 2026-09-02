@@ -65,7 +65,7 @@ class Multipart:
         self.data[self.path].extend(args)
 
         if text is not None:
-            list(self.feed(text))
+            list(self.scan(text))
 
     @property
     def header(self):
@@ -77,7 +77,7 @@ class Multipart:
     def __str__(self):
         return "\n".join(str(i) if isinstance(i, UserString) else i for i in self.dump())
 
-    def feed(
+    def scan(
         self, text: str, header_length=255,
         code_types=set(("application/x-python-code", "application/x-python", "application/python", "code/python")),
         data_types=set(("application/json", "text/json", "data/json", "text/python", "text/x-python", "data/python"))
