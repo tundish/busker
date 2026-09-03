@@ -239,6 +239,7 @@ class PlotlineTests(unittest.TestCase):
         lens = Plotline(adaptor)
         journal = Journal(adaptor, lens, uri=pathlib.Path("test.rht"))
         list(adaptor.scan(text))
+        journal.model
         return journal
 
     def test_model(self):
@@ -267,22 +268,25 @@ class PlotlineTests(unittest.TestCase):
         self.assertEqual(len(count), len(mesh) + 1, mesh)  # Kitchen door is stuck
 
     def test_plotline_branches(self):
-        rht = Plotline.model(self.texts[1])
+        journal = self.build_journal(self.texts[1])
+        plotline = journal.registry[Lens][0]
 
-        self.assertEqual(3, len(rht.branches(("spots", "hall"))))
+        self.assertEqual(3, len(plotline.branches(("spots", "hall"))))
 
-        branches = {i[0].port: i for i in rht.branches(("spots", "hall"))}
+        branches = {i[0].port: i for i in plotline.branches(("spots", "hall"))}
         self.assertEqual(
             set(i[1].path for i in branches.values()),
             {("spots", "bedroom", "door"), ("spots", "kitchen", "door"), ("spots", "stairs")}
         )
 
-        branches = {i[0].port: i for i in rht.branches(("spots", "stairs"))}
+        branches = {i[0].port: i for i in plotline.branches(("spots", "stairs"))}
         self.assertEqual(set(i[1].path for i in branches.values()), {("spots", "hall")})
 
     def test_plotline_route(self):
-        rht = Plotline.model(self.texts[1])
-        r = rht.route(("spots", "kitchen"), ("spots", "bedroom"))
+        journal = self.build_journal(self.texts[1])
+        plotline = journal.registry[Lens][0]
+
+        r = plotline.route(("spots", "kitchen"), ("spots", "bedroom"))
         self.assertEqual(5, len(r), r)
         self.assertEqual(5, len(set(r)))
         self.assertEqual(
