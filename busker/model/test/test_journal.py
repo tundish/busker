@@ -61,12 +61,13 @@ class JournalTests(unittest.TestCase):
                     self.assertEqual(elem.parent, frame)
 
     def test_model_context(self):
-        rht = self.journal.model(PlotlineTests.texts[0])
-        self.assertIsInstance(rht.doc.data[()][0], Element)
-        self.assertEqual(rht.doc.data[()][0].get("type"), ElementType.CONTEXT.value)
+        journal = self.build_journal(PlotlineTests.texts[0])
+        rht = journal.model
+        self.assertIsInstance(rht[()][0], Element)
+        self.assertEqual(rht[()][0].get("type"), ElementType.CONTEXT.value)
 
-        self.assertIsInstance(rht.doc.data[()][1], Element)
-        self.assertEqual(rht.doc.data[()][1].get("type"), ElementType.CONTEXT.value)
+        self.assertIsInstance(rht[()][1], Element)
+        self.assertEqual(rht[()][1].get("type"), ElementType.CONTEXT.value)
 
     def test_journal_context(self):
         rht = Journal.model(PlotlineTests.texts[2])
