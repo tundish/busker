@@ -160,7 +160,8 @@ class MultipartTests(unittest.TestCase):
         {"seal": 2863490869328, "type": "text/plain", "path": ["a", "b"]}
         Yesterday, upon the stair...
         """).lstrip()
-        doc = Multipart(text=text)
+        doc = Multipart()
+        list(doc.scan(text))
         for k, seq in doc.data.items():
             with self.subTest(k=k):
                 self.assertIsInstance(seq, list)
@@ -170,7 +171,8 @@ class MultipartTests(unittest.TestCase):
                         self.assertTrue(i)
                         self.assertIsInstance(i, (dict, str))
 
-        doc = Multipart(text=text, factory={dict: UserDict, list: UserList, str: UserString})
+        doc = Multipart(factory={dict: UserDict, list: UserList, str: UserString})
+        list(doc.scan(text))
         for k, seq in doc.data.items():
             with self.subTest(k=k):
                 self.assertIsInstance(seq, UserList)

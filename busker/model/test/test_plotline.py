@@ -232,6 +232,7 @@ class PlotlineTests(unittest.TestCase):
 
     def test_model(self):
         adapter = Multipart(factory={dict: UserDict, list: UserList, str: UserString})
+        journal = Journal(adaptor, lens)
         rht = Plotline.model(self.texts[0])
         for path, frame in rht.doc.data.items():
             with self.subTest(frame=frame, path=path):
