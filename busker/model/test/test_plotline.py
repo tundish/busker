@@ -20,15 +20,18 @@ from collections import Counter
 from collections import UserDict
 from collections import UserList
 from collections import UserString
+import pathlib
 import textwrap
 import unittest
 
+from busker.model.journal import Journal
 from busker.model.multipart import Multipart
 from busker.model.plotline import Plotline
 from busker.model.types import Chain
 from busker.model.types import Element
 from busker.model.types import ElementType
 from busker.model.types import Frame
+from busker.model.types import Lens
 
 
 class PlotlineTests(unittest.TestCase):
@@ -230,11 +233,18 @@ class PlotlineTests(unittest.TestCase):
         """).lstrip(),
     ]
 
+    @staticmethod
+    def build_journal(text):
+        adaptor = Multipart(factory={dict: UserDict, list: UserList, str: UserString})
+        lens = Plotline(adaptor)
+        journal = Journal(adaptor, lens, uri=pathlib.Path("test.rht"))
+        list(adaptor.scan(text))
+        return journal
+
     def test_model(self):
-        adapter = Multipart(factory={dict: UserDict, list: UserList, str: UserString})
-        journal = Journal(adaptor, lens)
-        rht = Plotline.model(self.texts[0])
-        for path, frame in rht.doc.data.items():
+        journal = self.build_journal(self.texts[0])
+        rht = journal.model
+        for path, frame in rht.items():
             with self.subTest(frame=frame, path=path):
                 self.assertIsInstance(frame, Frame)
                 self.assertIsInstance(frame.path, tuple)
@@ -245,13 +255,15 @@ class PlotlineTests(unittest.TestCase):
                     self.assertEqual(elem.parent, frame)
 
     def test_plotline_mesh(self):
-        rht = Plotline.model(self.texts[1])
+        journal = self.build_journal(self.texts[1])
+        plotline = journal.registry[Lens][0]
+        rht = journal.model
         count = Counter(
-           e.get(k) for p, f in rht.doc.data.items() for e in f for k in ("port", "link")
+           e.get(k) for p, f in rht.items() for e in f for k in ("port", "link")
            if e.get("type") == ElementType.LINKAGE.value
         )
         self.assertTrue(all(v == 2 for v in count.values()))
-        mesh = list(rht.mesh)
+        mesh = list(plotline.mesh)
         self.assertEqual(len(count), len(mesh) + 1, mesh)  # Kitchen door is stuck
 
     def test_plotline_branches(self):

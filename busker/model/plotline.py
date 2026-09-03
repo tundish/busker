@@ -32,6 +32,7 @@ import math
 import operator
 
 from busker.model.multipart import Multipart
+from busker.model.types import Adaptor
 from busker.model.types import Chain
 from busker.model.types import Element
 from busker.model.types import ElementType
@@ -50,7 +51,7 @@ class Plotline(Lens):
     )
 
 
-    def __init__(self, doc: Multipart):
+    def __init__(self, doc: Adaptor):
         self.doc = doc
         self.routes = {}
 
