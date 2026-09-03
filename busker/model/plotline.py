@@ -23,10 +23,6 @@ from collections import UserDict
 from collections import UserList
 from collections import UserString
 from collections.abc import Generator
-from collections.abc import Mapping
-from collections.abc import MutableSequence
-from collections.abc import Set
-import itertools
 import logging
 import math
 import operator

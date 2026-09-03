@@ -26,48 +26,12 @@ import contextlib
 import logging
 import pathlib
 
-import jsonpath
-
 from busker.model.types import Adaptor
 from busker.model.types import Element
 from busker.model.types import ElementType
 from busker.model.types import Frame
 from busker.model.types import Lens
 from busker.model.types import Selector
-
-
-class JournalEnvironment(jsonpath.JSONPathEnvironment):
-    """
-    Modifications to the python-jsonpath library.
-    * allow attribute access semantics.
-    * allow wildcards to apply to sets.
-
-    """
-
-    def _resolve_name(self, node):
-        if self.token.kind == jsonpath.token.TOKEN_NAME and hasattr(node.obj, self.name):
-            match = node.new_child(getattr(node.obj, self.name), self.name)
-            node.add_child(match)
-            yield match
-
-        if isinstance(node.obj, Mapping):
-            with contextlib.suppress(KeyError):
-                match = node.new_child(self.env.getitem(node.obj, self.name), self.name)
-                node.add_child(match)
-                yield match
-
-    def _resolve_wildcard(self, node):
-        if isinstance(node.obj, Mapping):
-            for key, val in node.obj.items():
-                match = node.new_child(val, key)
-                node.add_child(match)
-                yield match
-
-        elif isinstance(node.obj, (Set, Sequence)) and not isinstance(node.obj, str):
-            for i, val in enumerate(node.obj):
-                match = node.new_child(val, i)
-                node.add_child(match)
-                yield match
 
 
 class Journal:

@@ -33,6 +33,7 @@ from busker.model.types import Chain
 from busker.model.types import Element
 from busker.model.types import ElementType
 from busker.model.types import Frame
+from busker.model.types import Lens
 
 from busker.model.test.test_plotline import PlotlineTests
 
@@ -41,6 +42,15 @@ class JournalTests(unittest.TestCase):
 
     def setUp(self):
         self.adaptor = Multipart(factory={dict: UserDict, list: UserList, str: UserString})
+
+    @staticmethod
+    def build_journal(text):
+        adaptor = Multipart(factory={dict: UserDict, list: UserList, str: UserString})
+        lens = Syntax(adaptor)
+        journal = Journal(adaptor, lens, uri=pathlib.Path("test.rht"))
+        list(adaptor.scan(text))
+        journal.model
+        return journal
 
     @unittest.skipIf(platform.python_version() < "3.13", "new eval semantics")
     def test_compile_exec_action(self):
@@ -66,19 +76,21 @@ class JournalTests(unittest.TestCase):
         )
         """)
         text = PlotlineTests.texts[2] + action_text
-        rht = Syntax.model(text)
+        journal = self.build_journal(text)
+        syntax = journal.registry[Lens][0]
+        rht = journal.model
         path = ("b", 1)
-        actions = rht.actions(path)
+        actions = syntax.actions(path)
         self.assertIsInstance(actions, dict)
         rv = actions.get("drop off milk at work")
         self.assertIsInstance(rv, tuple)
         self.assertEqual(len(rv), 2)
         self.assertIsInstance(rv[0], Element)
-        self.assertEqual(rv[0], rht.doc.data[()][-2])
-        self.assertEqual(rv[0].handler, rht.doc.data[()][-1])
+        self.assertEqual(rv[0], rht[()][-2])
+        self.assertEqual(rv[0].handler, rht[()][-1])
         self.assertEqual(rv[1], dict(goods="milk", place="work"))
 
-        self.assertEqual(rht.context(path).get("goods", None), {"crumpets", "milk"})
+        self.assertEqual(syntax.context(path).get("goods", None), {"crumpets", "milk"})
         code = compile(rv[0].handler, format(path), mode="exec")
         l = dict(rv[1], journal=rht, path=path)
         g = dict(logging=logging)

@@ -39,12 +39,17 @@ from busker.model.test.test_plotline import PlotlineTests
 
 class JournalTests(unittest.TestCase):
 
-    def setUp(self):
-        self.adaptor = Multipart(factory={dict: UserDict, list: UserList, str: UserString})
+    @staticmethod
+    def build_journal(text):
+        adaptor = Multipart(factory={dict: UserDict, list: UserList, str: UserString})
+        lenses = []
+        journal = Journal(adaptor, *lenses, uri=pathlib.Path("test.rht"))
+        list(adaptor.scan(text))
+        journal.model
+        return journal
 
     def test_model(self):
-        list(self.adaptor.scan(PlotlineTests.texts[0]))
-        journal = Journal(self.adaptor, uri=pathlib.Path("test.rht"))
+        journal = self.build_journal(PlotlineTests.texts[0])
         for path, frame in journal.model.items():
             with self.subTest(frame=frame, path=path):
                 self.assertIsInstance(frame, Frame)
@@ -56,7 +61,7 @@ class JournalTests(unittest.TestCase):
                     self.assertEqual(elem.parent, frame)
 
     def test_model_context(self):
-        rht = Journal.model(PlotlineTests.texts[0])
+        rht = self.journal.model(PlotlineTests.texts[0])
         self.assertIsInstance(rht.doc.data[()][0], Element)
         self.assertEqual(rht.doc.data[()][0].get("type"), ElementType.CONTEXT.value)
 
