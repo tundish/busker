@@ -46,10 +46,8 @@ class JournalTests(unittest.TestCase):
     @staticmethod
     def build_journal(text):
         adaptor = Multipart(factory={dict: UserDict, list: UserList, str: UserString})
-        lens = Syntax(adaptor)
-        journal = Journal(adaptor, lens, uri=pathlib.Path("test.rht"))
         list(adaptor.scan(text))
-        journal.model
+        journal = Journal(adaptor, Syntax, uri=pathlib.Path("test.rht"))
         return journal
 
     @unittest.skipIf(platform.python_version() < "3.13", "new eval semantics")
@@ -77,7 +75,7 @@ class JournalTests(unittest.TestCase):
         """)
         text = PlotlineTests.texts[2] + action_text
         journal = self.build_journal(text)
-        syntax = journal.registry[Lens][0]
+        syntax = list(journal.registry[Lens])[0]
         rht = journal.model
         path = ("b", 1)
         actions = syntax.actions(path)
@@ -92,7 +90,7 @@ class JournalTests(unittest.TestCase):
 
         self.assertEqual(syntax.context(path).get("goods", None), {"crumpets", "milk"})
         code = compile(rv[0].handler, format(path), mode="exec")
-        l = dict(rv[1], journal=rht, path=path)
+        l = dict(rv[1], journal=journal, path=path)
         g = dict(logging=logging)
         with self.assertLogs(format(path), logging.DEBUG) as check:
             exec(code, locals=l, globals=g)

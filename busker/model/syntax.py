@@ -108,8 +108,8 @@ class Syntax(Lens):
                     stack.append((body[k].copy(), v))
         return body
 
-    def __init__(self, doc: Adaptor):
-        self.doc = doc
+    def __init__(self, journal: object):
+        self.journal = journal
         jsonpath.selectors.NameSelector.resolve = JournalEnvironment._resolve_name
         jsonpath.selectors.WildcardSelector.resolve = JournalEnvironment._resolve_wildcard
         self.env = JournalEnvironment()
@@ -119,7 +119,7 @@ class Syntax(Lens):
         "Expand the document into a nested tree of frames"
         rv = dict()
         done = dict()
-        paths = list(self.doc.data)
+        paths = list(self.journal.adaptor.data)
         for path in paths:
             node = rv
             for n, key in enumerate(path):
@@ -129,7 +129,7 @@ class Syntax(Lens):
                     continue
 
                 try:
-                    frame = self.doc.data[pos]
+                    frame = self.journal.adaptor.data[pos]
                     node[key] = Chain(*(i for i in frame if i.type == ElementType.CONTEXT.value))
                 except KeyError:
                     node[key] = Chain()
@@ -141,7 +141,7 @@ class Syntax(Lens):
     def context(self, path: tuple) -> Chain:
         "Build a view of the document as seen from the supplied path"
         levels = [path[0: n] for n in range(len(path) + 1)]
-        frames = [self.doc.data.get(level, []) for level in levels]
+        frames = [self.journal.adaptor.data.get(level, []) for level in levels]
         chains = [
             Chain(*(i for i in frame if getattr(i, "type", None) == ElementType.CONTEXT.value))
             for frame in reversed(frames)
@@ -153,7 +153,7 @@ class Syntax(Lens):
 
     def actions(self, path: tuple) -> dict:
         levels = [path[0: n] for n in range(len(path) + 1)]
-        frames = [self.doc.data.get(level, []) for level in levels]
+        frames = [self.journal.adaptor.data.get(level, []) for level in levels]
         elements = [
             i for frame in frames for i in frame
             if isinstance(i, Element) and i.handler
