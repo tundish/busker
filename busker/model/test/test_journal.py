@@ -67,18 +67,6 @@ class JournalTests(unittest.TestCase):
         self.assertIsInstance(rht[()][1], Element)
         self.assertEqual(rht[()][1].get("type"), ElementType.CONTEXT.value)
 
-    def test_journal(self):
-        journal = self.build_journal(PlotlineTests.texts[2])
-        rht = journal.model
-        rv = rht.tree
-        self.assertIsInstance(rv, dict)
-        self.assertEqual(("a", "b"), tuple(rv), rv)
-        self.assertIn(0, rv["a"], rv)
-        self.assertIn(1, rv["a"][0])
-        self.assertIn(2, rv["a"][0][1])
-        self.assertEqual(rv["a"][0][1][2]["goods"], {"tea", "biscuits", "milk"})
-        self.assertIs(rv["a"][0][1][2].maps[1], rht.doc.data[("a", 0, 1, 2)][0])
-
     def test_search_context_key(self):
         journal = self.build_journal(PlotlineTests.texts[2])
         rht = journal.model

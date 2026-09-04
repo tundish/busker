@@ -64,6 +64,17 @@ class JournalTests(unittest.TestCase):
                 self.assertEqual(rv["goods"], {"tea", "biscuits", "eggs", "milk"})
                 self.assertEqual(rv["route"], ["home", "shop", "home", "work", "shop", "work", "home"], rv)
 
+    def test_journal_tree(self):
+        journal = self.build_journal(PlotlineTests.texts[2])
+        rv = journal.tree
+        self.assertIsInstance(rv, dict)
+        self.assertEqual(("a", "b"), tuple(rv), rv)
+        self.assertIn(0, rv["a"], rv)
+        self.assertIn(1, rv["a"][0])
+        self.assertIn(2, rv["a"][0][1])
+        self.assertEqual(rv["a"][0][1][2]["goods"], {"tea", "biscuits", "milk"})
+        self.assertIs(rv["a"][0][1][2].maps[1], journal.adaptor.data[("a", 0, 1, 2)][0])
+
     @unittest.skipIf(platform.python_version() < "3.13", "new eval semantics")
     def test_compile_exec_action(self):
         action_text = textwrap.dedent("""
@@ -90,7 +101,6 @@ class JournalTests(unittest.TestCase):
         text = PlotlineTests.texts[2] + action_text
         journal = self.build_journal(text)
         syntax = list(journal.registry[Lens])[0]
-        rht = journal.model
         path = ("b", 1)
         actions = syntax.actions(path)
         self.assertIsInstance(actions, dict)
@@ -98,8 +108,8 @@ class JournalTests(unittest.TestCase):
         self.assertIsInstance(rv, tuple)
         self.assertEqual(len(rv), 2)
         self.assertIsInstance(rv[0], Element)
-        self.assertEqual(rv[0], rht[()][-2])
-        self.assertEqual(rv[0].handler, rht[()][-1])
+        self.assertEqual(rv[0], journal.model[()][-2])
+        self.assertEqual(rv[0].handler, journal.model[()][-1])
         self.assertEqual(rv[1], dict(goods="milk", place="work"))
 
         self.assertEqual(syntax.context(path).get("goods", None), {"crumpets", "milk"})
@@ -111,4 +121,4 @@ class JournalTests(unittest.TestCase):
 
         self.assertTrue(check.output)
         self.assertIn("Removed goods 'milk' from context", check.output[0])
-        self.assertEqual(rht.context(path).get("goods", None), {"crumpets"})
+        self.assertEqual(syntax.context(path).get("goods", None), {"crumpets"})
