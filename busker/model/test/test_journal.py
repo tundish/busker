@@ -42,10 +42,8 @@ class JournalTests(unittest.TestCase):
     @staticmethod
     def build_journal(text):
         adaptor = Multipart(factory={dict: UserDict, list: UserList, str: UserString})
-        lenses = []
-        journal = Journal(adaptor, *lenses, uri=pathlib.Path("test.rht"))
         list(adaptor.scan(text))
-        journal.model
+        journal = Journal(adaptor, uri=pathlib.Path("test.rht"))
         return journal
 
     def test_model(self):
@@ -69,22 +67,9 @@ class JournalTests(unittest.TestCase):
         self.assertIsInstance(rht[()][1], Element)
         self.assertEqual(rht[()][1].get("type"), ElementType.CONTEXT.value)
 
-    def test_journal_context(self):
-        rht = Journal.model(PlotlineTests.texts[2])
-
-        path = ("a", 0, 1, 2)
-        for n in range(3):
-            with self.subTest(path=path, n=n):
-                rv = rht.context(path)
-                self.assertIsInstance(rv, Chain)
-                self.assertTrue(isinstance(i, Element) for i in rv.maps)
-                self.assertEqual(rv["type"], ElementType.CONTEXT.value)
-                self.assertEqual(rv["chord"], ("C", "F", "G"), rht.doc.data)
-                self.assertEqual(rv["goods"], {"tea", "biscuits", "eggs", "milk"})
-                self.assertEqual(rv["route"], ["home", "shop", "home", "work", "shop", "work", "home"], rv)
-
     def test_journal(self):
-        rht = Journal.model(PlotlineTests.texts[2])
+        journal = self.build_journal(PlotlineTests.texts[2])
+        rht = journal.model
         rv = rht.tree
         self.assertIsInstance(rv, dict)
         self.assertEqual(("a", "b"), tuple(rv), rv)
@@ -95,7 +80,8 @@ class JournalTests(unittest.TestCase):
         self.assertIs(rv["a"][0][1][2].maps[1], rht.doc.data[("a", 0, 1, 2)][0])
 
     def test_search_context_key(self):
-        rht = Journal.model(PlotlineTests.texts[2])
+        journal = self.build_journal(PlotlineTests.texts[2])
+        rht = journal.model
         context = rht.context(("b", 1))
         self.assertIsInstance(context.maps[0].parent, Frame)
 
@@ -103,7 +89,8 @@ class JournalTests(unittest.TestCase):
         self.assertEqual(rv, ["Wednesday"])
 
     def test_search_context_attribute(self):
-        rht = Journal.model(PlotlineTests.texts[2])
+        journal = self.build_journal(PlotlineTests.texts[2])
+        rht = journal.model
         context = rht.context(("b", 1))
         self.assertEqual(context.maps[0].type.value, ElementType.CONTEXT.value)
 

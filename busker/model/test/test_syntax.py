@@ -50,6 +50,20 @@ class JournalTests(unittest.TestCase):
         journal = Journal(adaptor, Syntax, uri=pathlib.Path("test.rht"))
         return journal
 
+    def test_journal_context(self):
+        journal = self.build_journal(PlotlineTests.texts[2])
+
+        path = ("a", 0, 1, 2)
+        for n in range(3):
+            with self.subTest(path=path, n=n):
+                rv = journal.context(path)
+                self.assertIsInstance(rv, Chain)
+                self.assertTrue(isinstance(i, Element) for i in rv.maps)
+                self.assertEqual(rv["type"], ElementType.CONTEXT.value)
+                self.assertEqual(rv["chord"], ("C", "F", "G"), journal.adaptor.data)
+                self.assertEqual(rv["goods"], {"tea", "biscuits", "eggs", "milk"})
+                self.assertEqual(rv["route"], ["home", "shop", "home", "work", "shop", "work", "home"], rv)
+
     @unittest.skipIf(platform.python_version() < "3.13", "new eval semantics")
     def test_compile_exec_action(self):
         action_text = textwrap.dedent("""

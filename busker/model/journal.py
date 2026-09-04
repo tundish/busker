@@ -51,6 +51,12 @@ class Journal:
 
         self.model  # Initialize model
 
+    def __getattr__(self, name):
+        try:
+            return next(getattr(i, name) for i in self.registry[Lens] if hasattr(i, name))
+        except StopIteration:
+            raise AttributeError(name)
+
     def attach(self, component: Adaptor | Selector | Lens):
         raise NotImplementedError
 
