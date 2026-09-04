@@ -43,7 +43,7 @@ class JournalTests(unittest.TestCase):
     def build_journal(text):
         adaptor = Multipart(factory={dict: UserDict, list: UserList, str: UserString})
         list(adaptor.scan(text))
-        journal = Journal(adaptor, uri=pathlib.Path("test.rht"))
+        journal = Journal(adaptor, Syntax, uri=pathlib.Path("test.rht"))
         return journal
 
     def test_model(self):
@@ -69,18 +69,16 @@ class JournalTests(unittest.TestCase):
 
     def test_search_context_key(self):
         journal = self.build_journal(PlotlineTests.texts[2])
-        rht = journal.model
-        context = rht.context(("b", 1))
+        context = journal.context(("b", 1))
         self.assertIsInstance(context.maps[0].parent, Frame)
 
-        rv = rht.search("$['day']", context)
+        rv = journal.search("$['day']", context)
         self.assertEqual(rv, ["Wednesday"])
 
     def test_search_context_attribute(self):
         journal = self.build_journal(PlotlineTests.texts[2])
-        rht = journal.model
-        context = rht.context(("b", 1))
+        context = journal.context(("b", 1))
         self.assertEqual(context.maps[0].type.value, ElementType.CONTEXT.value)
 
-        rv = rht.search("$.maps[0].type.value", context)
+        rv = journal.search("$.maps[0].type.value", context)
         self.assertEqual(rv, ["context"])
