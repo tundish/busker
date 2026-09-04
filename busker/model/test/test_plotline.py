@@ -236,10 +236,8 @@ class PlotlineTests(unittest.TestCase):
     @staticmethod
     def build_journal(text):
         adaptor = Multipart(factory={dict: UserDict, list: UserList, str: UserString})
-        lens = Plotline(adaptor)
-        journal = Journal(adaptor, lens, uri=pathlib.Path("test.rht"))
         list(adaptor.scan(text))
-        journal.model
+        journal = Journal(adaptor, Plotline, uri=pathlib.Path("test.rht"))
         return journal
 
     def test_model(self):
@@ -257,7 +255,7 @@ class PlotlineTests(unittest.TestCase):
 
     def test_plotline_mesh(self):
         journal = self.build_journal(self.texts[1])
-        plotline = journal.registry[Lens][0]
+        plotline = list(journal.registry[Lens])[0]
         rht = journal.model
         count = Counter(
            e.get(k) for p, f in rht.items() for e in f for k in ("port", "link")
@@ -269,7 +267,7 @@ class PlotlineTests(unittest.TestCase):
 
     def test_plotline_branches(self):
         journal = self.build_journal(self.texts[1])
-        plotline = journal.registry[Lens][0]
+        plotline = list(journal.registry[Lens])[0]
 
         self.assertEqual(3, len(plotline.branches(("spots", "hall"))))
 
@@ -284,7 +282,7 @@ class PlotlineTests(unittest.TestCase):
 
     def test_plotline_route(self):
         journal = self.build_journal(self.texts[1])
-        plotline = journal.registry[Lens][0]
+        plotline = list(journal.registry[Lens])[0]
 
         r = plotline.route(("spots", "kitchen"), ("spots", "bedroom"))
         self.assertEqual(5, len(r), r)

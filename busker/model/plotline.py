@@ -47,8 +47,8 @@ class Plotline(Lens):
     )
 
 
-    def __init__(self, doc: Adaptor):
-        self.doc = doc
+    def __init__(self, journal: object):
+        self.journal = journal
         self.routes = {}
 
     @property
@@ -62,7 +62,7 @@ class Plotline(Lens):
         """
         linkage_elements = {
             elem.get("port"): elem
-            for frame in self.doc.data.values()
+            for frame in self.journal.adaptor.data.values()
             for elem in frame
             if getattr(elem, "type", None) == ElementType.LINKAGE
         }

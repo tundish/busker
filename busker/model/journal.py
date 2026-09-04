@@ -18,6 +18,7 @@
 # Stage: Python code (world entity query model)
 # Story: Speech      (scene drama directives model)
 
+from collections import defaultdict
 from collections import UserString
 from collections.abc import Mapping
 from collections.abc import Sequence
@@ -37,12 +38,18 @@ from busker.model.types import Selector
 class Journal:
 
     def __init__(self, *args, uri: pathlib.Path | str = None):
-        self.registry = {
-            cls: [arg for arg in args if isinstance(arg, cls)]
-            for cls in (Adaptor, Selector, Lens)
-        }
         self.uri = uri
-        self._scan = list()
+        self.registry = defaultdict(set)
+
+        for cls in (Adaptor, Selector, Lens):
+            for arg in args:
+                if isinstance(arg, type) and issubclass(arg, cls):
+                    arg = arg(self)
+                if isinstance(arg, cls):
+                    arg.journal = self
+                    self.registry[cls].add(arg)
+
+        self.model  # Initialize model
 
     def attach(self, component: Adaptor | Selector | Lens):
         raise NotImplementedError
