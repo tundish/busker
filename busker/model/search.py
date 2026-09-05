@@ -22,7 +22,10 @@ import contextlib
 
 from busker.model.types import Selector
 
-import jsonpath
+try:
+    import jsonpath
+except ModuleNotFoundError:
+    jsonpath = None
 
 
 class JournalEnvironment(jsonpath.JSONPathEnvironment):
