@@ -27,7 +27,6 @@ import unittest
 from busker.model.journal import Journal
 from busker.model.multipart import Multipart
 from busker.model.travel import Travel
-from busker.model.types import Chain
 from busker.model.types import Element
 from busker.model.types import ElementType
 from busker.model.types import Frame

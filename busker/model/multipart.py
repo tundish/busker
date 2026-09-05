@@ -24,6 +24,7 @@ from collections import UserList
 from collections import UserString
 import json
 import logging
+import pathlib
 import pprint
 import re
 
@@ -38,7 +39,7 @@ class Multipart(Adaptor):
     def __init__(
         self, *args,
         path: tuple = None,
-        factory: dict= None,
+        factory: dict = None,
     ):
         self.logger = logging.getLogger("busker.multipart")
         self.backend = BackendType.RHT_TXT
@@ -179,7 +180,8 @@ class Multipart(Adaptor):
     def dump(self, safe=False):
         header = self.header
         for n, (k, v) in enumerate(self.data.items()):
-            if n == 1: header.pop("busker", None)
+            if n == 1:
+                header.pop("busker", None)
             for i in v:
                 if isinstance(i, ast.AST):
                     yield json.dumps(dict(header, type="code/python", path=k), sort_keys=False)

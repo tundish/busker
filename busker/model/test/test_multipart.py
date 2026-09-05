@@ -20,9 +20,6 @@ from collections import UserDict
 from collections import UserList
 from collections import UserString
 import json
-import pathlib
-import shutil
-import tempfile
 import textwrap
 import unittest
 

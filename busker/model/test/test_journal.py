@@ -19,17 +19,13 @@ import ast
 from collections import UserDict
 from collections import UserList
 from collections import UserString
-import logging
 import pathlib
-import platform
-import textwrap
 import unittest
 
 from busker.model.journal import Journal
 from busker.model.multipart import Multipart
 from busker.model.search import Search
 from busker.model.syntax import Syntax
-from busker.model.types import Chain
 from busker.model.types import Element
 from busker.model.types import ElementType
 from busker.model.types import Frame

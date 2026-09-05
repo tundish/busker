@@ -15,24 +15,12 @@
 # You should have received a copy of the GNU General Public License along with busker.
 # If not, see <https://www.gnu.org/licenses/>.
 
-import enum
-from collections import ChainMap
 from collections import defaultdict
 from collections import namedtuple
-from collections import UserDict
-from collections import UserList
-from collections import UserString
 from collections.abc import Generator
-import logging
 import math
-import operator
 
-from busker.model.multipart import Multipart
-from busker.model.types import Adaptor
-from busker.model.types import Chain
-from busker.model.types import Element
 from busker.model.types import ElementType
-from busker.model.types import Frame
 from busker.model.types import Lens
 
 
@@ -45,7 +33,6 @@ class Travel(Lens):
     Point = namedtuple(
         "Point", ["path", "port", "spin", "cost"], defaults=[0, 0]
     )
-
 
     def __init__(self, journal: object):
         self.journal = journal

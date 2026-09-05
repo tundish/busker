@@ -19,8 +19,6 @@ import ast
 from collections import ChainMap
 from collections import UserDict
 from collections import UserList
-from collections import UserString
-from collections.abc import Generator
 import enum
 import pathlib
 import warnings
