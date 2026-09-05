@@ -28,13 +28,12 @@ import unittest
 from busker.engine.base import Engine
 from busker.model.journal import Journal
 from busker.model.multipart import Multipart
-from busker.model.plotline import Plotline
 from busker.model.types import Chain
 from busker.model.types import Element
 from busker.model.types import ElementType
 from busker.model.types import Frame
 
-from busker.model.test.test_plotline import PlotlineTests
+from busker.model.test.test_travel import TravelTests
 
 
 class EngineTests(unittest.TestCase):

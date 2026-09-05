@@ -27,14 +27,13 @@ import unittest
 
 from busker.model.journal import Journal
 from busker.model.multipart import Multipart
-from busker.model.plotline import Plotline
 from busker.model.syntax import Syntax
 from busker.model.types import Chain
 from busker.model.types import Element
 from busker.model.types import ElementType
 from busker.model.types import Frame
 
-from busker.model.test.test_plotline import PlotlineTests
+from busker.model.test.test_travel import TravelTests
 
 
 class JournalTests(unittest.TestCase):
@@ -47,7 +46,7 @@ class JournalTests(unittest.TestCase):
         return journal
 
     def test_model(self):
-        journal = self.build_journal(PlotlineTests.texts[0])
+        journal = self.build_journal(TravelTests.texts[0])
         for path, frame in journal.model.items():
             with self.subTest(frame=frame, path=path):
                 self.assertIsInstance(frame, Frame)
@@ -59,7 +58,7 @@ class JournalTests(unittest.TestCase):
                     self.assertEqual(elem.parent, frame)
 
     def test_model_context(self):
-        journal = self.build_journal(PlotlineTests.texts[0])
+        journal = self.build_journal(TravelTests.texts[0])
         rht = journal.model
         self.assertIsInstance(rht[()][0], Element)
         self.assertEqual(rht[()][0].get("type"), ElementType.CONTEXT.value)
@@ -68,7 +67,7 @@ class JournalTests(unittest.TestCase):
         self.assertEqual(rht[()][1].get("type"), ElementType.CONTEXT.value)
 
     def test_search_context_key(self):
-        journal = self.build_journal(PlotlineTests.texts[2])
+        journal = self.build_journal(TravelTests.texts[2])
         context = journal.context(("b", 1))
         self.assertIsInstance(context.maps[0].parent, Frame)
 
@@ -76,7 +75,7 @@ class JournalTests(unittest.TestCase):
         self.assertEqual(rv, ["Wednesday"])
 
     def test_search_context_attribute(self):
-        journal = self.build_journal(PlotlineTests.texts[2])
+        journal = self.build_journal(TravelTests.texts[2])
         context = journal.context(("b", 1))
         self.assertEqual(context.maps[0].type.value, ElementType.CONTEXT.value)
 

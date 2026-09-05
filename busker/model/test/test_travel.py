@@ -26,7 +26,7 @@ import unittest
 
 from busker.model.journal import Journal
 from busker.model.multipart import Multipart
-from busker.model.plotline import Plotline
+from busker.model.travel import Travel
 from busker.model.types import Chain
 from busker.model.types import Element
 from busker.model.types import ElementType
@@ -34,7 +34,7 @@ from busker.model.types import Frame
 from busker.model.types import Lens
 
 
-class PlotlineTests(unittest.TestCase):
+class TravelTests(unittest.TestCase):
 
     texts = [
         textwrap.dedent("""
@@ -237,7 +237,7 @@ class PlotlineTests(unittest.TestCase):
     def build_journal(text):
         adaptor = Multipart(factory={dict: UserDict, list: UserList, str: UserString})
         list(adaptor.scan(text))
-        journal = Journal(adaptor, Plotline, uri=pathlib.Path("test.rht"))
+        journal = Journal(adaptor, Travel, uri=pathlib.Path("test.rht"))
         return journal
 
     def test_model(self):

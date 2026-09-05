@@ -36,9 +36,9 @@ from busker.model.types import Frame
 from busker.model.types import Lens
 
 
-class Plotline(Lens):
+class Travel(Lens):
     """
-    Implements a Resource HyperTree (.rht).
+    Applies connectivity via linkage.
 
     """
 
