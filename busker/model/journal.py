@@ -20,10 +20,6 @@
 
 from collections import defaultdict
 from collections import UserString
-from collections.abc import Mapping
-from collections.abc import Sequence
-from collections.abc import Set
-import contextlib
 import logging
 import pathlib
 
@@ -53,7 +49,12 @@ class Journal:
 
     def __getattr__(self, name):
         try:
-            return next(getattr(i, name) for i in self.registry[Lens] if hasattr(i, name))
+            return next(
+                getattr(i, name)
+                for typ in (Selector, Lens)
+                for i in self.registry[typ]
+                if hasattr(i, name)
+            )
         except StopIteration:
             raise AttributeError(name)
 

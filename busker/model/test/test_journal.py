@@ -27,6 +27,7 @@ import unittest
 
 from busker.model.journal import Journal
 from busker.model.multipart import Multipart
+from busker.model.search import Search
 from busker.model.syntax import Syntax
 from busker.model.types import Chain
 from busker.model.types import Element
@@ -42,7 +43,7 @@ class JournalTests(unittest.TestCase):
     def build_journal(text):
         adaptor = Multipart(factory={dict: UserDict, list: UserList, str: UserString})
         list(adaptor.scan(text))
-        journal = Journal(adaptor, Syntax, uri=pathlib.Path("test.rht"))
+        journal = Journal(adaptor, Search, Syntax, uri=pathlib.Path("test.rht"))
         return journal
 
     def test_model(self):
