@@ -15,109 +15,43 @@
 # You should have received a copy of the GNU General Public License along with busker.
 # If not, see <https://www.gnu.org/licenses/>.
 
-import ast
 from collections import UserDict
 from collections import UserList
 from collections import UserString
-import logging
 import pathlib
-import platform
-import textwrap
 import unittest
 
 from busker.model.journal import Journal
 from busker.model.multipart import Multipart
+from busker.model.search import Search
 from busker.model.syntax import Syntax
-from busker.model.types import Chain
-from busker.model.types import Element
 from busker.model.types import ElementType
 from busker.model.types import Frame
-from busker.model.types import Lens
 
 from busker.model.test.test_travel import TravelTests
 
 
-class JournalTests(unittest.TestCase):
-
-    def setUp(self):
-        self.adaptor = Multipart(factory={dict: UserDict, list: UserList, str: UserString})
+class SearchTests(unittest.TestCase):
 
     @staticmethod
     def build_journal(text):
         adaptor = Multipart(factory={dict: UserDict, list: UserList, str: UserString})
         list(adaptor.scan(text))
-        journal = Journal(adaptor, Syntax, uri=pathlib.Path("test.rht"))
+        journal = Journal(adaptor, Search, Syntax, uri=pathlib.Path("test.rht"))
         return journal
 
-    def test_journal_context(self):
+    def test_search_context_key(self):
         journal = self.build_journal(TravelTests.texts[2])
+        context = journal.context(("b", 1))
+        self.assertIsInstance(context.maps[0].parent, Frame)
 
-        path = ("a", 0, 1, 2)
-        for n in range(3):
-            with self.subTest(path=path, n=n):
-                rv = journal.context(path)
-                self.assertIsInstance(rv, Chain)
-                self.assertTrue(isinstance(i, Element) for i in rv.maps)
-                self.assertEqual(rv["type"], ElementType.CONTEXT.value)
-                self.assertEqual(rv["chord"], ("C", "F", "G"), journal.adaptor.data)
-                self.assertEqual(rv["goods"], {"tea", "biscuits", "eggs", "milk"})
-                self.assertEqual(rv["route"], ["home", "shop", "home", "work", "shop", "work", "home"], rv)
+        rv = journal.search("$['day']", context)
+        self.assertEqual(rv, ["Wednesday"])
 
-    def test_journal_tree(self):
+    def test_search_context_attribute(self):
         journal = self.build_journal(TravelTests.texts[2])
-        rv = journal.tree
-        self.assertIsInstance(rv, dict)
-        self.assertEqual(("a", "b"), tuple(rv), rv)
-        self.assertIn(0, rv["a"], rv)
-        self.assertIn(1, rv["a"][0])
-        self.assertIn(2, rv["a"][0][1])
-        self.assertEqual(rv["a"][0][1][2]["goods"], {"tea", "biscuits", "milk"})
-        self.assertIs(rv["a"][0][1][2].maps[1], journal.adaptor.data[("a", 0, 1, 2)][0])
+        context = journal.context(("b", 1))
+        self.assertEqual(context.maps[0].type.value, ElementType.CONTEXT.value)
 
-    @unittest.skipIf(platform.python_version() < "3.13", "new eval semantics")
-    def test_compile_exec_action(self):
-        action_text = textwrap.dedent("""
-        {"seal": 127416676279376, "type": "application/json", "path": []}
-        {
-        "type": "handler",
-        "description": "Carry shopping",
-        "params": {
-            "goods": "$['goods'][*]",
-            "place": "$['route'][*]"
-        },
-        "terms": [
-            "Carry {goods} {place}",
-            "Drop off {goods} at {place}"
-        ]
-        }
-        {"seal": 127416676279376, "type": "application/x-python"}
-        context = journal.context(path)
-        context["goods"].remove(goods)
-        logging.getLogger(format(path)).debug(
-            f"Removed goods '{goods}' from context '{path}'"
-        )
-        """)
-        text = TravelTests.texts[2] + action_text
-        journal = self.build_journal(text)
-        syntax = list(journal.registry[Lens])[0]
-        path = ("b", 1)
-        actions = syntax.actions(path)
-        self.assertIsInstance(actions, dict)
-        rv = actions.get("drop off milk at work")
-        self.assertIsInstance(rv, tuple)
-        self.assertEqual(len(rv), 2)
-        self.assertIsInstance(rv[0], Element)
-        self.assertEqual(rv[0], journal.model[()][-2])
-        self.assertEqual(rv[0].handler, journal.model[()][-1])
-        self.assertEqual(rv[1], dict(goods="milk", place="work"))
-
-        self.assertEqual(syntax.context(path).get("goods", None), {"crumpets", "milk"})
-        code = compile(rv[0].handler, format(path), mode="exec")
-        l = dict(rv[1], journal=journal, path=path)
-        g = dict(logging=logging)
-        with self.assertLogs(format(path), logging.DEBUG) as check:
-            exec(code, locals=l, globals=g)
-
-        self.assertTrue(check.output)
-        self.assertIn("Removed goods 'milk' from context", check.output[0])
-        self.assertEqual(syntax.context(path).get("goods", None), {"crumpets"})
+        rv = journal.search("$.maps[0].type.value", context)
+        self.assertEqual(rv, ["context"])

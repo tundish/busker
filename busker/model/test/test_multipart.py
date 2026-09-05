@@ -29,6 +29,8 @@ import unittest
 import busker
 from busker.model.multipart import Multipart
 
+from busker.model.test.test_travel import TravelTests
+
 
 class MultipartTests(unittest.TestCase):
 
@@ -134,6 +136,18 @@ class MultipartTests(unittest.TestCase):
         rv = str(doc)
         lines = rv.splitlines()
         self.assertEqual(len(lines), 6, rv)
+
+    def test_tree(self):
+        doc = Multipart(factory={dict: UserDict, list: UserList, str: UserString})
+        list(doc.scan(TravelTests.texts[2]))
+        rv = doc.tree
+        self.assertIsInstance(rv, dict)
+        self.assertEqual(("a", "b"), tuple(rv), rv)
+        self.assertIn(0, rv["a"], rv)
+        self.assertIn(1, rv["a"][0])
+        self.assertIn(2, rv["a"][0][1])
+        self.assertEqual(rv["a"][0][1][2]["goods"], {"tea", "biscuits", "milk"})
+        self.assertIs(rv["a"][0][1][2].maps[1], doc.data[("a", 0, 1, 2)][0])
 
     def test_factory(self):
         text = textwrap.dedent("""

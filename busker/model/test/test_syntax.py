@@ -15,7 +15,6 @@
 # You should have received a copy of the GNU General Public License along with busker.
 # If not, see <https://www.gnu.org/licenses/>.
 
-import ast
 from collections import UserDict
 from collections import UserList
 from collections import UserString
@@ -31,16 +30,12 @@ from busker.model.syntax import Syntax
 from busker.model.types import Chain
 from busker.model.types import Element
 from busker.model.types import ElementType
-from busker.model.types import Frame
 from busker.model.types import Lens
 
 from busker.model.test.test_travel import TravelTests
 
 
-class JournalTests(unittest.TestCase):
-
-    def setUp(self):
-        self.adaptor = Multipart(factory={dict: UserDict, list: UserList, str: UserString})
+class SyntaxTests(unittest.TestCase):
 
     @staticmethod
     def build_journal(text):
@@ -62,17 +57,6 @@ class JournalTests(unittest.TestCase):
                 self.assertEqual(rv["chord"], ("C", "F", "G"), journal.adaptor.data)
                 self.assertEqual(rv["goods"], {"tea", "biscuits", "eggs", "milk"})
                 self.assertEqual(rv["route"], ["home", "shop", "home", "work", "shop", "work", "home"], rv)
-
-    def test_journal_tree(self):
-        journal = self.build_journal(TravelTests.texts[2])
-        rv = journal.tree
-        self.assertIsInstance(rv, dict)
-        self.assertEqual(("a", "b"), tuple(rv), rv)
-        self.assertIn(0, rv["a"], rv)
-        self.assertIn(1, rv["a"][0])
-        self.assertIn(2, rv["a"][0][1])
-        self.assertEqual(rv["a"][0][1][2]["goods"], {"tea", "biscuits", "milk"})
-        self.assertIs(rv["a"][0][1][2].maps[1], journal.adaptor.data[("a", 0, 1, 2)][0])
 
     @unittest.skipIf(platform.python_version() < "3.13", "new eval semantics")
     def test_compile_exec_action(self):

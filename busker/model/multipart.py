@@ -17,34 +17,20 @@
 
 import ast
 from collections.abc import Generator
-from collections.abc import MutableMapping
+from collections.abc import Mapping
 from collections import defaultdict
 from collections import UserDict
 from collections import UserList
 from collections import UserString
-import io
 import json
 import logging
-import mimetypes
 import pprint
 import re
 
 from busker import __version__
 from busker.model.types import Adaptor
 from busker.model.types import BackendType
-
-
-# TODO: Refactor to
-#   Backends, eg .rht, .db
-#   Inspector eg: jsonpath search
-#   Lenses eg: Navigation, Perception, etc.
-#   Run Procedures against Marker
-
-# Build:
-# Select backend based on input format
-# Feed / scan into memory
-# Switch backend if necessary
-# Backend offers choice of Selectors?
+from busker.model.types import Chain
 
 
 class Multipart(Adaptor):
@@ -75,6 +61,30 @@ class Multipart(Adaptor):
 
     def __str__(self):
         return "\n".join(str(i) if isinstance(i, UserString) else i for i in self.dump())
+
+    @property
+    def tree(self) -> dict:
+        "Expand the document into a nested tree of frames"
+        rv = dict()
+        done = dict()
+        paths = list(self.data)
+        for path in paths:
+            node = rv
+            for n, key in enumerate(path):
+                pos = tuple(path[:n + 1])
+                if pos in done:
+                    node = done[pos]
+                    continue
+
+                try:
+                    frame = self.data[pos]
+                    node[key] = Chain(*(i for i in frame if isinstance(i, Mapping)))
+                except KeyError:
+                    node[key] = Chain()
+
+                node[key] = node[key].new_child()
+                done[pos] = node[key]
+        return rv
 
     def load(self, uri: str | pathlib.Path):
         return uri.read_text()

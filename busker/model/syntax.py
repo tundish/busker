@@ -73,30 +73,6 @@ class Syntax(Lens):
     def __init__(self, journal: object):
         self.journal = journal
 
-    @property
-    def tree(self) -> dict:
-        "Expand the document into a nested tree of frames"
-        rv = dict()
-        done = dict()
-        paths = list(self.journal.adaptor.data)
-        for path in paths:
-            node = rv
-            for n, key in enumerate(path):
-                pos = tuple(path[:n + 1])
-                if pos in done:
-                    node = done[pos]
-                    continue
-
-                try:
-                    frame = self.journal.adaptor.data[pos]
-                    node[key] = Chain(*(i for i in frame if i.type == ElementType.CONTEXT.value))
-                except KeyError:
-                    node[key] = Chain()
-
-                node[key] = node[key].new_child()
-                done[pos] = node[key]
-        return rv
-
     def context(self, path: tuple) -> Chain:
         "Build a view of the document as seen from the supplied path"
         levels = [path[0: n] for n in range(len(path) + 1)]
