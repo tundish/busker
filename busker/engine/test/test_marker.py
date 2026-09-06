@@ -33,17 +33,73 @@ class MarkerTests(unittest.TestCase):
 
     def setUp(self):
         self.text = textwrap.dedent("""
-        {"seal": 2863490869328, "type": "application/json", "path": ["a"]}
+        {"seal": 20260906200320, "type": "application/json", "path": []}
         {
         "type": "marking",
         "name": "world_focus",
-        "view": ["a", "b"],
+        "view": [0, 0],
         "face": [0, 1],
         "span": 12,
         "tick": 0,
         "memo": {
             "['b', 'c']": 3
         }
+        }
+        {"seal": 20260906200320, "type": "data/python", "path": [0, 0]}
+        # Centre square, N
+        {
+        "type": "linkage",
+        "port": (0,0,0),
+        "link": (0,1,4)
+        }
+        {"seal": 20260906200320, "type": "data/python", "path": [0, 0]}
+        # Centre square, NE
+        {
+        "type": "linkage",
+        "port": (0,0,1),
+        "link": (1,1,5),
+        }
+        {"seal": 20260906200320, "type": "data/python", "path": [0, 0]}
+        # Centre square, E
+        {
+        "type": "linkage",
+        "port": (0,0,2),
+        "link": (1,0,6),
+        }
+        {"seal": 20260906200320, "type": "data/python", "path": [0, 0]}
+        # Centre square, SE
+        {
+        "type": "linkage",
+        "port": (0,0,3),
+        "link": (1,1,7),
+        }
+        {"seal": 20260906200320, "type": "data/python", "path": [0, 0]}
+        # Centre square, S
+        {
+        "type": "linkage",
+        "port": (0,0,4),
+        "link": (0,-1,0),
+        }
+        {"seal": 20260906200320, "type": "data/python", "path": [0, 0]}
+        # Centre square, SW
+        {
+        "type": "linkage",
+        "port": (0,0,5),
+        "link": (-1,-1,1),
+        }
+        {"seal": 20260906200320, "type": "data/python", "path": [0, 0]}
+        # Centre square, W
+        {
+        "type": "linkage",
+        "port": (0,0,6),
+        "link": (-1,0,2),
+        }
+        {"seal": 20260906200320, "type": "data/python", "path": [0, 0]}
+        # Centre square, NW
+        {
+        "type": "linkage",
+        "port": (0,0,7),
+        "link": (-1,1,3),
         }
         """).lstrip()
 
@@ -62,10 +118,10 @@ class MarkerTests(unittest.TestCase):
         )
         item = next(adaptor.scan(self.text), None)
         self.assertIsInstance(item.get("payload"), Marker)
-        self.assertEqual(item["payload"].view, ("a", "b"))
-        self.assertEqual(list(adaptor.data), [(), ("a",)])
+        self.assertEqual(item["payload"].view, (0, 0))
+        self.assertEqual(list(adaptor.data), [()])
 
-        frame = adaptor.data[("a",)]
+        frame = adaptor.data[()]
         self.assertTrue(frame)
         self.assertIsInstance(frame[0], Marker)
 
@@ -78,10 +134,10 @@ class MarkerTests(unittest.TestCase):
         items = list(adaptor.scan(self.text))
         journal = Journal(adaptor, uri="test.rht")
 
-        frame = journal.model[("a",)]
+        frame = journal.model[()]
         self.assertTrue(frame)
         self.assertIsInstance(frame, Frame)
-        self.assertEqual(getattr(frame, "path"), ("a",))
+        self.assertEqual(getattr(frame, "path"), ())
 
         element = frame[0]
         self.assertIs(getattr(element, "parent"), frame)
