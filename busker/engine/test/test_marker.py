@@ -51,6 +51,7 @@ class MarkerTests(unittest.TestCase):
         params = dict(name="test_marker")
         rv = Marker(**params)
         self.assertIsInstance(rv, Marker)
+        self.assertEqual(rv.view, ())
         self.assertEqual(rv.type, ElementType.MARKING.value)
 
     def test_marker_via_text(self):
@@ -61,7 +62,7 @@ class MarkerTests(unittest.TestCase):
         )
         item = next(adaptor.scan(self.text), None)
         self.assertIsInstance(item.get("payload"), Marker)
-        self.assertEqual(item["payload"].view, ["a", "b"])
+        self.assertEqual(item["payload"].view, ("a", "b"))
         self.assertEqual(list(adaptor.data), [(), ("a",)])
 
         frame = adaptor.data[("a",)]

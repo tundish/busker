@@ -52,11 +52,17 @@ with closing(some_sync_generator(path)) as tmp:
 class Marker:
     name: str
     view: tuple = None
-    face: tuple = None
     tick: int = 0
     face: tuple = (0, 1)
     span: int = None
     type: str = ElementType.MARKING.value
     memo: Counter = dataclasses.field(default_factory=Counter, compare=False)
+
+    def __post_init__(self):
+        try:
+            self.view = tuple(self.view)
+        except TypeError:
+            self.view = tuple()
+        self.type = ElementType.MARKING.value
 
 
