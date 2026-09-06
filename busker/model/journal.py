@@ -20,6 +20,7 @@
 
 from collections import defaultdict
 from collections import UserString
+from collections.abc import Mapping
 import logging
 import pathlib
 
@@ -34,7 +35,7 @@ from busker.model.types import Selector
 class Journal:
 
     def __init__(self, *args, uri: pathlib.Path | str = None):
-        self.uri = uri
+        self.uri = pathlib.Path(uri)
         self.registry = defaultdict(set)
 
         for cls in (Adaptor, Selector, Lens):
@@ -80,13 +81,19 @@ class Journal:
         ]
 
     @property
-    def model(self):
+    def model(self) -> Mapping:
         """
         Decorate each frame with its path, and each Element with its type.
 
         """
         logger = logging.getLogger(self.__class__.__name__.lower())
-        data = self.adaptor.data
+        try:
+            data = self.adaptor.data
+        except Exception as err:
+            logger.warning(f"Journal can find no adaptor. Check {self.uri=}")
+            logger.debug(err, exc_info=True)
+            return {}
+
         for p in list(data):
             frame = data[p] = Frame(data[p].data)
             frame.path = p
