@@ -43,6 +43,17 @@ with closing(some_sync_generator(path)) as tmp:
 
 """
 
+# Order of implementation
+# Marker
+# + visit counter for every path
+#
+# Content
+# + style
+# + theme
+# + pulse - allow eg: (0, 1E99) for one-shots
+#
+# types text/speechmark or text/plain so factory param required
+
 class Engine:
 
     ignored_words = ("a", "an", "any", "her", "his", "my", "some", "the", "their")
