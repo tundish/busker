@@ -29,7 +29,12 @@ from busker.model.multipart import Multipart
 
 class MarkerTests(unittest.TestCase):
 
-    def test_world_marker(self):
+    def test_marker_dict(self):
+        params = {}
+        rv = Marker(**params)
+        self.assertIsInstance(rv, Marker)
+        
+    def test_marker_text(self):
         text = textwrap.dedent("""
         {"seal": 2863490869328, "type": "application/json", "path": ["a"]}
         {
@@ -44,10 +49,14 @@ class MarkerTests(unittest.TestCase):
         }
         }
         """).lstrip()
-        adapter = Multipart(
+        adaptor = Multipart(
             factory={
                 dict: UserDict, list: UserList, str: UserString, "marking": Marker
             }
         )
-        elements = list(adapter.scan(text))
-        self.assertEqual(len(elements), 1)
+        element = next(adaptor.scan(text), None)
+        self.assertEqual(element.get("payload", {}).get("path"), ["a", "b"])
+        self.assertEqual(list(adaptor.data), [("a",)])
+        self.assertEqual(getattr(element, "porent"), 0)
+        self.assertTrue(element)
+        self.assertIsInstance(element, Marker)
