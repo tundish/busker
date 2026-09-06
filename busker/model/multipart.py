@@ -160,8 +160,14 @@ class Multipart(Adaptor):
                 parser = ast.literal_eval if "python" in data["type"] else json.loads
                 try:
                     payload = parser(payload)
-                    if type(payload) in self.factory:
-                        payload = self.factory[type(payload)](payload)
+                    if isinstance(payload, Mapping) and payload.get("type") in self.factory:
+                        factory = self.factory[payload["type"]]
+                        self.logger.debug(f"Data item {n}. Type: {factory.__name__}")
+                        payload = factory(**payload)
+                    elif type(payload) in self.factory:
+                        facvtory = self.factory[type(payload)]
+                        self.logger.debug(f"Data item {n}. Type: {factory.__name__}")
+                        payload = factory(payload)
                     data["payload"] = payload
                 except (SyntaxError, ValueError) as err:
                     self.logger.error(f"Invalid Literal. Pos: {d.end()}", exc_info=True)
