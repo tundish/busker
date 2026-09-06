@@ -86,6 +86,10 @@ class Frame(UserList):
 class Element(UserDict):
 
     @property
+    def content(self):
+        raise NotImplementedError
+
+    @property
     def handler(self):
         rv = None
         if self.data.get("type") != ElementType.HANDLER.value:
