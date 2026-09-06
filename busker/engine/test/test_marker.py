@@ -42,9 +42,14 @@ class MarkerTests(unittest.TestCase):
         "span": 12,
         "tick": 0,
         "memo": {
-            "['b', 'c']": 3
+            "[0, 0]": 3
         }
         }
+        {"seal": 20260906200320, "type": "text/plain", "path": []}
+        This test data is a grid of nine squares. The square in the centre
+        is connected to its neighbours in 8 directions. The outer squares
+        return these links back to the centre and communicate in N,E,S,W
+        directions with each other.
         {"seal": 20260906200320, "type": "data/python", "path": [0, 0]}
         # Centre square, N
         {
@@ -100,6 +105,139 @@ class MarkerTests(unittest.TestCase):
         "type": "linkage",
         "port": (0,0,7),
         "link": (-1,1,3),
+        }
+        {"seal": 20260906200320, "type": "data/python", "path": [0, 1]}
+        # North square, E
+        {
+        "type": "linkage",
+        "port": (0,1,2),
+        "link": (1,1,6),
+        }
+        {"seal": 20260906200320, "type": "data/python", "path": [0, 1]}
+        # North square, S
+        {
+        "type": "linkage",
+        "port": (0,1,4),
+        "link": (0,0,0),
+        }
+        {"seal": 20260906200320, "type": "data/python", "path": [0, 1]}
+        # North square, W
+        {
+        "type": "linkage",
+        "port": (0,1,6),
+        "link": (-1,1,2),
+        }
+        {"seal": 20260906200320, "type": "data/python", "path": [1, 1]}
+        # NorthEast square, S
+        {
+        "type": "linkage",
+        "port": (1,1,4),
+        "link": (1,0,0),
+        }
+        {"seal": 20260906200320, "type": "data/python", "path": [1, 1]}
+        # NorthEast square, W
+        {
+        "type": "linkage",
+        "port": (1,1,6),
+        "link": (0,1,2),
+        }
+        {"seal": 20260906200320, "type": "data/python", "path": [1, 0]}
+        # East square, N
+        {
+        "type": "linkage",
+        "port": (1,0,0),
+        "link": (1,1,4),
+        }
+        {"seal": 20260906200320, "type": "data/python", "path": [1, 0]}
+        # East square, S
+        {
+        "type": "linkage",
+        "port": (1,0,4),
+        "link": (1,-1,0),
+        }
+        {"seal": 20260906200320, "type": "data/python", "path": [1, -1]}
+        # SouthEast square, N
+        {
+        "type": "linkage",
+        "port": (1,-1,0),
+        "link": (1,0,4),
+        }
+        {"seal": 20260906200320, "type": "data/python", "path": [1, -1]}
+        # SouthEast square, W
+        {
+        "type": "linkage",
+        "port": (1,-1,6),
+        "link": (0,-1,2),
+        }
+        {"seal": 20260906200320, "type": "data/python", "path": [0, -1]}
+        # South square, N
+        {
+        "type": "linkage",
+        "port": (0,-1,0),
+        "link": (0,0,4),
+        }
+        {"seal": 20260906200320, "type": "data/python", "path": [0, -1]}
+        # South square, E
+        {
+        "type": "linkage",
+        "port": (0,-1,2),
+        "link": (1,-1,6),
+        }
+        {"seal": 20260906200320, "type": "data/python", "path": [0, -1]}
+        # South square, W
+        {
+        "type": "linkage",
+        "port": (0,-1,6),
+        "link": (-1,-1,2),
+        }
+        {"seal": 20260906200320, "type": "data/python", "path": [-1, -1]}
+        # SouthWest square, N
+        {
+        "type": "linkage",
+        "port": (-1,-1,0),
+        "link": (-1,0,4),
+        }
+        {"seal": 20260906200320, "type": "data/python", "path": [-1, -1]}
+        # SouthWest square, E
+        {
+        "type": "linkage",
+        "port": (-1,-1,2),
+        "link": (0,-1,6),
+        }
+        {"seal": 20260906200320, "type": "data/python", "path": [-1, 0]}
+        # West square, N
+        {
+        "type": "linkage",
+        "port": (-1,0,0),
+        "link": (-1,1,4),
+        }
+        {"seal": 20260906200320, "type": "data/python", "path": [-1, 0]}
+        # West square, E
+        {
+        "type": "linkage",
+        "port": (-1,0,2),
+        "link": (0,0,6),
+        }
+        {"seal": 20260906200320, "type": "data/python", "path": [-1, 0]}
+        # West square, S
+        {
+        "type": "linkage",
+        "port": (-1,0,4),
+        "link": (-1,-1,2),
+        }
+        {"seal": 20260906200320, "type": "data/python", "path": [-1, 1]}
+        # NorthWest square, E
+        {
+        "type": "linkage",
+        "port": (-1,1,2),
+        "link": (0,1,6),
+        }
+        {"seal": 20260906200320, "type": "data/python", "path": [-1, 1]}
+        # NorthWest square, S
+        {
+        "type": "linkage",
+        "port": (-1,1,4),
+        "link": (-1,0,0),
         }
         """).lstrip()
 
