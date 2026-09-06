@@ -25,6 +25,7 @@ import unittest
 from busker.engine.marker import Marker
 from busker.model.journal import Journal
 from busker.model.multipart import Multipart
+from busker.model.types import ElementType
 from busker.model.types import Frame
 
 
@@ -47,9 +48,10 @@ class MarkerTests(unittest.TestCase):
         """).lstrip()
 
     def test_marker_via_dict(self):
-        params = {}
+        params = dict(name="test_marker")
         rv = Marker(**params)
         self.assertIsInstance(rv, Marker)
+        self.assertEqual(rv.type, ElementType.MARKING.value)
 
     def test_marker_via_text(self):
         adaptor = Multipart(
@@ -58,13 +60,13 @@ class MarkerTests(unittest.TestCase):
             }
         )
         item = next(adaptor.scan(self.text), None)
-        self.assertEqual(item.get("payload", {}).get("view"), ["a", "b"])
+        self.assertIsInstance(item.get("payload"), Marker)
+        self.assertEqual(item["payload"].view, ["a", "b"])
         self.assertEqual(list(adaptor.data), [(), ("a",)])
 
-        element = adaptor.data[("a",)]
-        self.assertIsInstance(getattr(element, "parent"), Frame)
-        self.assertTrue(element)
-        self.assertIsInstance(element, Marker)
+        frame = adaptor.data[("a",)]
+        self.assertTrue(frame)
+        self.assertIsInstance(frame[0], Marker)
 
     def test_marker_via_journal(self):
         adaptor = Multipart(
@@ -78,6 +80,7 @@ class MarkerTests(unittest.TestCase):
         frame = journal.model[("a",)]
         self.assertTrue(frame)
         self.assertIsInstance(frame, Frame)
+        self.assertEqual(getattr(frame, "path"), ("a",))
 
         element = frame[0]
         self.assertIs(getattr(element, "parent"), frame)

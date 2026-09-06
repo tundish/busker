@@ -15,10 +15,11 @@
 # You should have received a copy of the GNU General Public License along with busker.
 # If not, see <https://www.gnu.org/licenses/>.
 
+from collections import Counter
 import dataclasses
 import logging
 
-from busker.model.journal import Journal
+from busker.model.types import ElementType
 
 """
 def some_sync_generator(path):
@@ -47,8 +48,15 @@ with closing(some_sync_generator(path)) as tmp:
 #
 # types text/speechmark or text/plain so factory param required
 
-@dataclasses.dataclass
+@dataclasses.dataclass(kw_only=True)
 class Marker:
-    pass
+    name: str
+    view: tuple = None
+    face: tuple = None
+    tick: int = 0
+    face: tuple = (0, 1)
+    span: int = None
+    type: str = ElementType.MARKING.value
+    memo: Counter = dataclasses.field(default_factory=Counter, compare=False)
 
 

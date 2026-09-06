@@ -165,7 +165,7 @@ class Multipart(Adaptor):
                         self.logger.debug(f"Data item {n}. Type: {factory.__name__}")
                         payload = factory(**payload)
                     elif type(payload) in self.factory:
-                        facvtory = self.factory[type(payload)]
+                        factory = self.factory[type(payload)]
                         self.logger.debug(f"Data item {n}. Type: {factory.__name__}")
                         payload = factory(payload)
                     data["payload"] = payload
