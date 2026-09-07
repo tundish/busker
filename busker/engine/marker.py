@@ -64,5 +64,6 @@ class Marker:
         except TypeError:
             self.view = tuple()
         self.type = ElementType.MARKING.value
+        self.memo = Counter(self.memo)
 
 

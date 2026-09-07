@@ -287,9 +287,9 @@ class MarkerTests(unittest.TestCase):
         items = list(adaptor.scan("\n".join(text.splitlines() + self.text.splitlines()[12:])))
         self.assertIsInstance(items[0]["payload"], Marker)
         self.assertIsInstance(items[0]["payload"].face, tuple)
-        self.assertIsInstance(list(items[0]["payload"].memo)[0], tuple)
         self.assertIsInstance(items[0]["payload"], Marker)
         self.assertIsInstance(items[0]["payload"].memo, Counter)
+        self.assertIsInstance(list(items[0]["payload"].memo)[0], tuple)
 
         journal = Journal(adaptor, uri="test.rht")
 
