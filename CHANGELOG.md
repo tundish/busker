@@ -1,6 +1,11 @@
 History
 =======
 
+0.34.0
+------
+
+* First implementation of Marker class.
+
 0.31.0
 ------
 
