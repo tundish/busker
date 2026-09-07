@@ -15,6 +15,7 @@
 # You should have received a copy of the GNU General Public License along with busker.
 # If not, see <https://www.gnu.org/licenses/>.
 
+from collections import Counter
 from collections import UserDict
 from collections import UserList
 from collections import UserString
@@ -263,6 +264,35 @@ class MarkerTests(unittest.TestCase):
         self.assertTrue(frame)
         self.assertIsInstance(frame[0], Marker)
 
+    def test_marker_compound_keys(self):
+        text = textwrap.dedent("""
+        {"seal": 20260906200320, "type": "data/python", "path": []}
+        {
+        "type": "marking",
+        "name": "world_focus",
+        "view": [0, 0],
+        "face": (0, 1),
+        "span": 12,
+        "tick": 0,
+        "memo": {
+            (0, 0): 3,
+        }
+        }
+        """).lstrip()
+        adaptor = Multipart(
+            factory={
+                dict: UserDict, list: UserList, str: UserString, "marking": Marker
+            }
+        )
+        items = list(adaptor.scan("\n".join(text.splitlines() + self.text.splitlines()[12:])))
+        self.assertIsInstance(items[0]["payload"], Marker)
+        self.assertIsInstance(items[0]["payload"].face, tuple)
+        self.assertIsInstance(list(items[0]["payload"].memo)[0], tuple)
+        self.assertIsInstance(items[0]["payload"], Marker)
+        self.assertIsInstance(items[0]["payload"].memo, Counter)
+
+        journal = Journal(adaptor, uri="test.rht")
+
     def test_marker_via_journal(self):
         adaptor = Multipart(
             factory={
@@ -271,6 +301,9 @@ class MarkerTests(unittest.TestCase):
         )
         items = list(adaptor.scan(self.text))
         journal = Journal(adaptor, uri="test.rht")
+
+        self.assertIsInstance(items[0]["payload"], Marker)
+        self.assertIsInstance(items[0]["payload"].memo, Counter)
 
         frame = journal.model[()]
         self.assertTrue(frame)
