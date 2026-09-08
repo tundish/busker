@@ -34,16 +34,16 @@ class MarkerTests(unittest.TestCase):
 
     def setUp(self):
         self.text = textwrap.dedent("""
-        {"seal": 20260906200320, "type": "application/json", "path": []}
+        {"seal": 20260906200320, "type": "data/python", "path": []}
         {
         "type": "marking",
         "name": "world_focus",
         "view": [0, 0],
-        "face": [0, 1],
+        "face": (0, 1),
         "span": 12,
         "tick": 0,
         "memo": {
-            "[0, 0]": 3
+            (0, 0): 3,
         }
         }
         {"seal": 20260906200320, "type": "text/plain", "path": []}
@@ -64,6 +64,7 @@ class MarkerTests(unittest.TestCase):
         "type": "linkage",
         "port": (0,0,1),
         "link": (1,1,5),
+        "cost": 2,
         }
         {"seal": 20260906200320, "type": "data/python", "path": [0, 0]}
         # Centre square, E
@@ -78,6 +79,7 @@ class MarkerTests(unittest.TestCase):
         "type": "linkage",
         "port": (0,0,3),
         "link": (1,1,7),
+        "cost": 2,
         }
         {"seal": 20260906200320, "type": "data/python", "path": [0, 0]}
         # Centre square, S
@@ -92,6 +94,7 @@ class MarkerTests(unittest.TestCase):
         "type": "linkage",
         "port": (0,0,5),
         "link": (-1,-1,1),
+        "cost": 2,
         }
         {"seal": 20260906200320, "type": "data/python", "path": [0, 0]}
         # Centre square, W
@@ -106,6 +109,7 @@ class MarkerTests(unittest.TestCase):
         "type": "linkage",
         "port": (0,0,7),
         "link": (-1,1,3),
+        "cost": 2,
         }
         {"seal": 20260906200320, "type": "data/python", "path": [0, 1]}
         # North square, E
@@ -264,18 +268,18 @@ class MarkerTests(unittest.TestCase):
         self.assertTrue(frame)
         self.assertIsInstance(frame[0], Marker)
 
-    def test_marker_compound_keys(self):
+    def test_marker_from_json(self):
         text = textwrap.dedent("""
-        {"seal": 20260906200320, "type": "data/python", "path": []}
+        {"seal": 20260906200320, "type": "application/json", "path": []}
         {
         "type": "marking",
         "name": "world_focus",
         "view": [0, 0],
-        "face": (0, 1),
+        "face": [0, 1],
         "span": 12,
         "tick": 0,
         "memo": {
-            (0, 0): 3,
+            "[0, 0]": 3
         }
         }
         """).lstrip()
@@ -286,10 +290,8 @@ class MarkerTests(unittest.TestCase):
         )
         items = list(adaptor.scan("\n".join(text.splitlines() + self.text.splitlines()[12:])))
         self.assertIsInstance(items[0]["payload"], Marker)
-        self.assertIsInstance(items[0]["payload"].face, tuple)
         self.assertIsInstance(items[0]["payload"], Marker)
         self.assertIsInstance(items[0]["payload"].memo, Counter)
-        self.assertIsInstance(list(items[0]["payload"].memo)[0], tuple)
 
         journal = Journal(adaptor, uri="test.rht")
 
@@ -303,7 +305,9 @@ class MarkerTests(unittest.TestCase):
         journal = Journal(adaptor, uri="test.rht")
 
         self.assertIsInstance(items[0]["payload"], Marker)
+        self.assertIsInstance(items[0]["payload"].face, tuple)
         self.assertIsInstance(items[0]["payload"].memo, Counter)
+        self.assertIsInstance(list(items[0]["payload"].memo)[0], tuple)
 
         frame = journal.model[()]
         self.assertTrue(frame)
@@ -313,3 +317,16 @@ class MarkerTests(unittest.TestCase):
         element = frame[0]
         self.assertIs(getattr(element, "parent"), frame)
         self.assertIsInstance(element, Marker)
+
+    def test_marker_move(self):
+        adaptor = Multipart(
+            factory={
+                dict: UserDict, list: UserList, str: UserString, "marking": Marker
+            }
+        )
+        items = list(adaptor.scan(self.text))
+        journal = Journal(adaptor, uri="test.rht")
+        marker = journal.marking[0]
+        self.assertIs(marker, journal.adaptor.data[()][0])
+        self.assertIs(marker, journal.model[()][0])
+        self.fail(marker)

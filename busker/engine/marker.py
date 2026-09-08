@@ -21,32 +21,6 @@ import logging
 
 from busker.model.types import ElementType
 
-"""
-def some_sync_generator(path):
-    with open(path) as ...:
-        yield ...
-
-# DON'T do this
-for obj in some_sync_generator(path):
-    ...
-
-# DO do this
-from contextlib import closing
-with closing(some_sync_generator(path)) as tmp:
-    for obj in tmp:
-"""
-
-
-# Order of implementation
-# Marker
-# + visit counter for every path
-#
-# Content
-# + style
-# + theme
-# + pulse - allow eg: (0, 1E99) for one-shots
-#
-# types text/speechmark or text/plain so factory param required
 
 @dataclasses.dataclass(kw_only=True)
 class Marker:
@@ -66,4 +40,5 @@ class Marker:
         self.type = ElementType.MARKING.value
         self.memo = Counter(self.memo)
 
-
+    def move(self, spin, cost):
+        pass
