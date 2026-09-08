@@ -42,6 +42,7 @@ class MarkerTests(unittest.TestCase):
         "face": (0, 1),
         "span": 1,
         "tick": 0,
+        "twist": False,
         "memo": {
             (0, 0): 3,
         }
@@ -315,7 +316,7 @@ class MarkerTests(unittest.TestCase):
                 dict: UserDict, list: UserList, str: UserString, "marking": Marker
             }
         )
-        items = list(adaptor.scan("\n".join(text.splitlines() + self.text.splitlines()[12:])))
+        items = list(adaptor.scan("\n".join(text.splitlines() + self.text.splitlines()[13:])))
         self.assertIsInstance(items[0]["payload"], Marker)
         self.assertIsInstance(items[0]["payload"], Marker)
         self.assertIsInstance(items[0]["payload"].memo, Counter)
@@ -356,6 +357,6 @@ class MarkerTests(unittest.TestCase):
         marker = journal.marking[0]
         self.assertIs(marker, journal.adaptor.data[()][0])
         self.assertIs(marker, journal.model[()][0])
-        self.fail(marker)
 
         rv = marker.jump((0, 1))
+        self.fail(rv)

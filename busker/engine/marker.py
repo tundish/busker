@@ -31,6 +31,7 @@ class Marker:
     face: tuple = (0, 1)
     span: int = None
     type: str = ElementType.MARKING.value
+    twist: bool = False
     memo: Counter = dataclasses.field(default_factory=Counter, compare=False)
 
     def __post_init__(self):
@@ -41,8 +42,8 @@ class Marker:
         self.type = ElementType.MARKING.value
         self.memo = Counter(self.memo)
 
-    def jump(self, via, spin, cost, twist=False):
+    def jump(self, via, spin, cost):
         raise NotImplemented
 
-    def move(self, via, spin, cost, twist=False):
+    def move(self, via, spin, cost):
         raise NotImplemented
