@@ -17,6 +17,7 @@
 
 from collections import Counter
 import dataclasses
+from fractions import Fraction
 import logging
 
 from busker.model.types import ElementType
@@ -40,5 +41,8 @@ class Marker:
         self.type = ElementType.MARKING.value
         self.memo = Counter(self.memo)
 
-    def move(self, spin, cost):
-        pass
+    def jump(self, via, spin, cost, twist=False):
+        raise NotImplemented
+
+    def move(self, via, spin, cost, twist=False):
+        raise NotImplemented
