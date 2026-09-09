@@ -26,6 +26,7 @@ import unittest
 from busker.engine.marker import Marker
 from busker.model.journal import Journal
 from busker.model.multipart import Multipart
+from busker.model.travel import Travel
 from busker.model.types import ElementType
 from busker.model.types import Frame
 
@@ -82,7 +83,7 @@ class MarkerTests(unittest.TestCase):
         {
         "type": "linkage",
         "port": (0,0,3),
-        "link": (1,1,7),
+        "link": (1,-1,7),
         "spin": (3, 8),
         "cost": 2,
         }
@@ -153,6 +154,15 @@ class MarkerTests(unittest.TestCase):
         "spin": (1, 2),
         }
         {"seal": 20260906200320, "type": "data/python", "path": [1, 1]}
+        # NorthEast square, SW
+        {
+        "type": "linkage",
+        "port": (1,1,5),
+        "link": (0,0,1),
+        "spin": (5, 8),
+        "cost": 2,
+        }
+        {"seal": 20260906200320, "type": "data/python", "path": [1, 1]}
         # NorthEast square, W
         {
         "type": "linkage",
@@ -167,6 +177,14 @@ class MarkerTests(unittest.TestCase):
         "port": (1,0,0),
         "link": (1,1,4),
         "spin": (0, 1),
+        }
+        {"seal": 20260906200320, "type": "data/python", "path": [1, 0]}
+        # East square, W
+        {
+        "type": "linkage",
+        "port": (1,0,6),
+        "link": (0,0,2),
+        "spin": (3, 4),
         }
         {"seal": 20260906200320, "type": "data/python", "path": [1, 0]}
         # East square, S
@@ -191,6 +209,15 @@ class MarkerTests(unittest.TestCase):
         "port": (1,-1,6),
         "link": (0,-1,2),
         "spin": (3, 4),
+        }
+        {"seal": 20260906200320, "type": "data/python", "path": [1, -1]}
+        # SouthEast square, NW
+        {
+        "type": "linkage",
+        "port": (1,-1,7),
+        "link": (0,0,3),
+        "spin": (7, 8),
+        "cost": 2,
         }
         {"seal": 20260906200320, "type": "data/python", "path": [0, -1]}
         # South square, N
@@ -223,6 +250,15 @@ class MarkerTests(unittest.TestCase):
         "port": (-1,-1,0),
         "link": (-1,0,4),
         "spin": (0, 1),
+        }
+        {"seal": 20260906200320, "type": "data/python", "path": [-1, -1]}
+        # SouthWest square, NE
+        {
+        "type": "linkage",
+        "port": (-1,-1,1),
+        "link": (0,0,5),
+        "spin": (1, 8),
+        "cost": 2,
         }
         {"seal": 20260906200320, "type": "data/python", "path": [-1, -1]}
         # SouthWest square, E
@@ -263,6 +299,15 @@ class MarkerTests(unittest.TestCase):
         "port": (-1,1,2),
         "link": (0,1,6),
         "spin": (1, 4),
+        }
+        {"seal": 20260906200320, "type": "data/python", "path": [-1, 1]}
+        # NorthWest square, SE
+        {
+        "type": "linkage",
+        "port": (-1,1,3),
+        "link": (0,0,7),
+        "spin": (3, 8),
+        "cost": 2,
         }
         {"seal": 20260906200320, "type": "data/python", "path": [-1, 1]}
         # NorthWest square, S
@@ -346,6 +391,26 @@ class MarkerTests(unittest.TestCase):
         self.assertIs(getattr(element, "parent"), frame)
         self.assertIsInstance(element, Marker)
 
+    def test_marker_jump(self):
+        adaptor = Multipart(
+            factory={
+                dict: UserDict, list: UserList, str: UserString, "marking": Marker
+            }
+        )
+        items = list(adaptor.scan(self.text))
+        journal = Journal(adaptor, Travel, uri="test.rht")
+        branches = journal.branches((0, 0))
+        self.assertEqual(len(branches), 8)
+        marker = journal.marking["world_focus"]
+
+        self.assertIs(marker, journal.adaptor.data[()][0])
+        self.assertIs(marker, journal.model[()][0])
+
+        self.assertEqual(marker.tick, 0)
+
+        rv = marker.jump((1, 1))
+        self.fail(rv)
+
     def test_marker_move(self):
         adaptor = Multipart(
             factory={
@@ -354,9 +419,9 @@ class MarkerTests(unittest.TestCase):
         )
         items = list(adaptor.scan(self.text))
         journal = Journal(adaptor, uri="test.rht")
-        marker = journal.marking[0]
+        marker = journal.marking["world_focus"]
         self.assertIs(marker, journal.adaptor.data[()][0])
         self.assertIs(marker, journal.model[()][0])
 
-        rv = marker.jump((0, 1))
+        rv = marker.move((0, 1))
         self.fail(rv)

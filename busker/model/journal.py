@@ -74,11 +74,12 @@ class Journal:
 
     @property
     def marking(self):
-        return [
-            element for frame in self.adaptor.data.values()
+        return {
+            getattr(element, "name", None): element
+            for frame in self.adaptor.data.values()
             for element in frame
             if getattr(element, "type", None) == ElementType.MARKING.value
-        ]
+        }
 
     @property
     def model(self) -> Mapping:
