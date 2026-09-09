@@ -53,5 +53,8 @@ class Marker:
             return dict(view=path, tick=self.tick + 1, face=spin or self.face)
 
     def move(self, path: tuple, cost: Number=0, spin: tuple = None, **kwargs):
+        jump = self.jump(path, cost=cost, spin=spin, **kwargs)
+        for k, v in jump.items():
+            setattr(self, k, v)
         self.memo[path] += 1
-        raise NotImplementedError
+        return jump

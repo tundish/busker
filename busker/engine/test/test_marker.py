@@ -401,6 +401,8 @@ class MarkerTests(unittest.TestCase):
         journal = Journal(adaptor, Travel, uri="test.rht")
         branches = journal.branches((0, 0))
         self.assertEqual(len(branches), 8)
+
+        options = {pair[1].path: pair[0].spin for pair in branches}
         marker = journal.marking["world_focus"]
 
         self.assertIs(marker, journal.adaptor.data[()][0])
@@ -408,8 +410,12 @@ class MarkerTests(unittest.TestCase):
 
         self.assertEqual(marker.tick, 0)
 
-        rv = marker.jump((1, 1))
-        self.fail(rv)
+        path = (1, 1)
+        with self.subTest(path=path):
+            spin = options[path]
+            rv = marker.jump(path, spin=spin)
+            self.assertEqual(rv["tick"], 1)
+            self.assertEqual(rv["face"], spin)
 
     def test_marker_move(self):
         adaptor = Multipart(
@@ -418,10 +424,36 @@ class MarkerTests(unittest.TestCase):
             }
         )
         items = list(adaptor.scan(self.text))
-        journal = Journal(adaptor, uri="test.rht")
+        journal = Journal(adaptor, Travel, uri="test.rht")
+
         marker = journal.marking["world_focus"]
         self.assertIs(marker, journal.adaptor.data[()][0])
         self.assertIs(marker, journal.model[()][0])
 
-        rv = marker.move((0, 1))
-        self.fail(rv)
+        path = (1, 1)
+        with self.subTest(path=path):
+            branches = journal.branches(marker.view)
+            options = {pair[1].path: pair[0].spin for pair in branches}
+            spin = options[path]
+            rv = marker.move(path, spin=spin)
+            self.assertEqual(rv["tick"], 1)
+            self.assertEqual(rv["face"], spin)
+
+            self.assertEqual(marker.tick, 1)
+            self.assertEqual(marker.face, spin)
+            self.assertEqual(marker.view, (1, 1))
+
+        marker.twist = True
+        path = (1, 0)
+        with self.subTest(path=path):
+            branches = journal.branches(marker.view)
+            options = {pair[1].path: pair[0].spin for pair in branches}
+            spin = options[path]
+            rv = marker.move(path, spin=spin)
+            self.assertEqual(rv["tick"], 2)
+            self.assertEqual(rv["face"], (5, 8))  # 1/4 turn + 1/2 turn
+
+            self.assertEqual(marker.tick, 2)
+            self.assertEqual(marker.face, (5, 8))
+            self.assertEqual(marker.view, (1, 0))
+
