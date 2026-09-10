@@ -18,6 +18,7 @@
 import argparse
 import asyncio
 import concurrent.futures
+import contextvars
 import logging
 import pathlib
 import tkinter as tk
@@ -53,7 +54,11 @@ class LogBridge(logging.Handler):
         self.log_queue.put(msg, block=False)
 
 
-class Monk:
+class Resident:
+    "A core-resident actor"
+
+    # Shared among subclasses within the same thread
+    shared = contextvars.ContextVar("shared")
 
     def __init__(self, cmd_queue: asyncio.Queue() = None, msg_queue: asyncio.Queue() = None):
         self.cmd_queue = cmd_queue or asyncio.Queue()
@@ -86,11 +91,11 @@ def build_log_panel(parent: tk.Widget):
     rv.frame.rowconfigure(0, weight=1)
 
     rv.text_widget = tk.Text(parent)
-    rv.text_widget.grid(row=0, column=0)
+    rv.text_widget.grid(row=0, column=0, sticky="NESW")
     rv.log_queue = queue.Queue()
 
     logging.getLogger().addHandler(LogBridge(rv.log_queue))
-    parent.after(500, logger.info("Hello, World!"))
+    parent.after(500, logger.info(f"Busker {busker.__version__}"))
     return rv
 
 
