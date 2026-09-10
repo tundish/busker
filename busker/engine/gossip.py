@@ -20,9 +20,14 @@ import asyncio
 import concurrent.futures
 import logging
 import pathlib
+import tkinter as tk
+from tkinter import ttk
+from types import SimpleNamespace as Gift
 import queue
 import sys
 
+
+import busker
 
 """
 Demo of multiple threads accessing the same Journal, eg:
@@ -40,14 +45,13 @@ class LogBridge(logging.Handler):
     def __init__(self, log_queue: queue.Queue, level=logging.NOTSET, fmt=None, defaults=None):
         super().__init__(level=level)
         self.log_queue = log_queue
-        fmt = fmt or "{asctime}| {levelname:>8}| {name:<18} | {message}",
+        fmt = fmt or "{asctime}| {levelname:>8}| {name:<18} | {message}"
         self.setFormatter(logging.Formatter(fmt=fmt, datefmt=None, style="{", validate=True, defaults=defaults))
 
     def emit(self, record):
         msg = self.formatter.format(record)
         self.log_queue.put(msg, block=False)
 
-async with asyncio.TaskGroup() as tasks:
 
 class Monk:
 
@@ -55,23 +59,67 @@ class Monk:
         self.cmd_queue = cmd_queue or asyncio.Queue()
         self.msg_queue = msg_queue or asyncio.Queue()
 
+    async def __call__(self, **kwargs):
+        async with asyncio.TaskGroup() as tasks:
+            ...
+
+
+def monitor(gui):
+    logger = logging.getLogger("monitor")
+
+    while True:
+        try:
+            text = gui.log_panel.log_queue.get(block=False)
+            gui.log_panel.text_widget.insert(tk.END, text)
+            gui.log_panel.text_widget.see(tk.END)
+        except queue.Empty:
+            break
+
+    gui.root.after(150, monitor, gui)
+
+
+def build_log_panel(parent: tk.Widget):
+    logger = logging.getLogger("log_panel")
+    rv = Gift()
+    rv.frame = ttk.Frame(parent)
+    rv.frame.columnconfigure(0, weight=1)
+    rv.frame.rowconfigure(0, weight=1)
+
+    rv.text_widget = tk.Text(parent)
+    rv.text_widget.grid(row=0, column=0)
+    rv.log_queue = queue.Queue()
+
+    logging.getLogger().addHandler(LogBridge(rv.log_queue))
+    parent.after(500, logger.info("Hello, World!"))
+    return rv
+
+
+def build_gui(args: argparse.Namespace):
+    rv = Gift()
+    rv.root = tk.Tk()
+    rv.root.title(f"Busker {busker.__version__}")
+    rv.root.columnconfigure(0, weight=1)
+    rv.root.rowconfigure(0, weight=1)
+
+    rv.log_panel = build_log_panel(rv.root)
+    rv.root.after(500, monitor, rv)
+    rv.root.grid()
+    return rv
+
 
 def start():
     pass
 
 
 def main(args):
+    gui = build_gui(args)
+    gui.root.mainloop()
     return 0
 
 
 def parser():
     rv = argparse.ArgumentParser(usage=__doc__, fromfile_prefix_chars="=")
     rv.convert_arg_line_to_args = lambda x: x.split()
-    rv.add_argument(
-        "input",
-        type=pathlib.Path, default=None,
-        help=f"Specify .rht file"
-    )
     rv.add_argument(
         "--debug", action="store_true", default=False,
         help=f"Display debug logs"
