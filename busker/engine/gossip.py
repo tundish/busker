@@ -24,7 +24,7 @@ import logging
 import pathlib
 import tkinter as tk
 from tkinter import ttk
-from types import SimpleNamespace as Gift
+from types import SimpleNamespace as Result
 import queue
 import sys
 
@@ -96,7 +96,7 @@ def monitor(gui):
 
 
 def build_status_panel(parent: tk.Widget):
-    rv = Gift()
+    rv = Result()
     rv.frame = ttk.Frame(parent)
     rv.frame.rowconfigure(0, weight=1)
     rv.frame.columnconfigure(0, weight=1)
@@ -108,14 +108,14 @@ def build_status_panel(parent: tk.Widget):
 
 def build_tree_panel(parent: tk.Widget):
     logger = logging.getLogger("tree_panel")
-    rv = Gift()
+    rv = Result()
     rv.widget = ttk.Treeview(parent)
     return rv
 
 
 def build_log_panel(parent: tk.Widget):
     logger = logging.getLogger("log_panel")
-    rv = Gift(name="Log")
+    rv = Result(name="Log")
     rv.frame = ttk.Frame(parent)
     rv.frame.columnconfigure(0, weight=1)
     rv.frame.columnconfigure(1, weight=0)
@@ -134,7 +134,7 @@ def build_log_panel(parent: tk.Widget):
 
 
 def build_gui(args: argparse.Namespace):
-    rv = Gift()
+    rv = Result()
     rv.root = tk.Tk()
     rv.root.title(f"Busker {busker.__version__}")
     rv.root.columnconfigure(0, weight=1)
