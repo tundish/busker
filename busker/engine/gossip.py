@@ -106,9 +106,16 @@ def build_status_panel(parent: tk.Widget):
     return rv
 
 
+def build_tree_panel(parent: tk.Widget):
+    logger = logging.getLogger("tree_panel")
+    rv = Gift()
+    rv.widget = ttk.Treeview(parent)
+    return rv
+
+
 def build_log_panel(parent: tk.Widget):
     logger = logging.getLogger("log_panel")
-    rv = Gift()
+    rv = Gift(name="Log")
     rv.frame = ttk.Frame(parent)
     rv.frame.columnconfigure(0, weight=1)
     rv.frame.columnconfigure(1, weight=0)
@@ -141,12 +148,14 @@ def build_gui(args: argparse.Namespace):
     base_split = ttk.PanedWindow(base, orient=tk.HORIZONTAL)
     base_split.grid(row=0, column=0, sticky="NESW")
 
-    rv.log_panel = build_log_panel(base_split)
-    base_split.add(rv.log_panel.frame)
+    rv.tree_panel = build_tree_panel(base_split)
+    base_split.add(rv.tree_panel.widget)
 
     book = ttk.Notebook(base_split)
     base_split.add(book)
 
+    rv.log_panel = build_log_panel(base_split)
+    book.add(rv.log_panel.frame, text=rv.log_panel.name)
     rv.status_panel = build_status_panel(base)
     rv.status_panel.frame.grid(row=1, column=0, sticky="NESW")
 
