@@ -20,6 +20,7 @@ import asyncio
 from collections.abc import Generator
 import concurrent.futures
 import contextvars
+import dataclasses
 import logging
 import pathlib
 import tkinter as tk
@@ -27,6 +28,7 @@ from tkinter import ttk
 from types import SimpleNamespace as Result
 import queue
 import sys
+import weakref
 
 
 import busker
@@ -53,6 +55,15 @@ class LogBridge(logging.Handler):
     def emit(self, record):
         msg = self.formatter.format(record)
         self.log_queue.put(msg, block=False)
+
+
+class Scenario:
+    "A manager of journals"
+
+    instances = weakref.WeakValueDictionary()
+
+    def __init__(self):
+        self.journals = []
 
 
 class Resident:
@@ -109,7 +120,16 @@ def build_status_panel(parent: tk.Widget):
 def build_tree_panel(parent: tk.Widget):
     logger = logging.getLogger("tree_panel")
     rv = Result()
-    rv.widget = ttk.Treeview(parent)
+    rv.frame = ttk.Frame(parent)
+    rv.frame.columnconfigure(0, weight=1)
+    rv.frame.columnconfigure(1, weight=0)
+    rv.frame.rowconfigure(0, weight=1)
+
+    rv.tree_widget = ttk.Treeview(rv.frame)
+    rv.tree_widget.grid(row=0, column=0, sticky="NESW")
+    scroll_bar = ttk.Scrollbar(rv.frame, orient=tk.VERTICAL, command=rv.tree_widget.yview)
+    scroll_bar.grid(row=0, column=1, sticky="NS")
+    rv.tree_widget.configure(yscrollcommand=scroll_bar.set)
     return rv
 
 
@@ -149,7 +169,7 @@ def build_gui(args: argparse.Namespace):
     base_split.grid(row=0, column=0, sticky="NESW")
 
     rv.tree_panel = build_tree_panel(base_split)
-    base_split.add(rv.tree_panel.widget)
+    base_split.add(rv.tree_panel.frame)
 
     book = ttk.Notebook(base_split)
     base_split.add(book)
