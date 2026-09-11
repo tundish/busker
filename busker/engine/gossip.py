@@ -95,17 +95,32 @@ def monitor(gui):
     gui.root.after(150, monitor, gui)
 
 
+def build_status_panel(parent: tk.Widget):
+    rv = Gift()
+    rv.frame = ttk.Frame(parent)
+    rv.frame.rowconfigure(0, weight=1)
+    rv.frame.columnconfigure(0, weight=1)
+    rv.frame.columnconfigure(1, weight=1)
+    rv.frame.columnconfigure(2, weight=0)
+    ttk.Sizegrip(rv.frame).grid(row=0, column=2, sticky="SE")
+    return rv
+
+
 def build_log_panel(parent: tk.Widget):
     logger = logging.getLogger("log_panel")
     rv = Gift()
     rv.frame = ttk.Frame(parent)
     rv.frame.columnconfigure(0, weight=1)
+    rv.frame.columnconfigure(1, weight=0)
     rv.frame.rowconfigure(0, weight=1)
 
-    rv.text_widget = tk.Text(parent)
+    rv.text_widget = tk.Text(rv.frame)
     rv.text_widget.grid(row=0, column=0, sticky="NESW")
-    rv.log_queue = queue.Queue()
+    scroll_bar = ttk.Scrollbar(rv.frame, orient=tk.VERTICAL, command=rv.text_widget.yview)
+    scroll_bar.grid(row=0, column=1, sticky="NS")
+    rv.text_widget.configure(yscrollcommand=scroll_bar.set)
 
+    rv.log_queue = queue.Queue()
     logging.getLogger().addHandler(LogBridge(rv.log_queue))
     parent.after(500, logger.info(f"Busker {busker.__version__}"))
     return rv
@@ -118,9 +133,27 @@ def build_gui(args: argparse.Namespace):
     rv.root.columnconfigure(0, weight=1)
     rv.root.rowconfigure(0, weight=1)
 
-    rv.log_panel = build_log_panel(rv.root)
-    rv.root.after(500, monitor, rv)
+    base = ttk.Frame(rv.root)
+    base.columnconfigure(0, weight=1)
+    base.rowconfigure(0, weight=1)
+    base.rowconfigure(1, weight=0)
+
+    base_split = ttk.PanedWindow(base, orient=tk.HORIZONTAL)
+    base_split.grid(row=0, column=0, sticky="NESW")
+
+    rv.log_panel = build_log_panel(base_split)
+    base_split.add(rv.log_panel.frame)
+
+    book = ttk.Notebook(base_split)
+    base_split.add(book)
+
+    rv.status_panel = build_status_panel(base)
+    rv.status_panel.frame.grid(row=1, column=0, sticky="NESW")
+
+    base.grid(row=0, column=0, sticky="NESW")
     rv.root.grid()
+
+    rv.root.after(500, monitor, rv)
     return rv
 
 
