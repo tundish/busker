@@ -129,7 +129,7 @@ def build_tree_panel(parent: tk.Widget):
     rv.tree_widget.grid(row=0, column=0, sticky="NESW")
     scroll_bar = ttk.Scrollbar(rv.frame, orient=tk.VERTICAL, command=rv.tree_widget.yview)
     scroll_bar.grid(row=0, column=1, sticky="NS")
-    rv.tree_widget.configure(yscrollcommand=scroll_bar.set)
+    rv.tree_widget.configure(yscrollcommand=scroll_bar.set, selectmode="browse")
     return rv
 
 
