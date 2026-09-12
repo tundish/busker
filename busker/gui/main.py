@@ -44,6 +44,38 @@ Need to manage the write lock, etc.
 
 """
 
+"""
+        tree = ttk.Treeview(parent)
+        tree["columns"] = Scenario._fields[1:]
+        for c in tree["columns"]:
+            tree.heading(c, text=c.title())
+            tree.column(c, width=32)
+
+        tree.grid(column=0, row=0, sticky="NESW")
+
+    def add_item(self, name, data:dict):
+        if name:
+            item = Scenario(name, *data.values())
+            try:
+                tree.insert("", "end", item.name, text=item.name, values=item[1:])
+            except tk.TclError:
+                pass
+
+    def delete_item(self):
+        item = tree.selection()
+        try:
+            stree.delete(item)
+        except tk.TclError:
+            pass
+
+    def get_items(self, *args):
+        return [
+            Scenario(i["text"], *i["values"])
+            for i in [tree.item(i) for i in tree.get_children()]
+        ]
+
+"""
+
 class LogBridge(logging.Handler):
 
     def __init__(self, log_queue: queue.Queue, level=logging.NOTSET, fmt=None, defaults=None):
