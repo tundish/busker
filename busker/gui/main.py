@@ -123,23 +123,26 @@ def build_tree_panel(parent: tk.Widget):
 
 
 def build_context_menu(parent: tk.Widget):
+    logger = logging.getLogger("context_menu")
     rv = Result()
-    rv.menu = tk.Menu(parent, tearoff=0)
-    rv.menu.add_command(label="Cut")
-    rv.menu.add_command(label="Copy")
-    rv.menu.add_command(label="Paste")
-    rv.menu.add_command(label="Reload", underline=1)
-    rv.menu.add_separator()
-    rv.menu.add_command(label ="Rename")
+    rv.menu = tk.Menu(parent, tearoff=0, takefocus=1)
+
+    def on_select(event=None):
+        logger.info(f"selected {event}")
 
     def do_popup(event):
-        logger = logging.getLogger("context_menu")
         try:
             logger.info(event)
             rv.menu.tk_popup(event.x_root, event.y_root)
         finally:
             rv.menu.grab_release()
 
+    rv.menu.add_command(label="Cut")
+    rv.menu.add_command(label="Copy")
+    rv.menu.add_command(label="Paste")
+    rv.menu.add_command(label="Reload", underline=1, accelerator="Ctrl+R", command=on_select)
+    rv.menu.add_separator()
+    rv.menu.add_command(label ="Rename")
     parent.bind("<Button-3>", do_popup)
     return rv
 
