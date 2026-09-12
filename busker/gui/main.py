@@ -183,6 +183,7 @@ def build_context_menu(parent: tk.Widget):
     rv.menu.add_separator()
     rv.menu.add_command(label ="Rename")
     parent.bind("<Button-3>", do_popup)
+    parent.bind('<ButtonRelease-3>', do_popup)
     return rv
 
 
