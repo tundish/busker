@@ -164,6 +164,8 @@ def build_context_menu(parent: tk.Widget):
         logger.info(f"selected {event}")
 
     def do_popup(event):
+        item = parent.selection()
+        logger.info(f"{item=}")
         try:
             logger.info(event)
             rv.menu.tk_popup(event.x_root, event.y_root)
