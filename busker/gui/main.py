@@ -258,6 +258,8 @@ def build_gui(args: argparse.Namespace):
     rv.tree_panel = build_tree_panel(base_split)
     base_split.add(rv.tree_panel.frame)
 
+    # root.configure(menu=menubar)
+    # https://tkdocs.com/tutorial/menus.html
     rv.context_menu = build_context_menu(rv.tree_panel.tree_widget)
     rv.content = build_content(rv.tree_panel.tree_widget)
 
