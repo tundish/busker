@@ -35,20 +35,16 @@ from busker.model.types import Selector
 class Journal:
 
     def __init__(self, *args, uri: pathlib.Path | str = None):
+        """
+        Lazy construction:
+        1. __init__
+        2. attach
+        3. scan
+
+        """
         self.uri = pathlib.Path(uri)
         self.registry = defaultdict(set)
-        for arg in args:
-            self.register(arg)
-
-    def register(self, helper):
-        for cls in (Adaptor, Selector, Lens):
-            if isinstance(helper, type) and issubclass(helper, cls):
-                helper = helper(self)
-            if isinstance(helper, cls):
-                helper.journal = self
-                self.registry[cls].add(helper)
-
-        self.model  # Re-initialize model
+        self.attach(*args)
 
     def __getattr__(self, name):
         try:
@@ -61,11 +57,27 @@ class Journal:
         except StopIteration:
             raise AttributeError(name)
 
-    def attach(self, component: Adaptor | Selector | Lens):
-        raise NotImplementedError
+    def register(self, helper):
+        rv = None
+        for cls in (Adaptor, Selector, Lens):
+            if isinstance(helper, type) and issubclass(helper, cls):
+                helper = helper(self)
+            if isinstance(helper, cls):
+                helper.journal = self
+                self.registry[cls].add(helper)
+                rv = helper
+        return rv
 
-    def remove(self, component: Adaptor | Selector | Lens):
-        raise NotImplementedError
+    def attach(self, *helpers: Adaptor | Selector | Lens):
+        for helper in helpers:
+            self.register(helper)
+        self.model  # Re-initialize model
+
+    def remove(self, *helpers: Adaptor | Selector | Lens):
+        for helper in helpers:
+            for registered in self.registry.values():
+                registered.discard(helper)
+        self.model  # Re-initialize model
 
     @property
     def adaptor(self):
