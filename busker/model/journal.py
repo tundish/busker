@@ -23,6 +23,7 @@ from collections import UserString
 from collections.abc import Mapping
 import logging
 import pathlib
+import threading
 
 from busker.model.types import Adaptor
 from busker.model.types import Element
@@ -43,6 +44,7 @@ class Journal:
 
         """
         self.uri = pathlib.Path(uri)
+        self.write_lock = threading.Lock()
         self.registry = defaultdict(set)
         self.attach(*args)
 
@@ -69,14 +71,16 @@ class Journal:
         return rv
 
     def attach(self, *helpers: Adaptor | Selector | Lens):
-        for helper in helpers:
-            self.register(helper)
+        with self.write_lock:
+            for helper in helpers:
+                self.register(helper)
         self.model  # Re-initialize model
 
     def remove(self, *helpers: Adaptor | Selector | Lens):
-        for helper in helpers:
-            for registered in self.registry.values():
-                registered.discard(helper)
+        with self.write_lock:
+            for helper in helpers:
+                for registered in self.registry.values():
+                    registered.discard(helper)
         self.model  # Re-initialize model
 
     @property
@@ -109,36 +113,38 @@ class Journal:
             logger.debug(err, exc_info=True)
             return {}
 
-        for p in list(data):
-            frame = data[p] = Frame(data[p].data)
-            frame.path = p
-            for n, obj in enumerate(frame.copy()):
-                try:
-                    frame[n] = Element(obj.data)
-                except AttributeError:
-                    logger.debug(f"Not a data element: {obj}")
-                    continue
-                except ValueError:
-                    logger.debug(f"Not a data element: {obj}")
-                    if isinstance(obj, UserString):
-                        frame[n].type = ElementType.CONTENT
-                    continue
-                finally:
-                    frame[n].parent = frame
+        with self.write_lock:
+            for p in list(data):
+                frame = data[p] = Frame(data[p].data)
+                frame.path = p
+                for n, obj in enumerate(frame.copy()):
+                    try:
+                        frame[n] = Element(obj.data)
+                    except AttributeError:
+                        logger.debug(f"Not a data element: {obj}")
+                        continue
+                    except ValueError:
+                        logger.debug(f"Not a data element: {obj}")
+                        if isinstance(obj, UserString):
+                            frame[n].type = ElementType.CONTENT
+                        continue
+                    finally:
+                        frame[n].parent = frame
 
-                try:
-                    frame[n].type = ElementType[obj["type"].upper()]
-                except KeyError:
-                    if "type" in obj:
-                        logger.error(f"Unknown resource type: {obj['type']}")
-                    else:
-                        logger.error(f"Type value missing: path {p} item {n}")
-                    return
+                    try:
+                        frame[n].type = ElementType[obj["type"].upper()]
+                    except KeyError:
+                        if "type" in obj:
+                            logger.error(f"Unknown resource type: {obj['type']}")
+                        else:
+                            logger.error(f"Type value missing: path {p} item {n}")
+                        return
 
-            frame.refresh()
+                frame.refresh()
         return data
 
     def scan(self, **kwargs):
-        adaptor = self.adaptor
-        data = adaptor.load(self.uri)
-        return list(adaptor.scan(data, **kwargs))
+        with self.write_lock:
+            adaptor = self.adaptor
+            data = adaptor.load(self.uri)
+            return list(adaptor.scan(data, **kwargs))

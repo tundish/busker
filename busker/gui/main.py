@@ -82,8 +82,9 @@ class Scenario:
 
     instances = weakref.WeakValueDictionary()
 
-    def __init__(self):
-        self.journals = []
+    def __init__(self, *args: tuple[Journal], name=None):
+        self.journals = list(args)
+        self.name = name
 
 
 class Resident:
@@ -213,6 +214,28 @@ def build_status_panel(parent: tk.Widget):
     return rv
 
 
+def build_content(tree: tk.Widget):
+    logger = logging.getLogger("build_content")
+    rv = Result()
+    content = [
+        Scenario(Journal(uri="one.rht"), name="test_1"),
+        Scenario(
+            Journal(uri="two.rht"),
+            Journal(uri="two_00.rht"),
+            Journal(uri="two_01.rht"),
+            name="test_3",
+        ),
+        Scenario(Journal(uri="one.rht"), Journal(uri="one_00.rht"), name="test_2"),
+    ]
+    for s in content:
+        try:
+            tree.insert("", "end", s.name, text=s.name, values=[])
+        except tk.TclError as err:
+            logger.warning(err)
+
+    return rv
+
+
 def build_gui(args: argparse.Namespace):
     rv = Result()
     rv.root = tk.Tk()
@@ -232,6 +255,7 @@ def build_gui(args: argparse.Namespace):
     base_split.add(rv.tree_panel.frame)
 
     rv.context_menu = build_context_menu(rv.tree_panel.tree_widget)
+    rv.content = build_content(rv.tree_panel.tree_widget)
 
     book = ttk.Notebook(base_split)
     base_split.add(book)
