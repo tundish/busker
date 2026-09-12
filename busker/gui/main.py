@@ -32,6 +32,7 @@ import weakref
 
 
 import busker
+from busker.model.journal import Journal
 
 """
 Demo of multiple threads accessing the same Journal, eg:
@@ -76,19 +77,6 @@ Need to manage the write lock, etc.
 
 """
 
-class LogBridge(logging.Handler):
-
-    def __init__(self, log_queue: queue.Queue, level=logging.NOTSET, fmt=None, defaults=None):
-        super().__init__(level=level)
-        self.log_queue = log_queue
-        fmt = fmt or "{asctime}| {levelname:>8}| {name:<18} | {message}"
-        self.setFormatter(logging.Formatter(fmt=fmt, datefmt=None, style="{", validate=True, defaults=defaults))
-
-    def emit(self, record):
-        msg = self.formatter.format(record)
-        self.log_queue.put(msg, block=False)
-
-
 class Scenario:
     "A manager of journals"
 
@@ -122,6 +110,19 @@ class Resident:
     async def __call__(self, **kwargs):
         async with asyncio.TaskGroup() as tasks:
             ...
+
+
+class LogBridge(logging.Handler):
+
+    def __init__(self, log_queue: queue.Queue, level=logging.NOTSET, fmt=None, defaults=None):
+        super().__init__(level=level)
+        self.log_queue = log_queue
+        fmt = fmt or "{asctime}| {levelname:>8}| {name:<18} | {message}"
+        self.setFormatter(logging.Formatter(fmt=fmt, datefmt=None, style="{", validate=True, defaults=defaults))
+
+    def emit(self, record):
+        msg = self.formatter.format(record)
+        self.log_queue.put(msg, block=False)
 
 
 def monitor(gui):

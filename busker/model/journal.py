@@ -37,16 +37,18 @@ class Journal:
     def __init__(self, *args, uri: pathlib.Path | str = None):
         self.uri = pathlib.Path(uri)
         self.registry = defaultdict(set)
+        for arg in args:
+            self.register(arg)
 
+    def register(self, helper):
         for cls in (Adaptor, Selector, Lens):
-            for arg in args:
-                if isinstance(arg, type) and issubclass(arg, cls):
-                    arg = arg(self)
-                if isinstance(arg, cls):
-                    arg.journal = self
-                    self.registry[cls].add(arg)
+            if isinstance(helper, type) and issubclass(helper, cls):
+                helper = helper(self)
+            if isinstance(helper, cls):
+                helper.journal = self
+                self.registry[cls].add(helper)
 
-        self.model  # Initialize model
+        self.model  # Re-initialize model
 
     def __getattr__(self, name):
         try:
