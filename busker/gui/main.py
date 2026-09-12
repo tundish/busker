@@ -98,23 +98,12 @@ def monitor(gui):
     while True:
         try:
             text = gui.log_panel.log_queue.get(block=False)
-            gui.log_panel.text_widget.insert(tk.END, text)
+            gui.log_panel.text_widget.insert(tk.END, f"{text}\n")
             gui.log_panel.text_widget.see(tk.END)
         except queue.Empty:
             break
 
     gui.root.after(150, monitor, gui)
-
-
-def build_status_panel(parent: tk.Widget):
-    rv = Result()
-    rv.frame = ttk.Frame(parent)
-    rv.frame.rowconfigure(0, weight=1)
-    rv.frame.columnconfigure(0, weight=1)
-    rv.frame.columnconfigure(1, weight=1)
-    rv.frame.columnconfigure(2, weight=0)
-    ttk.Sizegrip(rv.frame).grid(row=0, column=2, sticky="SE")
-    return rv
 
 
 def build_tree_panel(parent: tk.Widget):
@@ -130,6 +119,28 @@ def build_tree_panel(parent: tk.Widget):
     scroll_bar = ttk.Scrollbar(rv.frame, orient=tk.VERTICAL, command=rv.tree_widget.yview)
     scroll_bar.grid(row=0, column=1, sticky="NS")
     rv.tree_widget.configure(yscrollcommand=scroll_bar.set, selectmode="browse")
+    return rv
+
+
+def build_context_menu(parent: tk.Widget):
+    rv = Result()
+    rv.menu = tk.Menu(parent, tearoff=0)
+    rv.menu.add_command(label="Cut")
+    rv.menu.add_command(label="Copy")
+    rv.menu.add_command(label="Paste")
+    rv.menu.add_command(label="Reload", underline=1)
+    rv.menu.add_separator()
+    rv.menu.add_command(label ="Rename")
+
+    def do_popup(event):
+        logger = logging.getLogger("context_menu")
+        try:
+            logger.info(event)
+            rv.menu.tk_popup(event.x_root, event.y_root)
+        finally:
+            rv.menu.grab_release()
+
+    parent.bind("<Button-3>", do_popup)
     return rv
 
 
@@ -153,6 +164,17 @@ def build_log_panel(parent: tk.Widget):
     return rv
 
 
+def build_status_panel(parent: tk.Widget):
+    rv = Result()
+    rv.frame = ttk.Frame(parent)
+    rv.frame.rowconfigure(0, weight=1)
+    rv.frame.columnconfigure(0, weight=1)
+    rv.frame.columnconfigure(1, weight=1)
+    rv.frame.columnconfigure(2, weight=0)
+    ttk.Sizegrip(rv.frame).grid(row=0, column=2, sticky="SE")
+    return rv
+
+
 def build_gui(args: argparse.Namespace):
     rv = Result()
     rv.root = tk.Tk()
@@ -170,6 +192,8 @@ def build_gui(args: argparse.Namespace):
 
     rv.tree_panel = build_tree_panel(base_split)
     base_split.add(rv.tree_panel.frame)
+
+    rv.context_menu = build_context_menu(rv.tree_panel.tree_widget)
 
     book = ttk.Notebook(base_split)
     base_split.add(book)
