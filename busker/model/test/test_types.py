@@ -18,7 +18,14 @@
 import unittest
 
 
+from busker.model.types import Accumulator
+
+
 class AccumulatorTests(unittest.TestCase):
 
     def test_complex(self):
-        self.fail()
+        memo = Accumulator()
+        rv = memo["a"]
+        self.assertIsInstance(rv, complex)
+        self.assertEqual(rv, 0)
+        self.assertFalse(rv)

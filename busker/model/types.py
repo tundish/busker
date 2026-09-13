@@ -16,6 +16,7 @@
 # If not, see <https://www.gnu.org/licenses/>.
 
 import ast
+from collections import defaultdict
 from collections import ChainMap
 from collections import UserDict
 from collections import UserList
@@ -39,6 +40,9 @@ class ElementType(enum.StrEnum):
     MARKING = enum.auto()
     MONITOR = enum.auto()
     TRIGGER = enum.auto()
+
+
+Accumulator = lambda: defaultdict(complex)
 
 
 class Adaptor:

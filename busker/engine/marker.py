@@ -21,6 +21,7 @@ from fractions import Fraction
 import logging
 from numbers import Number
 
+from busker.model.types import Accumulator
 from busker.model.types import ElementType
 
 
@@ -33,7 +34,7 @@ class Marker:
     span: Number = None
     type: str = ElementType.MARKING.value
     twist: bool = False
-    memo: Counter = dataclasses.field(default_factory=Counter, compare=False)
+    memo: Accumulator = dataclasses.field(default_factory=Accumulator, compare=False)
 
     def __post_init__(self):
         try:
