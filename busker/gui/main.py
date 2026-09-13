@@ -240,6 +240,23 @@ def build_content(tree: tk.Widget):
     return rv
 
 
+def build_main_menu(parent: tk.Widget):
+    logger = logging.getLogger("main_menu")
+    rv = Result()
+    rv.menu = tk.Menu(parent, tearoff=0, takefocus=1)
+
+    def on_select(event=None):
+        logger.info(f"selected {event}")
+
+    rv.menu.add_command(label="File", underline=0)
+    rv.menu.add_command(label="Edit", underline=0)
+    rv.menu.add_command(label="Help", underline=0)
+    # rv.menu.add_command(label="Reload", underline=0, accelerator="Ctrl+R", command=on_select)
+    # parent.bind("<Button-3>", do_popup)
+    # parent.bind('<ButtonRelease-3>', do_popup)
+    return rv
+
+
 def build_gui(args: argparse.Namespace):
     rv = Result()
     rv.root = tk.Tk()
@@ -271,6 +288,8 @@ def build_gui(args: argparse.Namespace):
     rv.status_panel = build_status_panel(base)
     rv.status_panel.frame.grid(row=1, column=0, sticky="NESW")
 
+    rv.main_menu = build_main_menu(base)
+    rv.root.configure(menu=rv.main_menu.menu)
     base.grid(row=0, column=0, sticky="NESW")
     rv.root.grid()
 
