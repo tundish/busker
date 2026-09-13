@@ -21,6 +21,7 @@ from collections.abc import Generator
 import concurrent.futures
 import contextvars
 import dataclasses
+import datetime
 import logging
 import pathlib
 import tkinter as tk
@@ -137,6 +138,7 @@ def monitor(gui):
         except queue.Empty:
             break
 
+    gui.status_panel.clock_display.configure(text=datetime.datetime.now().strftime("%H:%M"))
     gui.root.after(150, monitor, gui)
 
 
@@ -212,9 +214,11 @@ def build_status_panel(parent: tk.Widget):
     rv.frame = ttk.Frame(parent)
     rv.frame.rowconfigure(0, weight=1)
     rv.frame.columnconfigure(0, weight=1)
-    rv.frame.columnconfigure(1, weight=1)
+    rv.frame.columnconfigure(1, weight=0)
     rv.frame.columnconfigure(2, weight=0)
     ttk.Sizegrip(rv.frame).grid(row=0, column=2, sticky="SE")
+    rv.clock_display = ttk.Label(rv.frame)
+    rv.clock_display.grid(row=0, column=1, padx=6, pady=3, sticky="SE")
     return rv
 
 
