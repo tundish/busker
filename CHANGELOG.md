@@ -1,6 +1,11 @@
 History
 =======
 
+0.36.0
+------
+
+* Prototype GUI in place.
+
 0.34.0
 ------
 
