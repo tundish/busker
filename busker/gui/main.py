@@ -150,11 +150,15 @@ def build_tree_panel(parent: tk.Widget):
     rv.frame.columnconfigure(1, weight=0)
     rv.frame.rowconfigure(0, weight=1)
 
+    def on_select(event=None):
+        logger.info(f"selected {event}")
+
     rv.tree_widget = ttk.Treeview(rv.frame)
     rv.tree_widget.grid(row=0, column=0, sticky="NESW")
     scroll_bar = ttk.Scrollbar(rv.frame, orient=tk.VERTICAL, command=rv.tree_widget.yview)
     scroll_bar.grid(row=0, column=1, sticky="NS")
     rv.tree_widget.configure(yscrollcommand=scroll_bar.set, selectmode="browse")
+    rv.tree_widget.bind('<<TreeviewSelect>>', on_select)
     return rv
 
 
@@ -237,9 +241,12 @@ def build_content(tree: tk.Widget):
     ]
     for s in content:
         try:
-            tree.insert("", "end", s.name, text=s.name, values=[])
+            s_name = f"Scenario-{s.name}"
+            s_iid = tree.insert("", "end", s_name, text=s_name, values=[])
         except tk.TclError as err:
             logger.warning(err)
+        for n, j in enumerate(s.journals):
+            j_iid = tree.insert(s_iid, "end", f"{s_iid}-{n}-{j.uri}", text=j.uri, values=[])
 
     return rv
 
