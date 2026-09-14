@@ -171,11 +171,9 @@ def build_context_menu(parent: tk.Widget):
         logger.info(f"selected {event}")
 
     def do_popup(event):
-        item = parent.selection()  # Tuple
-        focus = parent.focus()
-        data = parent.item(focus)
-        bbox = parent.bbox(focus, column="#0")
-        logger.info(f"{item=} {focus=} {data=} {bbox=}")
+        row = parent.identify_row(event.y)
+        parent.selection_set(row)
+        logger.info(f"{row=}")
         try:
             logger.info(event)
             rv.menu.tk_popup(event.x_root, event.y_root)

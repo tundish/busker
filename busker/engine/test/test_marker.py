@@ -451,7 +451,7 @@ class MarkerTests(unittest.TestCase):
             spin = options[path]
             rv = marker.move(path, spin=spin)
             self.assertEqual(rv["tick"], 2)
-            self.assertEqual(rv["face"], (5, 8))  # 1/4 turn + 1/2 turn
+            self.assertEqual(rv["face"], (5, 8))  # 1/8 turn + 1/2 turn
 
             self.assertEqual(marker.tick, 2)
             self.assertEqual(marker.face, (5, 8))
