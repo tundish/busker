@@ -22,6 +22,7 @@ import concurrent.futures
 import contextvars
 import dataclasses
 import datetime
+import functools
 import logging
 import pathlib
 import tkinter as tk
@@ -167,8 +168,10 @@ def build_context_menu(parent: tk.Widget):
     rv = Result()
     rv.menu = tk.Menu(parent, tearoff=0, takefocus=1)
 
-    def on_select(event=None):
-        logger.info(f"selected {event}")
+    def on_select(parent=parent, event=None):
+        logger.info(f"{parent=} {event=}")
+        item = parent.selection()
+        logger.info(f"selected {item=}")
 
     def do_popup(event):
         row = parent.identify_row(event.y)
@@ -183,7 +186,7 @@ def build_context_menu(parent: tk.Widget):
     rv.menu.add_command(label="Cut")
     rv.menu.add_command(label="Copy")
     rv.menu.add_command(label="Paste")
-    rv.menu.add_command(label="Reload", underline=1, accelerator="Ctrl+R", command=on_select)
+    rv.menu.add_command(label="Reload", underline=1, accelerator="Ctrl+R", command=functools.partial(on_select, parent))
     rv.menu.add_separator()
     rv.menu.add_command(label ="Rename")
     parent.bind("<Button-3>", do_popup)
