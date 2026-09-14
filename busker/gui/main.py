@@ -170,8 +170,9 @@ def build_context_menu(parent: tk.Widget):
 
     def on_select(parent=parent, event=None):
         logger.info(f"{parent=} {event=}")
-        item = parent.selection()
-        logger.info(f"selected {item=}")
+        iid = parent.selection()
+        text = parent.item(iid, "text")
+        logger.info(f"selected {iid=} {text=}")
 
     def do_popup(event):
         row = parent.identify_row(event.y)
