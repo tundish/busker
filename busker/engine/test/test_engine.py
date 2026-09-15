@@ -29,7 +29,8 @@ from busker.model.multipart import Multipart
 class EngineTests(unittest.TestCase):
 
     def setUp(self):
-        with importlib.resources.path("busker.data", "cloak_of_harkness.rht") as path:
+        with importlib.resources.path("busker.data", "demo/cloak_of_harkness.rht") as path:
+            self.assertTrue(path.exists(), path)
             adapter = Multipart(factory={dict: UserDict, list: UserList, str: UserString})
             journal = Journal(adapter, uri=path)
             self.engine = Engine(journal)

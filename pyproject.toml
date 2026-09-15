@@ -57,6 +57,7 @@ packages = [
 [tool.setuptools.package-data]
 "busker.data" = [
     "*.rht",
+    "*/*.rht",
 ]
 "busker.test" = [
     "*.rht",
