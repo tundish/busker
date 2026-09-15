@@ -24,7 +24,9 @@ import dataclasses
 import datetime
 import functools
 import logging
+import logging.handlers
 import pathlib
+import tempfile
 import tkinter as tk
 from tkinter import ttk
 from types import SimpleNamespace as Result
@@ -47,46 +49,26 @@ Need to manage the write lock, etc.
 
 """
 
-"""
-        tree = ttk.Treeview(parent)
-        tree["columns"] = Scenario._fields[1:]
-        for c in tree["columns"]:
-            tree.heading(c, text=c.title())
-            tree.column(c, width=32)
-
-        tree.grid(column=0, row=0, sticky="NESW")
-
-    def add_item(self, name, data:dict):
-        if name:
-            item = Scenario(name, *data.values())
-            try:
-                tree.insert("", "end", item.name, text=item.name, values=item[1:])
-            except tk.TclError:
-                pass
-
-    def delete_item(self):
-        item = tree.selection()
-        try:
-            stree.delete(item)
-        except tk.TclError:
-            pass
-
-    def get_items(self, *args):
-        return [
-            Scenario(i["text"], *i["values"])
-            for i in [tree.item(i) for i in tree.get_children()]
-        ]
-
-"""
 
 class Scenario:
     "A manager of journals"
 
     instances = weakref.WeakValueDictionary()
 
-    def __init__(self, *args: tuple[Journal], name=None):
-        self.journals = list(args)
-        self.name = name
+    def __init__(self, self.path: pathlib.Path, *args: tuple[Journal]):
+        # TODO: Temporary session directory?
+        self.journals = list(args) #  TODO: a property
+        self.path = path
+
+    def clone(self, name, debug=False):
+        with tempfile.TemporaryDirectory(prefix="busker_", delete=not debug) as temp_dir:
+            temp_path = pathlib.Path(temp_dir)
+            # TODO: get journal write locks.
+
+    @property
+    def journals(self):
+        # TODO: Discover
+        pass
 
 
 class Resident:
@@ -229,6 +211,7 @@ def build_status_panel(parent: tk.Widget):
 
 
 def build_content(tree: tk.Widget):
+    # TODO: Build from file system
     logger = logging.getLogger("build_content")
     rv = Result()
     content = [
