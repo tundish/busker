@@ -23,8 +23,10 @@ import contextvars
 import dataclasses
 import datetime
 import functools
+import itertools
 import logging
 import logging.handlers
+import operator
 import pathlib
 import tempfile
 import tkinter as tk
@@ -37,6 +39,7 @@ import weakref
 
 import busker
 from busker.model.journal import Journal
+from busker.model.types import BackendType
 
 """
 Demo of multiple threads accessing the same Journal, eg:
@@ -55,10 +58,22 @@ class Scenario:
 
     instances = weakref.WeakValueDictionary()
 
-    def __init__(self, self.path: pathlib.Path, *args: tuple[Journal]):
+    @classmethod
+    def discover(cls, playlist_path: pathlib.Path):
+        patterns = [playlist_path.glob(f"*/*{i}") for t in BackendType for i in t.value]
+        resources = sorted(path for pattern in patterns for path in pattern)
+        return [
+            cls(parent, *children)
+            for parent, children in itertools.groupby(resources, key=operator.attrgetter("parent"))
+        ]
+
+    def __init__(self, path: pathlib.Path, *args: tuple[Journal], **kwargs):
         # TODO: Temporary session directory?
-        self.journals = list(args) #  TODO: a property
         self.path = path
+        self.args = list(args)
+
+    def __repr__(self):
+        return f"{self.__class__.__name__}-{self.path.name} {len(self.args):02d}@{self.path}"
 
     def clone(self, name, debug=False):
         with tempfile.TemporaryDirectory(prefix="busker_", delete=not debug) as temp_dir:
@@ -68,7 +83,7 @@ class Scenario:
     @property
     def journals(self):
         # TODO: Discover
-        pass
+        return self.args
 
 
 class Resident:
@@ -210,28 +225,19 @@ def build_status_panel(parent: tk.Widget):
     return rv
 
 
-def build_content(tree: tk.Widget):
+def build_content(tree: tk.Widget, path=None):
     # TODO: Build from file system
     logger = logging.getLogger("build_content")
     rv = Result()
-    content = [
-        Scenario(Journal(uri="one.rht"), name="test_1"),
-        Scenario(
-            Journal(uri="two.rht"),
-            Journal(uri="two_00.rht"),
-            Journal(uri="two_01.rht"),
-            name="test_3",
-        ),
-        Scenario(Journal(uri="one.rht"), Journal(uri="one_00.rht"), name="test_2"),
-    ]
-    for s in content:
+    rv.content = Scenario.discover(path)
+    logger.info(rv.content)
+    for s in rv.content:
         try:
-            s_name = f"Scenario-{s.name}"
-            s_iid = tree.insert("", "end", s_name, text=s_name, values=[])
+            s_iid = tree.insert("", "end", repr(s), text=repr(s), values=[])
         except tk.TclError as err:
             logger.warning(err)
         for n, j in enumerate(s.journals):
-            j_iid = tree.insert(s_iid, "end", f"{s_iid}-{n}-{j.uri}", text=j.uri, values=[])
+            j_iid = tree.insert(s_iid, "end", repr(j), text=repr(j), values=[])
 
     return rv
 
@@ -274,7 +280,7 @@ def build_gui(args: argparse.Namespace):
     # root.configure(menu=menubar)
     # https://tkdocs.com/tutorial/menus.html
     rv.context_menu = build_context_menu(rv.tree_panel.tree_widget)
-    rv.content = build_content(rv.tree_panel.tree_widget)
+    rv.content = build_content(rv.tree_panel.tree_widget, path=args.playlist)
 
     book = ttk.Notebook(base_split)
     base_split.add(book)
