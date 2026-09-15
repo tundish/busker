@@ -315,6 +315,7 @@ def start():
 
 
 def main(args):
+    args.playlist.mkdir(parents=True, exist_ok=True)
     gui = build_gui(args)
     gui.root.mainloop()
     return 0
@@ -326,6 +327,11 @@ def parser():
     rv.add_argument(
         "--debug", action="store_true", default=False,
         help=f"Display debug logs"
+    )
+    rv.add_argument(
+        "--playlist", type=pathlib.Path,
+        default=(default := pathlib.Path.home().joinpath("busker_playlist").resolve()),
+        help=f"Specify a playlist location [{default}]"
     )
     return rv
 
