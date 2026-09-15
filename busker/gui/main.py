@@ -73,7 +73,7 @@ class Scenario:
         self.args = list(args)
 
     def __repr__(self):
-        return f"{self.__class__.__name__}-{self.path.name} {len(self.args):02d}@{self.path}"
+        return f"{self.path.name}@{self.path.parent.as_posix()}"
 
     def clone(self, name, debug=False):
         with tempfile.TemporaryDirectory(prefix="busker_", delete=not debug) as temp_dir:
@@ -237,7 +237,7 @@ def build_content(tree: tk.Widget, path=None):
         except tk.TclError as err:
             logger.warning(err)
         for n, j in enumerate(s.journals):
-            j_iid = tree.insert(s_iid, "end", repr(j), text=repr(j), values=[])
+            j_iid = tree.insert(s_iid, "end", j.name, text=j.name, values=[])
 
     return rv
 
