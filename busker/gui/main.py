@@ -29,6 +29,7 @@ import logging.handlers
 import operator
 import pathlib
 import tempfile
+import time
 import tkinter as tk
 from tkinter import ttk
 from types import SimpleNamespace as Result
@@ -66,6 +67,13 @@ class Scenario:
             cls(parent, *children)
             for parent, children in itertools.groupby(resources, key=operator.attrgetter("parent"))
         ]
+
+    @staticmethod
+    def stats(path):
+        return dict(
+            mtime=time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(path.stat().st_mtime)),
+            size=f"{path.stat().st_size/1E3:0.3f}K" if path.is_file() else "",
+        )
 
     def __init__(self, path: pathlib.Path, *args: tuple[Journal], **kwargs):
         # TODO: Temporary session directory?
@@ -154,7 +162,8 @@ def build_tree_panel(parent: tk.Widget):
     def on_select(event=None):
         logger.info(f"selected {event}")
 
-    rv.tree_widget = ttk.Treeview(rv.frame)
+    rv.tree_widget = ttk.Treeview(rv.frame, show="tree headings", columns=("size", "modified"))
+    rv.tree_widget["columns"] = ("size", "saved")
     rv.tree_widget.grid(row=0, column=0, sticky="NESW")
     scroll_bar = ttk.Scrollbar(rv.frame, orient=tk.VERTICAL, command=rv.tree_widget.yview)
     scroll_bar.grid(row=0, column=1, sticky="NS")
@@ -236,11 +245,11 @@ def build_content(tree: tk.Widget, path=None):
     logger.info(rv.content)
     for s in rv.content:
         try:
-            s_iid = tree.insert("", "end", repr(s), text=repr(s), values=[])
+            s_iid = tree.insert("", "end", repr(s), text=repr(s), values=[i or "" for i in s.stats(s.path).values()])
         except tk.TclError as err:
             logger.warning(err)
         for n, j in enumerate(s.journals):
-            j_iid = tree.insert(s_iid, "end", j.name, text=j.name, values=[])
+            j_iid = tree.insert(s_iid, "end", j.name, text=j.name, values=[i or "" for i in s.stats(j).values()])
 
     return rv
 
