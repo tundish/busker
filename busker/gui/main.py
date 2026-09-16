@@ -125,19 +125,22 @@ class LogBridge(logging.Handler):
         self.log_queue.put(msg, block=False)
 
 
-def monitor(gui):
-    logger = logging.getLogger("monitor")
+class Controller:
 
-    while True:
-        try:
-            text = gui.log_panel.log_queue.get(block=False)
-            gui.log_panel.text_widget.insert(tk.END, f"{text}\n")
-            gui.log_panel.text_widget.see(tk.END)
-        except queue.Empty:
-            break
+    @staticmethod
+    def monitor(gui):
+        logger = logging.getLogger("monitor")
 
-    gui.status_panel.clock_display.configure(text=datetime.datetime.now().strftime("%H:%M"))
-    gui.root.after(150, monitor, gui)
+        while True:
+            try:
+                text = gui.log_panel.log_queue.get(block=False)
+                gui.log_panel.text_widget.insert(tk.END, f"{text}\n")
+                gui.log_panel.text_widget.see(tk.END)
+            except queue.Empty:
+                break
+
+        gui.status_panel.clock_display.configure(text=datetime.datetime.now().strftime("%H:%M"))
+        gui.root.after(150, Controller.monitor, gui)
 
 
 def build_tree_panel(parent: tk.Widget):
@@ -295,7 +298,7 @@ def build_gui(args: argparse.Namespace):
     base.grid(row=0, column=0, sticky="NESW")
     rv.root.grid()
 
-    rv.root.after(500, monitor, rv)
+    rv.root.after(500, Controller.monitor, rv)
     return rv
 
 
