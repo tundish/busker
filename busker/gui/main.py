@@ -177,16 +177,25 @@ def build_context_menu(parent: tk.Widget):
     rv = Result()
     rv.menu = tk.Menu(parent, tearoff=0, takefocus=1)
 
+    def do_select(event=None, parent=parent):
+        logger.info(f"{parent=} {event=}")
+        row = parent.identify_row(event.y)
+        parent.selection_set(row)
+        iid = parent.selection()
+        text = parent.item(iid, "text")
+        logger.info(f"selected {iid=} {text=}")
+
     def on_select(parent=parent, event=None):
         logger.info(f"{parent=} {event=}")
         iid = parent.selection()
         text = parent.item(iid, "text")
         logger.info(f"selected {iid=} {text=}")
 
-    def do_popup(event):
+    def do_popup(event=None):
         row = parent.identify_row(event.y)
         parent.selection_set(row)
         logger.info(f"{row=}")
+        # TODO: Pick the menu here.
         try:
             logger.info(event)
             rv.menu.tk_popup(event.x_root, event.y_root)
@@ -199,7 +208,7 @@ def build_context_menu(parent: tk.Widget):
     rv.menu.add_command(label="Reload", underline=1, accelerator="Ctrl+R", command=functools.partial(on_select, parent))
     rv.menu.add_separator()
     rv.menu.add_command(label ="Rename")
-    parent.bind("<Button-3>", do_popup)
+    parent.bind("<Button-3>", do_select)
     parent.bind('<ButtonRelease-3>', do_popup)
     return rv
 
