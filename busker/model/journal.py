@@ -44,7 +44,7 @@ class Journal:
 
         """
         self.uri = pathlib.Path(uri)
-        self.write_lock = threading.Lock()
+        self.write_lock = threading.RLock()
         self.registry = defaultdict(set)
         self.attach(*args)
 
