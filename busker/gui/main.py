@@ -136,6 +136,29 @@ class LogBridge(logging.Handler):
 class Controller:
 
     @staticmethod
+    def select_tree_item(event=None, gui=None, parent=None):
+        logger = logging.getLogger("context_menu")
+        logger.info(f"{parent=} {event=}")
+        row = parent.identify_row(event.y)
+        parent.selection_set(row)
+        iid = parent.selection()
+        text = parent.item(iid, "text")
+        logger.info(f"selected {iid=} {text=}")
+
+    @staticmethod
+    def display_tree_item_context_menu(event=None, gui=None, parent=None):
+        logger = logging.getLogger("context_menu")
+        row = parent.identify_row(event.y)
+        parent.selection_set(row)
+        logger.info(f"{row=}")
+        # TODO: Pick the menu here.
+        try:
+            logger.info(event)
+            gui.menus[0].tk_popup(event.x_root, event.y_root)
+        finally:
+            gui.menus[0].grab_release()
+
+    @staticmethod
     def monitor(gui):
         logger = logging.getLogger("monitor")
 
@@ -179,39 +202,20 @@ def build_context_menus(parent: tk.Widget):
         tk.Menu(parent, tearoff=0, takefocus=1)
     ]
 
-    def do_select(event=None, parent=parent):
-        logger.info(f"{parent=} {event=}")
-        row = parent.identify_row(event.y)
-        parent.selection_set(row)
-        iid = parent.selection()
-        text = parent.item(iid, "text")
-        logger.info(f"selected {iid=} {text=}")
-
-    def on_select(parent=parent, event=None):
-        logger.info(f"{parent=} {event=}")
-        iid = parent.selection()
-        text = parent.item(iid, "text")
-        logger.info(f"selected {iid=} {text=}")
-
-    def do_popup(event=None):
-        row = parent.identify_row(event.y)
-        parent.selection_set(row)
-        logger.info(f"{row=}")
-        # TODO: Pick the menu here.
-        try:
-            logger.info(event)
-            rv.menus[0].tk_popup(event.x_root, event.y_root)
-        finally:
-            rv.menus[0].grab_release()
-
     rv.menus[0].add_command(label="Cut")
     rv.menus[0].add_command(label="Copy")
     rv.menus[0].add_command(label="Paste")
-    rv.menus[0].add_command(label="Reload", underline=1, accelerator="Ctrl+R", command=functools.partial(on_select, parent))
+    rv.menus[0].add_command(label="Reload", underline=1, accelerator="Ctrl+R")
     rv.menus[0].add_separator()
     rv.menus[0].add_command(label ="Rename")
-    parent.bind("<Button-3>", do_select)
-    parent.bind('<ButtonRelease-3>', do_popup)
+    parent.bind(
+        "<Button-3>",
+        functools.partial(Controller.select_tree_item, gui=rv, parent=parent)
+    )
+    parent.bind(
+        "<ButtonRelease-3>",
+        functools.partial(Controller.display_tree_item_context_menu, gui=rv, parent=parent)
+    )
     return rv
 
 
