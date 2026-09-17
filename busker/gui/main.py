@@ -32,6 +32,7 @@ import tempfile
 import time
 import tkinter as tk
 from tkinter import ttk
+from tkinter import font as tkfont
 from types import SimpleNamespace as Result
 import queue
 import sys
@@ -177,6 +178,15 @@ class Controller:
 def build_tree_panel(parent: tk.Widget):
     logger = logging.getLogger("tree_panel")
     rv = Result()
+    style = ttk.Style()
+    family = next(iter({"Courier New", "Liberation Mono", "Ubuntu Mono"}.intersection(set(tkfont.families()))))
+    logger.info(f"Selected font family '{family}'")
+    fonts = [
+        tkfont.Font(family=family, size=12, weight="bold"),
+        tkfont.Font(family=family, size=12, weight="normal"),
+    ]
+    style.configure("Treeview.Heading", font=fonts[0].actual(), rowheight=24)
+    style.configure("Treeview", font=fonts[1].actual(), rowheight=24)
     rv.frame = ttk.Frame(parent)
     rv.frame.columnconfigure(0, weight=1)
     rv.frame.columnconfigure(1, weight=0)
@@ -187,6 +197,9 @@ def build_tree_panel(parent: tk.Widget):
 
     rv.tree_widget = ttk.Treeview(rv.frame, show="tree headings", columns=("size", "modified"))
     rv.tree_widget["columns"] = ("size", "saved")
+    rv.tree_widget.column("#0", minwidth=fonts[0].measure("0" * 36))
+    rv.tree_widget.column("#1", minwidth=fonts[0].measure("0" * 20))
+    rv.tree_widget.column("#2", minwidth=fonts[0].measure("0" * 6))
     rv.tree_widget.grid(row=0, column=0, sticky="NESW")
     scroll_bar = ttk.Scrollbar(rv.frame, orient=tk.VERTICAL, command=rv.tree_widget.yview)
     scroll_bar.grid(row=0, column=1, sticky="NS")
@@ -253,7 +266,6 @@ def build_status_panel(parent: tk.Widget):
 
 
 def build_content(tree: tk.Widget, path=None):
-    # TODO: Build from file system
     logger = logging.getLogger("build_content")
     rv = Result()
     rv.content = Scenario.discover(path)
