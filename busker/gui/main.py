@@ -172,10 +172,12 @@ def build_tree_panel(parent: tk.Widget):
     return rv
 
 
-def build_context_menu(parent: tk.Widget):
+def build_context_menus(parent: tk.Widget):
     logger = logging.getLogger("context_menu")
     rv = Result()
-    rv.menu = tk.Menu(parent, tearoff=0, takefocus=1)
+    rv.menus = [
+        tk.Menu(parent, tearoff=0, takefocus=1)
+    ]
 
     def do_select(event=None, parent=parent):
         logger.info(f"{parent=} {event=}")
@@ -198,16 +200,16 @@ def build_context_menu(parent: tk.Widget):
         # TODO: Pick the menu here.
         try:
             logger.info(event)
-            rv.menu.tk_popup(event.x_root, event.y_root)
+            rv.menus[0].tk_popup(event.x_root, event.y_root)
         finally:
-            rv.menu.grab_release()
+            rv.menus[0].grab_release()
 
-    rv.menu.add_command(label="Cut")
-    rv.menu.add_command(label="Copy")
-    rv.menu.add_command(label="Paste")
-    rv.menu.add_command(label="Reload", underline=1, accelerator="Ctrl+R", command=functools.partial(on_select, parent))
-    rv.menu.add_separator()
-    rv.menu.add_command(label ="Rename")
+    rv.menus[0].add_command(label="Cut")
+    rv.menus[0].add_command(label="Copy")
+    rv.menus[0].add_command(label="Paste")
+    rv.menus[0].add_command(label="Reload", underline=1, accelerator="Ctrl+R", command=functools.partial(on_select, parent))
+    rv.menus[0].add_separator()
+    rv.menus[0].add_command(label ="Rename")
     parent.bind("<Button-3>", do_select)
     parent.bind('<ButtonRelease-3>', do_popup)
     return rv
@@ -300,7 +302,7 @@ def build_gui(args: argparse.Namespace):
 
     # root.configure(menu=menubar)
     # https://tkdocs.com/tutorial/menus.html
-    rv.context_menu = build_context_menu(rv.tree_panel.tree_widget)
+    rv.context_menus = build_context_menus(rv.tree_panel.tree_widget)
     rv.content = build_content(rv.tree_panel.tree_widget, path=args.playlist)
 
     book = ttk.Notebook(base_split)
