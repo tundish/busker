@@ -20,7 +20,15 @@ import logging
 import queue
 import sched
 
-from busker.model.journal import Journal
+try:
+    import tkinter as tk
+    from tkinter import ttk
+    from tkinter import font as tkfont
+    from busker.model.journal import Journal
+except ModuleNotFoundError:
+    tk = None
+    ttk = None
+    tkfont = None
 
 # https://python-patterns.guide/
 # https://streamkap.com/resources-and-guides/streaming-api-design-patterns

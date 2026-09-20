@@ -19,7 +19,6 @@ import argparse
 import cmd
 import logging
 import pathlib
-import readline
 import sys
 
 from spiki.speechmark import SpeechMark
@@ -55,7 +54,8 @@ class Console(cmd.Cmd):
         self.index = None
 
     def preloop(self):
-        self.onecmd("file feed")
+        # self.onecmd("file feed")
+        pass
 
     def precmd(self, line):
         self.logger.debug(f"{line=}")
