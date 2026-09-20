@@ -27,6 +27,10 @@ from spiki.speechmark import SpeechMark
 from busker.engine.base import Engine
 from busker.model.journal import Journal
 
+# <@0> xxx  # Route to engine index 0
+# <> xxx    # Route to console
+# xxxx      # Route to current engine
+
 
 class Console(cmd.Cmd):
     intro = "Type 'help' for more instructions."
