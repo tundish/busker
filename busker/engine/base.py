@@ -17,7 +17,9 @@
 
 import difflib
 import logging
+import queue
 import sched
+
 from busker.model.journal import Journal
 
 # https://python-patterns.guide/
@@ -101,6 +103,8 @@ class Engine:
         self.logger = logging.getLogger(self.__class__.__name__)
         self.journal = journal
         self.clocks = dict(self.set_clocks(journal))
+        self.queues = (queue.Queue(maxsize=1), queue.Queue())
+        # NB: call task_done on self.queues[0]
 
     @staticmethod
     def split_to_words(text: str, preserver=".", discard=None):
