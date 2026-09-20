@@ -23,6 +23,7 @@ classifiers = [
 
 dependencies = [
 "python-jsonpath",
+"spiki>=0.26.0",
 ]
 
 [project.optional-dependencies]

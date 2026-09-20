@@ -22,6 +22,8 @@ import pathlib
 import readline
 import sys
 
+from spiki.speechmark import SpeechMark
+
 from busker.engine.base import Engine
 from busker.model.journal import Journal
 
@@ -45,7 +47,8 @@ class Console(cmd.Cmd):
         super().__init__(self)
         self.logger = logging.getLogger("console")
         self.args = args
-        self.engine = None
+        self.engines = []
+        self.index = None
 
     def preloop(self):
         self.onecmd("file feed")
