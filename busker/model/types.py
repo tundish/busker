@@ -36,6 +36,7 @@ class ElementType(enum.StrEnum):
     CONTEXT = enum.auto()
     FIXTURE = enum.auto()
     HANDLER = enum.auto()
+    HISTORY = enum.auto()
     LINKAGE = enum.auto()
     MARKING = enum.auto()
     MONITOR = enum.auto()
