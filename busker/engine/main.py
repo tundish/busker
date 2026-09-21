@@ -43,6 +43,16 @@ class Console():
         self.engines = []
         self.index = None
 
+        try:
+            self.engines.append(self.build_engine(args.input))
+        except IndexError as err:
+            self.logger.warning(f"Error building engine from {args.input}")
+            self.logger.debug(err, exc_info=True)
+
+    def build_engine(self, path: pathlib.Path) -> Engine:
+        rv = Engine()
+        return rv
+
     def cmdloop(self, **kwargs):
         print(self.intro, file=sys.stderr)
         while True:

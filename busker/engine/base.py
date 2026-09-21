@@ -107,11 +107,27 @@ class Engine:
     class Exclamation(Exception):
         pass
 
+    class BusyError(Exception):
+        "Call add_note as to why"
+        pass
+
+    class InternalError(Exception):
+        """
+        try:
+            ...
+        except ValueError from err:
+            err.add_note(...)
+            raise InternalError from err
+
+        """
+        pass
+
     def __init__(self, journal: Journal = None):
         self.logger = logging.getLogger(self.__class__.__name__)
-        self.journal = journal
-        self.clocks = dict(self.set_clocks(journal))
         self.queues = (queue.Queue(maxsize=1), queue.Queue())
+        self.journal = journal
+        if journal:
+            self.clocks = dict(self.set_clocks(journal))
         # NB: call task_done on self.queues[0]
 
     @staticmethod
