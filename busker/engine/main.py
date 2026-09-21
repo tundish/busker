@@ -42,6 +42,7 @@ class Console():
         self.args = args
         self.engines = []
         self.index = None
+        self.parser = SpeechMark()
 
         try:
             self.engines.append(self.build_engine(args.input))
@@ -59,6 +60,14 @@ class Console():
             text = input(self.prompt)
             if not text:
                 break
+            script = "\n".join(i.strip() for i in text.split(";"))
+            self.parser.loads(script)
+            cues = self.parser.cues
+            for cue in cues:
+                self.index = int(cue.get("role", self.index))
+            if not self.parser.cues:
+                self.engines[self.index].queues[0]
+            print(f"{self.parser.cues=}")
         return
 
     def default(self, line: str):
