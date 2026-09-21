@@ -19,6 +19,7 @@ import argparse
 import cmd
 import logging
 import pathlib
+import re
 import sys
 
 from spiki.speechmark import SpeechMark
@@ -46,9 +47,14 @@ class Console():
 
         try:
             self.engines.append(self.build_engine(args.input))
+            self.index = len(self.engines) - 1
         except IndexError as err:
             self.logger.warning(f"Error building engine from {args.input}")
             self.logger.debug(err, exc_info=True)
+
+    @staticmethod
+    def one_cue_per_line(text: str) -> str:
+        return "\n".join(i.strip() for i in text.split(";"))
 
     def build_engine(self, path: pathlib.Path) -> Engine:
         rv = Engine()
@@ -57,17 +63,33 @@ class Console():
     def cmdloop(self, **kwargs):
         print(self.intro, file=sys.stderr)
         while True:
-            text = input(self.prompt)
-            if not text:
-                break
-            script = "\n".join(i.strip() for i in text.split(";"))
-            self.parser.loads(script)
+            line = input(self.prompt)
+            text = self.one_cue_per_line(line)
+            self.parser.loads(text)
+
             cues = self.parser.cues
-            for cue in cues:
-                self.index = int(cue.get("role", self.index))
-            if not self.parser.cues:
-                self.engines[self.index].queues[0]
-            print(f"{self.parser.cues=}")
+            print(f"{cues=}")
+            for cue in cues or [{}]:
+                words = cue.get("words", re.split(r"\W+", line))
+                index = int(cue.get("role", self.index))
+
+                try:
+                    cmd = " ".join(words)
+                    engine = self.engines[index]
+                    self.index = index
+                except IndexError:
+                    print(f"No Engine exists at index {index}.", file=sys.stderr)
+                    print(f"Command discarded: '{cmd}'.", file=sys.stderr)
+                    continue
+
+                try:
+                    engine.queues[0].put(cmd, block=True, timeout=2)
+                except:
+                    pass
+                print(f"{engine.queues[0]=}")
+
+            if not line:
+                break
         return
 
     def default(self, line: str):
