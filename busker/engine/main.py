@@ -29,37 +29,27 @@ from busker.model.journal import Journal
 # <@0> xxx  # Route to engine index 0
 # <> xxx    # Route to console
 # xxxx      # Route to current engine
+#
+# Request actions, if none, then call `unknown` method.
 
 
-class Console(cmd.Cmd):
-    intro = "Type 'help' for more instructions."
+class Console():
+    intro = "Type 'help' for more instructions.\n"
     prompt = "> "
 
-    @staticmethod
-    def parse(line: str):
-        for word in line.split():
-            word = word.strip()
-            if not word: continue
-
-            if word.isdigit():
-                yield float(word)
-            else:
-                yield word
-
     def __init__(self, args: argparse.Namespace):
-        super().__init__(self)
         self.logger = logging.getLogger("console")
         self.args = args
         self.engines = []
         self.index = None
 
-    def preloop(self):
-        # self.onecmd("file feed")
-        pass
-
-    def precmd(self, line):
-        self.logger.debug(f"{line=}")
-        return line
+    def cmdloop(self, **kwargs):
+        print(self.intro, file=sys.stderr)
+        while True:
+            text = input(self.prompt)
+            if not text:
+                break
+        return
 
     def default(self, line: str):
         cmds = [i.strip() for i in line.split(";")]
@@ -110,15 +100,15 @@ class Console(cmd.Cmd):
         return True
 
 
-plugin_classes = [
-    "busker.engine.base:Engine",
-]
-
-
 def main(args):
     console = Console(args)
     console.cmdloop()
     return 0
+
+
+plugin_classes = [
+    "busker.engine.base:Engine",
+]
 
 
 def parser():
