@@ -34,16 +34,17 @@ from busker.model.journal import Journal
 # Request actions, if none, then call `unknown` method.
 
 
-class Console():
+class Console:
     intro = "Type 'help' for more instructions.\n"
     prompt = "> "
 
     def __init__(self, args: argparse.Namespace):
         self.logger = logging.getLogger("console")
         self.args = args
+        self.parser = SpeechMark()
+        self.streams = (sys.stdin, sys.stdout, sys.stderr)
         self.engines = []
         self.index = None
-        self.parser = SpeechMark()
 
         try:
             self.engines.append(self.build_engine(args.input))
@@ -61,7 +62,8 @@ class Console():
         return rv
 
     def cmdloop(self, **kwargs):
-        print(self.intro, file=sys.stderr)
+        print(self.intro, file=self.streams[2])
+        n = 0
         while True:
             line = input(self.prompt)
             text = self.one_cue_per_line(line)
@@ -70,6 +72,7 @@ class Console():
             cues = self.parser.cues
             print(f"{cues=}")
             for cue in cues or [{}]:
+                n += 1
                 words = cue.get("words", re.split(r"\W+", line))
                 index = int(cue.get("role", self.index))
 
@@ -78,8 +81,8 @@ class Console():
                     engine = self.engines[index]
                     self.index = index
                 except IndexError:
-                    print(f"No Engine exists at index {index}.", file=sys.stderr)
-                    print(f"Command discarded: '{cmd}'.", file=sys.stderr)
+                    print(f"No Engine exists at index {index}.", file=self.streams[2])
+                    print(f"Command {n} discarded: '{cmd}'.", file=self.streams[2])
                     continue
 
                 try:
