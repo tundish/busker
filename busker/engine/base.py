@@ -15,6 +15,8 @@
 # You should have received a copy of the GNU General Public License along with busker.
 # If not, see <https://www.gnu.org/licenses/>.
 
+from concurrent.futures import ThreadPoolExecutor
+import contextvars
 import difflib
 import logging
 import queue
@@ -100,7 +102,37 @@ etc.
 
 """
 
-class Engine:
+class Resident:
+    "A core-resident actor"
+
+    # Shared among subclasses within the same thread
+    shared = contextvars.ContextVar("shared")
+
+    executor = ThreadPoolExecutor()
+
+    """
+    def __init__(self, cmd_queue: asyncio.Queue() = None, msg_queue: asyncio.Queue() = None):
+        self.cmd_queue = cmd_queue or asyncio.Queue()
+        self.msg_queue = msg_queue or asyncio.Queue()
+
+    def __iter__(self):
+        "Or is __aiter__ a better fit?"
+        return
+        yield
+
+    async def __aiter__(self):
+        "async for i in ... means client code must be async too."
+        for n in range(10):
+            await asyncio.sleep(0.5)
+            yield n
+
+    async def __call__(self, **kwargs):
+        async with asyncio.TaskGroup() as tasks:
+            ...
+    """
+
+
+class Engine(Resident):
 
     ignored_words = ("a", "an", "any", "her", "his", "my", "some", "the", "their")
 
@@ -129,6 +161,15 @@ class Engine:
         if journal:
             self.clocks = dict(self.set_clocks(journal))
         # NB: call task_done on self.queues[0]
+
+    def __call__(self, **kwargs):
+        pass
+
+    def run(self, **kwargs):
+        pass
+
+    def cleanup(self, **kwargs):
+        pass
 
     @staticmethod
     def split_to_words(text: str, preserver=".", discard=None):

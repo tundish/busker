@@ -70,18 +70,29 @@ class Console:
             self.parser.loads(text)
 
             cues = self.parser.cues
-            print(f"{cues=}")
-            for cue in cues or [{}]:
+            if not cues:
+                words = re.split(r"\W+", line)
+                cues = [dict(role=str(self.index), words=words)]
+
+            for cue in cues:
+                print(f"{cue=}")
                 n += 1
-                words = cue.get("words", re.split(r"\W+", line))
-                index = int(cue.get("role", self.index))
+                role = cue.get("role", None)
+                cmd = " ".join(cue["words"])
+                if not role:
+                    print(f"Processing locally...", file=self.streams[2])
+                    continue
 
                 try:
-                    cmd = " ".join(words)
+                    index = int(role)
                     engine = self.engines[index]
                     self.index = index
                 except IndexError:
                     print(f"No Engine exists at index {index}.", file=self.streams[2])
+                    print(f"Command {n} discarded: '{cmd}'.", file=self.streams[2])
+                    continue
+                except ValueError:
+                    print(f"Invalid index.", file=self.streams[2])
                     print(f"Command {n} discarded: '{cmd}'.", file=self.streams[2])
                     continue
 

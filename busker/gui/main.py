@@ -95,32 +95,6 @@ class Scenario:
         return self.args
 
 
-class Resident:
-    "A core-resident actor"
-
-    # Shared among subclasses within the same thread
-    shared = contextvars.ContextVar("shared")
-
-    def __init__(self, cmd_queue: asyncio.Queue() = None, msg_queue: asyncio.Queue() = None):
-        self.cmd_queue = cmd_queue or asyncio.Queue()
-        self.msg_queue = msg_queue or asyncio.Queue()
-
-    def __iter__(Self):
-        "Or is __aiter__ a better fit?"
-        return
-        yield
-
-    async def __aiter__(self):
-        "async for i in ... means client code must be async too."
-        for n in range(10):
-            await asyncio.sleep(0.5)
-            yield n
-
-    async def __call__(self, **kwargs):
-        async with asyncio.TaskGroup() as tasks:
-            ...
-
-
 class LogBridge(logging.Handler):
 
     def __init__(self, log_queue: queue.Queue, level=logging.NOTSET, fmt=None, defaults=None):
