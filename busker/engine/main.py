@@ -16,7 +16,9 @@
 # If not, see <https://www.gnu.org/licenses/>.
 
 import argparse
-import cmd
+from collections import UserDict
+from collections import UserList
+from collections import UserString
 import logging
 import pathlib
 import re
@@ -26,6 +28,7 @@ from spiki.speechmark import SpeechMark
 
 from busker.engine.base import Engine
 from busker.model.journal import Journal
+from busker.model.multipart import Multipart
 
 # <@0> xxx  # Route to engine index 0
 # <> xxx    # Route to console
@@ -47,7 +50,7 @@ class Console:
         self.index = None
 
         try:
-            self.engines.append(self.build_engine(args.input))
+            self.engines.append(self.build_engine(path=args.input))
             self.index = len(self.engines) - 1
         except IndexError as err:
             self.logger.warning(f"Error building engine from {args.input}")
@@ -57,9 +60,14 @@ class Console:
     def one_cue_per_line(text: str) -> str:
         return "\n".join(i.strip() for i in text.split(";"))
 
-    def build_engine(self, path: pathlib.Path) -> Engine:
-        rv = Engine()
-        return rv.run()
+    @staticmethod
+    def build_engine(*args, path: pathlib.Path, **kwargs) -> Engine:
+        adaptor = Multipart(factory={dict: UserDict, list: UserList, str: UserString})
+        journal = Journal(adaptor, uri=path)
+        journal.attach(*args)
+        journal.scan(**kwargs)
+        engine = Engine(journal)
+        return engine.run()
 
     def cmdloop(self, **kwargs):
         print(self.intro, file=self.streams[2])

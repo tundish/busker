@@ -175,7 +175,7 @@ class Engine(Resident):
     def run(self, **kwargs):
         if not self.journal:
             raise self.InternalError("No journal attached")
-        self.future = self.executer.submit(self, **kwargs)
+        self.future = self.executor.submit(self, **kwargs)
         self.future.add_done_callback(self.cleanup)
         return self
 
