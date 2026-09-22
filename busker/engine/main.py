@@ -59,7 +59,7 @@ class Console:
 
     def build_engine(self, path: pathlib.Path) -> Engine:
         rv = Engine()
-        return rv
+        return rv.run()
 
     def cmdloop(self, **kwargs):
         print(self.intro, file=self.streams[2])

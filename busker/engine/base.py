@@ -158,17 +158,28 @@ class Engine(Resident):
         self.logger = logging.getLogger(self.__class__.__name__)
         self.queues = (queue.Queue(maxsize=1), queue.Queue())
         self.journal = journal
+        self.future = None
+        self.listen = True
+
+        """
         if journal:
             self.clocks = dict(self.set_clocks(journal))
-        # NB: call task_done on self.queues[0]
+        """
 
-    def __call__(self, **kwargs):
-        pass
+    def __call__(self, timeout=None, **kwargs):
+        while self.listen:
+            cmd = self.queues[0].get(block=True, timeout=timeout)
+            self.logger.info(f"{cmd=}")
+            self.queues[0].task_done()
 
     def run(self, **kwargs):
-        pass
+        if not self.journal:
+            raise self.InternalError("No journal attached")
+        self.future = self.executer.submit(self, **kwargs)
+        self.future.add_done_callback(self.cleanup)
+        return self
 
-    def cleanup(self, **kwargs):
+    def cleanup(self, future):
         pass
 
     @staticmethod
