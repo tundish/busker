@@ -41,7 +41,7 @@ class Console:
     intro = "Type 'help' for more instructions.\n"
     prompt = "> "
 
-    def __init__(self, args: argparse.Namespace):
+    def __init__(self, args: argparse.Namespace, *lenses):
         self.logger = logging.getLogger("console")
         self.args = args
         self.parser = SpeechMark()
@@ -50,7 +50,7 @@ class Console:
         self.index = None
 
         try:
-            self.engines.append(self.build_engine(path=args.input))
+            self.engines.append(self.build_engine(*lenses, path=args.input))
             self.index = len(self.engines) - 1
         except IndexError as err:
             self.logger.warning(f"Error building engine from {args.input}")
@@ -83,7 +83,6 @@ class Console:
                 cues = [dict(role=str(self.index), words=words)]
 
             for cue in cues:
-                print(f"{cue=}")
                 n += 1
                 role = cue.get("role", None)
                 cmd = " ".join(cue["words"])
@@ -108,55 +107,11 @@ class Console:
                     engine.queues[0].put(cmd, block=True, timeout=2)
                 except:
                     pass
-                print(f"{engine.queues[0]=}")
 
             if not line:
-                break
-        return
-
-    def default(self, line: str):
-        cmds = [i.strip() for i in line.split(";")]
-        events = self.engine.put(*cmds)
-        self.logger.debug(f"{events=}")
-        done = self.engine.step()
-        self.logger.debug(f"{done=}")
-        self.stdout.write("")
-
-    def do_file(self, line: str):
-        "Read or feed the file"
-        cmd = list(self.parse(line))
-        if len(cmd) == 0:
-            self.logger.info(f"File input: {self.args.input}")
-            return
-        elif cmd[0].lower() in ("feed", "read"):
-            text = self.args.input.read_text()
-            self.logger.debug(f"\n{text}")
-        else:
-            self.logger.warning(f"Bad syntax: {cmd}")
-
-        if cmd[0].lower() == "feed":
-            try:
-                self.engine = Engine(Journal.scan(text))
-                self.logger.info(f"Engine feed: {self.args.input}")
-                self.logger.debug(f"\n{self.engine.rht.doc}")
-            except Exception as err:
-                self.logger.error(err, exc_info=True)
-
-    def do_path(self, line: str):
-        "View paths"
-        cmd = list(self.parse(line))
-        try:
-            lookup = {format(k): v for k, v in self.engine.rht.doc.data.items()}
-        except AttributeError:
-            self.logger.error("'file feed' required.")
-            return
-
-        if len(cmd) == 0:
-            self.logger.debug(self.engine.rht.doc.data)
-            self.logger.info("\n".join(lookup))
-        else:
-            pass
-            return
+                for engine in self.engines:
+                    engine.listen = False
+                return
 
     def do_quit(self, line: str):
         "Quit the program"

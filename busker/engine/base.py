@@ -147,7 +147,7 @@ class Engine(Resident):
         """
         try:
             ...
-        except ValueError from err:
+        except ValueError as err:
             err.add_note(...)
             raise InternalError from err
 
@@ -169,6 +169,10 @@ class Engine(Resident):
     def __call__(self, timeout=None, **kwargs):
         while self.listen:
             cmd = self.queues[0].get(block=True, timeout=timeout)
+            # TODO:
+            # * check actions
+            # * call action, or
+            # * call unknown
             self.logger.info(f"{cmd=}")
             self.queues[0].task_done()
 
