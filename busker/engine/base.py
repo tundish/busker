@@ -166,9 +166,13 @@ class Engine(Resident):
             self.clocks = dict(self.set_clocks(journal))
         """
 
-    def __call__(self, timeout=None, **kwargs):
+    def __call__(self, timeout=2, **kwargs):
         while self.listen:
-            cmd = self.queues[0].get(block=True, timeout=timeout)
+            try:
+                cmd = self.queues[0].get(block=True, timeout=timeout)
+            except queue.Empty:
+                continue
+
             # TODO:
             # * check actions
             # * call action, or
@@ -184,7 +188,11 @@ class Engine(Resident):
         return self
 
     def cleanup(self, future):
-        pass
+        self.logger.info("Terminated")
+        try:
+            self.logger.debug(future.result())
+        except Exception as err:
+            self.logger.warning(err, exc_info=True)
 
     @staticmethod
     def split_to_words(text: str, preserver=".", discard=None):

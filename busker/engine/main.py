@@ -23,6 +23,7 @@ import logging
 import pathlib
 import re
 import sys
+import time
 
 from spiki.speechmark import SpeechMark
 
@@ -72,7 +73,8 @@ class Console:
     def cmdloop(self, **kwargs):
         print(self.intro, file=self.streams[2])
         n = 0
-        while True:
+        loop = True
+        while loop:
             line = input(self.prompt)
             text = self.one_cue_per_line(line)
             self.parser.loads(text)
@@ -83,35 +85,48 @@ class Console:
                 cues = [dict(role=str(self.index), words=words)]
 
             for cue in cues:
+                print(f"{cue=}")
                 n += 1
                 role = cue.get("role", None)
                 cmd = " ".join(cue["words"])
-                if not role:
+                if role:
+                    try:
+                        index = int(role)
+                        engine = self.engines[index]
+                        self.index = index
+                    except IndexError:
+                        print(f"No Engine exists at index {index}.", file=self.streams[2])
+                        print(f"Command {n} discarded: '{cmd}'.", file=self.streams[2])
+                        continue
+                    except ValueError:
+                        print(f"Invalid index.", file=self.streams[2])
+                        print(f"Command {n} discarded: '{cmd}'.", file=self.streams[2])
+                        continue
+
+                    try:
+                        engine.queues[0].put(cmd, block=True, timeout=2)
+                    except:
+                        pass
+
+                else:
                     print(f"Processing locally...", file=self.streams[2])
-                    continue
+                    if not self.handle_cue(**cue):
+                        loop = False
+                        break
 
-                try:
-                    index = int(role)
-                    engine = self.engines[index]
-                    self.index = index
-                except IndexError:
-                    print(f"No Engine exists at index {index}.", file=self.streams[2])
-                    print(f"Command {n} discarded: '{cmd}'.", file=self.streams[2])
-                    continue
-                except ValueError:
-                    print(f"Invalid index.", file=self.streams[2])
-                    print(f"Command {n} discarded: '{cmd}'.", file=self.streams[2])
-                    continue
+        self.logger.info("Closing down...")
+        for engine in self.engines:
+            engine.listen = False
+            time.sleep(0)
+        return
 
-                try:
-                    engine.queues[0].put(cmd, block=True, timeout=2)
-                except:
-                    pass
+    def handle_cue(self, words: list, mode: str = "", parameters: dict = {}, directives: list = [], **kwargs):
+        self.logger.info(words)
+        if "quit" in {i.lower() for i in words}:
+            return False
+        else:
+            return True
 
-            if not line:
-                for engine in self.engines:
-                    engine.listen = False
-                return
 
     def do_quit(self, line: str):
         "Quit the program"
