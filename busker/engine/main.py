@@ -19,6 +19,8 @@ import argparse
 from collections import UserDict
 from collections import UserList
 from collections import UserString
+from collections.abc import Callable
+import inspect
 import logging
 import pathlib
 import re
@@ -39,8 +41,17 @@ from busker.model.multipart import Multipart
 
 
 class Console:
-    intro = "Type 'help' for more instructions.\n"
+    intro = "Type '<> help' for more instructions.\n"
     prompt = "> "
+    journal_lenses = [
+        "busker.model.search:Search",
+        "busker.model.syntax:Syntax",
+        "busker.model.travel:Travel",
+    ]
+    plugin_classes = [
+        "busker.engine.base:Engine",
+    ]
+
 
     def __init__(self, args: argparse.Namespace, *lenses):
         self.logger = logging.getLogger("console")
@@ -122,15 +133,36 @@ class Console:
 
     def handle_cue(self, words: list, mode: str = "", parameters: dict = {}, directives: list = [], **kwargs):
         self.logger.info(words)
-        if "quit" in {i.lower() for i in words}:
-            return False
-        else:
+        try:
+            method_name = "do_{0}".format(words[0])
+            method = getattr(self, method_name)
+            return method(*words[1:], **parameters)
+        except (IndexError,):
+            self.logger.info(words)
             return True
 
-
-    def do_quit(self, line: str):
-        "Quit the program"
+    def do_help(self, *args, **kwargs):
+        "Show help"
+        methods = {
+            k: v
+            for k in dir(self)
+            if k.startswith("do_") and isinstance((v := getattr(self, k)), Callable)
+        }
+        for arg in args:
+            try:
+                fn = methods[f"do_{arg}"]
+                print(arg, "-" * len(arg), sep="\n", file=self.streams[2])
+                print(inspect.getdoc(fn), file=self.streams[2])
+            except KeyError:
+                continue
+        if not args:
+            print("Commands", "-" * 8, sep="\n", file=self.streams[2])
+            print(*(f"+ {i[3:]}" for i in methods), sep="\n", file=self.streams[2])
         return True
+
+    def do_quit(self, *args, **kwargs):
+        "Quit the program"
+        return False
 
 
 def main(args):
@@ -138,10 +170,6 @@ def main(args):
     console.cmdloop()
     return 0
 
-
-plugin_classes = [
-    "busker.engine.base:Engine",
-]
 
 
 def parser():
@@ -154,7 +182,7 @@ def parser():
     )
     rv.add_argument(
         "--plugin", action="append",
-        help=f"Specify plugin list {plugin_classes}"
+        help=f"Specify plugin list {Console.plugin_classes}"
     )
     rv.add_argument(
         "--debug", action="store_true", default=False,
