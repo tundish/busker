@@ -20,8 +20,10 @@ from collections import UserDict
 from collections import UserList
 from collections import UserString
 from collections.abc import Callable
+import difflib
 import inspect
 import logging
+import math
 import pathlib
 import re
 import sys
@@ -81,6 +83,14 @@ class Console:
         engine = Engine(journal)
         return engine.run()
 
+    @property
+    def methods(self):
+        return {
+            k: v
+            for k in dir(self)
+            if k.startswith("do_") and isinstance((v := getattr(self, k)), Callable)
+        }
+
     def cmdloop(self, **kwargs):
         print(self.intro, file=self.streams[2])
         n = 0
@@ -134,34 +144,46 @@ class Console:
     def handle_cue(self, words: list, mode: str = "", parameters: dict = {}, directives: list = [], **kwargs):
         self.logger.info(words)
         try:
-            method_name = "do_{0}".format(words[0])
-            method = getattr(self, method_name)
+            pick = difflib.get_close_matches(f"do_{words[0]}", self.methods, n=1)
+            method = getattr(self, pick[0])
             return method(*words[1:], **parameters)
         except (IndexError,):
             self.logger.info(words)
             return True
 
     def do_help(self, *args, **kwargs):
-        "Show help"
-        methods = {
-            k: v
-            for k in dir(self)
-            if k.startswith("do_") and isinstance((v := getattr(self, k)), Callable)
-        }
+        """
+        Show help
+
+        """
         for arg in args:
             try:
-                fn = methods[f"do_{arg}"]
+                fn = self.methods[f"do_{arg}"]
                 print(arg, "-" * len(arg), sep="\n", file=self.streams[2])
                 print(inspect.getdoc(fn), file=self.streams[2])
             except KeyError:
                 continue
         if not args:
             print("Commands", "-" * 8, sep="\n", file=self.streams[2])
-            print(*(f"+ {i[3:]}" for i in methods), sep="\n", file=self.streams[2])
+            print(*(f"+ {i[3:]}" for i in self.methods), sep="\n", file=self.streams[2])
+        return True
+
+    def do_list(self, *args, **kwargs):
+        """
+        List the currently running Engines
+
+        """
+        pad = round(math.log10(len(self.engines)) + 0.5) + 1
+        if not args:
+            print("Engines", "-" * 7, sep="\n", file=self.streams[2])
+            print(*(f"{{0: >{pad}}}: {{1!r}}".format(n, i) for n, i in enumerate(self.engines)), sep="\n", file=self.streams[2])
         return True
 
     def do_quit(self, *args, **kwargs):
-        "Quit the program"
+        """
+        Quit the program
+
+        """
         return False
 
 
