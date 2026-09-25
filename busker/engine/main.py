@@ -25,6 +25,7 @@ import inspect
 import logging
 import math
 import pathlib
+import pkgutil
 import re
 import sys
 import time
@@ -53,7 +54,6 @@ class Console:
     plugin_classes = [
         "busker.engine.base:Engine",
     ]
-
 
     def __init__(self, args: argparse.Namespace, *lenses):
         self.logger = logging.getLogger("console")
@@ -106,7 +106,6 @@ class Console:
                 cues = [dict(role=str(self.index), words=words)]
 
             for cue in cues:
-                print(f"{cue=}")
                 n += 1
                 role = cue.get("role", None)
                 cmd = " ".join(cue["words"])
@@ -125,6 +124,7 @@ class Console:
                         continue
 
                     try:
+                        self.logger.debug(f"Submitting '{cmd}' to {engine}")
                         engine.queues[0].put(cmd, block=True, timeout=2)
                     except:
                         pass
@@ -142,13 +142,13 @@ class Console:
         return
 
     def handle_cue(self, words: list, mode: str = "", parameters: dict = {}, directives: list = [], **kwargs):
-        self.logger.info(words)
+        self.logger.debug(f"{words=}")
         try:
             pick = difflib.get_close_matches(f"do_{words[0]}", self.methods, n=1)
             method = getattr(self, pick[0])
             return method(*words[1:], **parameters)
-        except (IndexError,):
-            self.logger.info(words)
+        except (IndexError,) as err:
+            self.logger.debug(f"{words=}", exc_info=True)
             return True
 
     def do_help(self, *args, **kwargs):
@@ -188,7 +188,12 @@ class Console:
 
 
 def main(args):
-    console = Console(args)
+    logger = logging.getLogger()
+    lenses = []
+    for spec in args.lens:
+        lenses.append(pkgutil.resolve_name(spec))
+        logger.info(f"Loaded lens {lenses[-1]}")
+    console = Console(args, *lenses)
     console.cmdloop()
     return 0
 
@@ -205,6 +210,10 @@ def parser():
     rv.add_argument(
         "--plugin", action="append",
         help=f"Specify plugin list {Console.plugin_classes}"
+    )
+    rv.add_argument(
+        "--lens", action="append", default=(default := Console.journal_lenses),
+        help=f"Specify lens list {default}"
     )
     rv.add_argument(
         "--debug", action="store_true", default=False,

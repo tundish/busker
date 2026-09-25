@@ -166,6 +166,10 @@ class Engine(Resident):
             self.clocks = dict(self.set_clocks(journal))
         """
 
+    def __repr__(self):
+        rv = super().__repr__()
+        return rv
+
     def __call__(self, timeout=2, **kwargs):
         while self.listen:
             try:
@@ -177,7 +181,7 @@ class Engine(Resident):
             # * check actions
             # * call action, or
             # * call unknown
-            self.logger.info(f"{cmd=}")
+            self.logger.debug(f"{cmd=}")
             self.queues[0].task_done()
 
     def run(self, **kwargs):
