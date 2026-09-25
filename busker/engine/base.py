@@ -20,6 +20,8 @@ import contextvars
 import difflib
 import logging
 import queue
+import time
+from types import SimpleNamespace as SN
 import sched
 
 try:
@@ -166,9 +168,23 @@ class Engine(Resident):
             self.clocks = dict(self.set_clocks(journal))
         """
 
+    @property
+    def stats(self):
+        path = self.journal.uri.resolve()
+        return SN(
+            path=path,
+            mtime=time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(path.stat().st_mtime)),
+            size=f"{path.stat().st_size/1E3:0.3f}K" if path.is_file() else "",
+        )
+
     def __repr__(self):
-        rv = super().__repr__()
-        return rv
+        stats = self.stats
+        return (
+            f"{self.__class__.__name__}"
+            f" {stats.mtime}"
+            f" {stats.path.as_uri()}"
+            f" {stats.size}"
+        )
 
     def __call__(self, timeout=2, **kwargs):
         while self.listen:
