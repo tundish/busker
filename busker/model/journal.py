@@ -22,6 +22,7 @@ from collections import defaultdict
 from collections import UserString
 from collections.abc import Mapping
 import logging
+import operator
 import pathlib
 import threading
 
@@ -93,6 +94,24 @@ class Journal:
 
     @property
     def marking(self):
+        store = defaultdict(list)
+        for frame in self.adaptor.data.values():
+            for element in frame:
+                if getattr(element, "type", None) == ElementType.MARKING.value:
+                    store[element.rank].append(element)
+
+        # Reverse iterate so that duplicate names get picked according to rank
+        picks = dict(
+            (v.name, v)
+            for k in reversed(sorted(store))
+            for v in reversed(sorted(store[k], key=lambda m: m.name))
+        )
+        return dict(reversed(picks.items()))
+        return {
+            k: next(iter(sorted(store[k], key=operator.attrgetter("name"))))
+            for k in sorted(store)
+        }
+
         return {
             getattr(element, "name", None): element
             for frame in self.adaptor.data.values()

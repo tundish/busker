@@ -28,7 +28,8 @@ from busker.model.types import ElementType
 @dataclasses.dataclass(kw_only=True)
 class Marker:
     name: str
-    view: tuple = None
+    mark: tuple = None
+    rank: int = 1
     tick: int = 0
     face: tuple = (0, 1)
     span: Number = None
@@ -38,9 +39,9 @@ class Marker:
 
     def __post_init__(self):
         try:
-            self.view = tuple(self.view)
+            self.mark = tuple(self.mark)
         except TypeError:
-            self.view = tuple()
+            self.mark = tuple()
         self.type = ElementType.MARKING.value
         self.memo = Counter(self.memo)
 
@@ -49,9 +50,9 @@ class Marker:
             return {}
         if self.twist and spin is not None:
             face = Fraction(*self.face) + Fraction(*spin)
-            return dict(view=path, tick=self.tick + 1, face=(face.numerator, face.denominator))
+            return dict(mark=path, tick=self.tick + 1, face=(face.numerator, face.denominator))
         else:
-            return dict(view=path, tick=self.tick + 1, face=spin or self.face)
+            return dict(mark=path, tick=self.tick + 1, face=spin or self.face)
 
     def move(self, path: tuple, cost: Number=0, spin: tuple = None, **kwargs):
         jump = self.jump(path, cost=cost, spin=spin, **kwargs)

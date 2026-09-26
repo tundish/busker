@@ -39,7 +39,7 @@ class MarkerTests(unittest.TestCase):
         {
         "type": "marking",
         "name": "world_focus",
-        "view": [0, 0],
+        "mark": [0, 0],
         "face": (0, 1),
         "span": 1,
         "tick": 0,
@@ -323,7 +323,7 @@ class MarkerTests(unittest.TestCase):
         params = dict(name="test_marker")
         rv = Marker(**params)
         self.assertIsInstance(rv, Marker)
-        self.assertEqual(rv.view, ())
+        self.assertEqual(rv.mark, ())
         self.assertEqual(rv.type, ElementType.MARKING.value)
 
     def test_marker_via_text(self):
@@ -334,7 +334,7 @@ class MarkerTests(unittest.TestCase):
         )
         item = next(adaptor.scan(self.text), None)
         self.assertIsInstance(item.get("payload"), Marker)
-        self.assertEqual(item["payload"].view, (0, 0))
+        self.assertEqual(item["payload"].mark, (0, 0))
         self.assertEqual(list(adaptor.data), [()])
 
         frame = adaptor.data[()]
@@ -347,7 +347,7 @@ class MarkerTests(unittest.TestCase):
         {
         "type": "marking",
         "name": "world_focus",
-        "view": [0, 0],
+        "mark": [0, 0],
         "face": [0, 1],
         "span": 12,
         "tick": 0,
@@ -432,7 +432,7 @@ class MarkerTests(unittest.TestCase):
 
         path = (1, 1)
         with self.subTest(path=path):
-            branches = journal.branches(marker.view)
+            branches = journal.branches(marker.mark)
             options = {pair[1].path: pair[0].spin for pair in branches}
             spin = options[path]
             rv = marker.move(path, spin=spin)
@@ -441,12 +441,12 @@ class MarkerTests(unittest.TestCase):
 
             self.assertEqual(marker.tick, 1)
             self.assertEqual(marker.face, spin)
-            self.assertEqual(marker.view, (1, 1))
+            self.assertEqual(marker.mark, (1, 1))
 
         marker.twist = True
         path = (1, 0)
         with self.subTest(path=path):
-            branches = journal.branches(marker.view)
+            branches = journal.branches(marker.mark)
             options = {pair[1].path: pair[0].spin for pair in branches}
             spin = options[path]
             rv = marker.move(path, spin=spin)
@@ -455,5 +455,5 @@ class MarkerTests(unittest.TestCase):
 
             self.assertEqual(marker.tick, 2)
             self.assertEqual(marker.face, (5, 8))
-            self.assertEqual(marker.view, (1, 0))
+            self.assertEqual(marker.mark, (1, 0))
 
