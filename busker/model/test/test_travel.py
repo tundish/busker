@@ -76,7 +76,7 @@ class TravelTests(unittest.TestCase):
         "type": "marking",
         "name": "stage",
         "path": ["a", "b"],
-        "face": [0, 1],
+        "axis": [0, 1],
         "span": 12,
         "tick": 0
         }
@@ -156,7 +156,7 @@ class TravelTests(unittest.TestCase):
         "type": "linkage",
         "port": 20260813201422,
         "link": 20260813201319,
-        "spin": [5, 8],
+        "curl": [5, 8],
         "cost": 0
         }
         {"seal": 127416676279376, "type": "application/json", "path": ["spots", "kitchen", "door"]}
@@ -164,7 +164,7 @@ class TravelTests(unittest.TestCase):
         "type": "linkage",
         "port": 20260813191208,
         "link": 20260813191107,
-        "spin": [1, 8],
+        "curl": [1, 8],
         "cost": Infinity
         }
         {"seal": 127416676279376, "type": "application/json", "path": ["spots", "kitchen"]}
@@ -178,7 +178,7 @@ class TravelTests(unittest.TestCase):
         "type": "linkage",
         "port": 20260813192820,
         "link": 20260813202041,
-        "spin": [1, 2],
+        "curl": [1, 2],
         "cost": 3
         }
         """).lstrip(),

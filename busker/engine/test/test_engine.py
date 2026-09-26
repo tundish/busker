@@ -21,7 +21,7 @@ from collections import UserString
 import importlib.resources
 import unittest
 
-from busker.engine.base import Engine
+from busker.engine.engine import Engine
 from busker.model.journal import Journal
 from busker.model.multipart import Multipart
 

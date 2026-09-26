@@ -16,9 +16,6 @@
 # If not, see <https://www.gnu.org/licenses/>.
 
 import argparse
-from collections import UserDict
-from collections import UserList
-from collections import UserString
 from collections.abc import Callable
 import difflib
 import inspect
@@ -26,15 +23,21 @@ import logging
 import math
 import pathlib
 import pkgutil
+import queue
 import re
 import sys
 import time
 
+try:
+    import readline
+    readline.parse_and_bind("tab: complete")
+    readline.parse_and_bind("set editing-mode vi")
+except ModuleNotFoundError:
+    readline = None
+
 from spiki.speechmark import SpeechMark
 
-from busker.engine.base import Engine
-from busker.model.journal import Journal
-from busker.model.multipart import Multipart
+from busker.engine.engine import Engine
 
 # <@0> xxx  # Route to engine index 0
 # <> xxx    # Route to console
@@ -45,15 +48,16 @@ from busker.model.multipart import Multipart
 
 class Console:
     intro = "Type '<> help' for more instructions.\n"
-    prompt = "> "
+    prompt = "\n> "
     journal_lenses = [
         "busker.model.search:Search",
         "busker.model.syntax:Syntax",
         "busker.model.travel:Travel",
     ]
     plugin_classes = [
-        "busker.engine.base:Engine",
+        "busker.engine.engine:Engine",
     ]
+    delay_prompt = 0.1
 
     def __init__(self, args: argparse.Namespace, *lenses):
         self.logger = logging.getLogger("console")
@@ -64,7 +68,7 @@ class Console:
         self.index = None
 
         try:
-            self.engines.append(self.build_engine(*lenses, path=args.input))
+            self.engines.append(Engine.build(*lenses, path=args.input))
             self.index = len(self.engines) - 1
         except IndexError as err:
             self.logger.warning(f"Error building engine from {args.input}")
@@ -73,15 +77,6 @@ class Console:
     @staticmethod
     def one_cue_per_line(text: str) -> str:
         return "\n".join(i.strip() for i in text.split(";"))
-
-    @staticmethod
-    def build_engine(*args, path: pathlib.Path, **kwargs) -> Engine:
-        adaptor = Multipart(factory={dict: UserDict, list: UserList, str: UserString})
-        journal = Journal(adaptor, uri=path)
-        journal.attach(*args)
-        journal.scan(**kwargs)
-        engine = Engine(journal)
-        return engine.run()
 
     @property
     def methods(self):
@@ -96,6 +91,7 @@ class Console:
         n = 0
         loop = True
         while loop:
+            time.sleep(self.delay_prompt)
             line = input(self.prompt)
             text = self.one_cue_per_line(line)
             self.parser.loads(text)
@@ -126,12 +122,24 @@ class Console:
                     try:
                         self.logger.debug(f"Submitting '{cmd}' to {engine}")
                         engine.queues[0].put(cmd, block=True, timeout=2)
-                    except:
+                    except queue.Full:
+                        # What now?
                         pass
 
+                    self.logger.debug(f"Waiting for complete")
+                    engine.queues[0].join()
+
+                    while True:
+                        try:
+                            item = engine.queues[1].get(block=False)
+                            print(item, file=self.streams[1])
+                            self.streams[1].flush()
+                        except queue.Empty:
+                            break
+
                 else:
-                    print(f"Processing locally...", file=self.streams[2])
-                    if not self.handle_cue(**cue):
+                    self.logger.debug("Processing locally")
+                    if not self.handle_local(**cue):
                         loop = False
                         break
 
@@ -141,13 +149,14 @@ class Console:
             time.sleep(0)
         return
 
-    def handle_cue(self, words: list, mode: str = "", parameters: dict = {}, directives: list = [], **kwargs):
+    def handle_local(self, words: list, mode: str = "", parameters: dict = {}, directives: list = [], **kwargs):
         self.logger.debug(f"{words=}")
         try:
             pick = difflib.get_close_matches(f"do_{words[0]}", self.methods, n=1)
             method = getattr(self, pick[0])
             return method(*words[1:], **parameters)
         except (IndexError,) as err:
+            print("No local handler for command '{0}'".format(" ".join(words)), file=self.streams[2])
             self.logger.debug(f"{words=}", exc_info=True)
             return True
 
@@ -225,9 +234,9 @@ def parser():
 def run():
     p = parser()
     args = p.parse_args()
-    level = logging.DEBUG if args.debug else logging.INFO
+    level = logging.DEBUG if args.debug else logging.WARNING
     logging.basicConfig(
-        format="{asctime}| {levelname:>8}| {name:<18} | {message}",
+        format="{levelname:>8}| {relativeCreated:>10,.0f} | {name:<18} | {message}",
         datefmt="",
         style="{",
         stream=sys.stderr,

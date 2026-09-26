@@ -15,6 +15,9 @@
 # You should have received a copy of the GNU General Public License along with busker.
 # If not, see <https://www.gnu.org/licenses/>.
 
+from collections import UserDict
+from collections import UserList
+from collections import UserString
 from concurrent.futures import ThreadPoolExecutor
 import contextvars
 import difflib
@@ -33,6 +36,10 @@ except ModuleNotFoundError:
     tk = None
     ttk = None
     tkfont = None
+
+from busker.engine.marker import Marker
+from busker.model.journal import Journal
+from busker.model.multipart import Multipart
 
 # https://python-patterns.guide/
 # https://streamkap.com/resources-and-guides/streaming-api-design-patterns
@@ -156,6 +163,19 @@ class Engine(Resident):
         """
         pass
 
+    @classmethod
+    def build(cls, *lenses, path: pathlib.Path, **kwargs) -> Engine:
+        logger = logging.getLogger(cls.__name__)
+        adaptor = Multipart(
+            factory={dict: UserDict, list: UserList, str: UserString, "marking": Marker}
+        )
+        journal = Journal(adaptor, uri=path)
+        journal.attach(*lenses)
+        for event in journal.scan(**kwargs):
+            logger.debug(event)
+        engine = cls(journal)
+        return engine.run()
+
     def __init__(self, journal: Journal = None):
         self.logger = logging.getLogger(self.__class__.__name__)
         self.queues = (queue.Queue(maxsize=1), queue.Queue())
@@ -195,11 +215,40 @@ class Engine(Resident):
             except queue.Empty:
                 continue
 
+            self.logger.debug(f"{cmd=}")
+
+            stream = []
             # TODO:
+            # * read markers
+            marking = self.journal.marking
+            if not marking:
+                from busker.model.types import ElementType
+                # TODO: Invoke DRC plugin?
+                self.logger.warning(f"Journal has no marking")
+                for path, values in self.journal.adaptor.data.items():
+                    self.logger.debug(f"FRAME at path {path}:")
+                    for item in values:
+                        self.logger.debug(item)
+
+            stream.append(marking)
+
             # * check actions
+            try:
+                stream.append(self.journal.actions)
+            except AttributeError:
+                # No Syntax lens. What now?
+                pass
+
             # * call action, or
             # * call unknown
-            self.logger.debug(f"{cmd=}")
+
+            for item in stream:
+                try:
+                    self.queues[1].put(item, block=False)
+                except queue.Full:
+                    # TODO: Roll back?
+                    pass
+
             self.queues[0].task_done()
 
     def run(self, **kwargs):
@@ -212,9 +261,12 @@ class Engine(Resident):
     def cleanup(self, future):
         self.logger.info("Terminated")
         try:
-            self.logger.debug(future.result())
+            self.logger.debug(f"return: {future.result()!s}")
         except Exception as err:
             self.logger.warning(err, exc_info=True)
+
+
+# NOTE: use for ideas.
 
     @staticmethod
     def split_to_words(text: str, preserver=".", discard=None):

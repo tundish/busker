@@ -28,9 +28,10 @@ from busker.model.types import ElementType
 @dataclasses.dataclass(kw_only=True)
 class Marker:
     name: str
-    view: tuple = None
+    mark: tuple = None
+    rank: int = 1
     tick: int = 0
-    face: tuple = (0, 1)
+    axis: tuple = (0, 1)
     span: Number = None
     type: str = ElementType.MARKING.value
     twist: bool = False
@@ -38,23 +39,23 @@ class Marker:
 
     def __post_init__(self):
         try:
-            self.view = tuple(self.view)
+            self.mark = tuple(self.mark)
         except TypeError:
-            self.view = tuple()
+            self.mark = tuple()
         self.type = ElementType.MARKING.value
         self.memo = Counter(self.memo)
 
-    def jump(self, path: tuple, cost: Number=0, spin: tuple = None, **kwargs) -> dict:
+    def jump(self, path: tuple, cost: Number=0, curl: tuple = None, **kwargs) -> dict:
         if cost > self.span:
             return {}
-        if self.twist and spin is not None:
-            face = Fraction(*self.face) + Fraction(*spin)
-            return dict(view=path, tick=self.tick + 1, face=(face.numerator, face.denominator))
+        if self.twist and curl is not None:
+            axis = Fraction(*self.axis) + Fraction(*curl)
+            return dict(mark=path, tick=self.tick + 1, axis=(axis.numerator, axis.denominator))
         else:
-            return dict(view=path, tick=self.tick + 1, face=spin or self.face)
+            return dict(mark=path, tick=self.tick + 1, axis=curl or self.axis)
 
-    def move(self, path: tuple, cost: Number=0, spin: tuple = None, **kwargs):
-        jump = self.jump(path, cost=cost, spin=spin, **kwargs)
+    def move(self, path: tuple, cost: Number=0, curl: tuple = None, **kwargs):
+        jump = self.jump(path, cost=cost, curl=curl, **kwargs)
         for k, v in jump.items():
             setattr(self, k, v)
         self.memo[path] += 1
