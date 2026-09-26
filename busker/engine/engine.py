@@ -202,6 +202,9 @@ class Engine(Resident):
             if not marking:
                 # TODO: Invoke DRC plugin?
                 self.logger.warning(f"Journal has no marking")
+                for path, values in self.journal.adaptor.data.items():
+                    for item in values:
+                        self.logger.debug(item)
 
             stream.append(marking)
 
@@ -234,7 +237,7 @@ class Engine(Resident):
     def cleanup(self, future):
         self.logger.info("Terminated")
         try:
-            self.logger.debug(future.result())
+            self.logger.debug(f"return: {future.result()!s}")
         except Exception as err:
             self.logger.warning(err, exc_info=True)
 
