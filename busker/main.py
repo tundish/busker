@@ -83,12 +83,13 @@ class Console:
     def one_cue_per_line(text: str) -> str:
         return "\n".join(i.strip() for i in text.split(";"))
 
-    @staticmethod
-    def build_engine(*args, path: pathlib.Path, **kwargs) -> Engine:
+    def build_engine(self, *args, path: pathlib.Path, **kwargs) -> Engine:
+        self.logger.info("Building engine...")
         adaptor = Multipart(factory={dict: UserDict, list: UserList, str: UserString})
         journal = Journal(adaptor, uri=path)
         journal.attach(*args)
-        journal.scan(**kwargs)
+        for event in journal.scan(**kwargs):
+            self.logger.debug(event)
         engine = Engine(journal)
         return engine.run()
 

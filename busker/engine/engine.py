@@ -200,11 +200,15 @@ class Engine(Resident):
             # * read markers
             marking = self.journal.marking
             if not marking:
+                from busker.model.types import ElementType
                 # TODO: Invoke DRC plugin?
                 self.logger.warning(f"Journal has no marking")
                 for path, values in self.journal.adaptor.data.items():
+                    self.logger.debug(f"FRAME at path {path}:")
                     for item in values:
                         self.logger.debug(item)
+                        bit = (getattr(item, "type", None) == ElementType.MARKING.value)
+                        self.logger.debug(f"Marker? {bit}")
 
             stream.append(marking)
 
