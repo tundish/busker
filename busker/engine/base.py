@@ -162,6 +162,8 @@ class Engine(Resident):
         self.journal = journal
         self.future = None
         self.listen = True
+        # TODO: Need a buffer so most recent contents
+        # can be reviewed.
 
         """
         if journal:
