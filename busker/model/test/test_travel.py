@@ -76,7 +76,7 @@ class TravelTests(unittest.TestCase):
         "type": "marking",
         "name": "stage",
         "path": ["a", "b"],
-        "face": [0, 1],
+        "axis": [0, 1],
         "span": 12,
         "tick": 0
         }

@@ -31,7 +31,7 @@ class Marker:
     mark: tuple = None
     rank: int = 1
     tick: int = 0
-    face: tuple = (0, 1)
+    axis: tuple = (0, 1)
     span: Number = None
     type: str = ElementType.MARKING.value
     twist: bool = False
@@ -49,10 +49,10 @@ class Marker:
         if cost > self.span:
             return {}
         if self.twist and curl is not None:
-            face = Fraction(*self.face) + Fraction(*curl)
-            return dict(mark=path, tick=self.tick + 1, face=(face.numerator, face.denominator))
+            axis = Fraction(*self.axis) + Fraction(*curl)
+            return dict(mark=path, tick=self.tick + 1, axis=(axis.numerator, axis.denominator))
         else:
-            return dict(mark=path, tick=self.tick + 1, face=curl or self.face)
+            return dict(mark=path, tick=self.tick + 1, axis=curl or self.axis)
 
     def move(self, path: tuple, cost: Number=0, curl: tuple = None, **kwargs):
         jump = self.jump(path, cost=cost, curl=curl, **kwargs)

@@ -40,7 +40,7 @@ class MarkerTests(unittest.TestCase):
         "type": "marking",
         "name": "world_focus",
         "mark": [0, 0],
-        "face": (0, 1),
+        "axis": (0, 1),
         "span": 1,
         "tick": 0,
         "twist": False,
@@ -348,7 +348,7 @@ class MarkerTests(unittest.TestCase):
         "type": "marking",
         "name": "world_focus",
         "mark": [0, 0],
-        "face": [0, 1],
+        "axis": [0, 1],
         "span": 12,
         "tick": 0,
         "memo": {
@@ -378,7 +378,7 @@ class MarkerTests(unittest.TestCase):
         journal = Journal(adaptor, uri="test.rht")
 
         self.assertIsInstance(items[0]["payload"], Marker)
-        self.assertIsInstance(items[0]["payload"].face, tuple)
+        self.assertIsInstance(items[0]["payload"].axis, tuple)
         self.assertIsInstance(items[0]["payload"].memo, Counter)
         self.assertIsInstance(list(items[0]["payload"].memo)[0], tuple)
 
@@ -415,7 +415,7 @@ class MarkerTests(unittest.TestCase):
             curl = options[path]
             rv = marker.jump(path, curl=curl)
             self.assertEqual(rv["tick"], 1)
-            self.assertEqual(rv["face"], curl)
+            self.assertEqual(rv["axis"], curl)
 
     def test_marker_move(self):
         adaptor = Multipart(
@@ -437,10 +437,10 @@ class MarkerTests(unittest.TestCase):
             curl = options[path]
             rv = marker.move(path, curl=curl)
             self.assertEqual(rv["tick"], 1)
-            self.assertEqual(rv["face"], curl)
+            self.assertEqual(rv["axis"], curl)
 
             self.assertEqual(marker.tick, 1)
-            self.assertEqual(marker.face, curl)
+            self.assertEqual(marker.axis, curl)
             self.assertEqual(marker.mark, (1, 1))
 
         marker.twist = True
@@ -451,9 +451,9 @@ class MarkerTests(unittest.TestCase):
             curl = options[path]
             rv = marker.move(path, curl=curl)
             self.assertEqual(rv["tick"], 2)
-            self.assertEqual(rv["face"], (5, 8))  # 1/8 turn + 1/2 turn
+            self.assertEqual(rv["axis"], (5, 8))  # 1/8 turn + 1/2 turn
 
             self.assertEqual(marker.tick, 2)
-            self.assertEqual(marker.face, (5, 8))
+            self.assertEqual(marker.axis, (5, 8))
             self.assertEqual(marker.mark, (1, 0))
 
