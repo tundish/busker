@@ -59,7 +59,7 @@ class MarkerTests(unittest.TestCase):
         "type": "linkage",
         "port": (0,0,0),
         "link": (0,1,4),
-        "spin": (0, 1),
+        "curl": (0, 1),
         }
         {"seal": 20260906200320, "type": "data/python", "path": [0, 0]}
         # Centre square, NE
@@ -67,7 +67,7 @@ class MarkerTests(unittest.TestCase):
         "type": "linkage",
         "port": (0,0,1),
         "link": (1,1,5),
-        "spin": (1, 8),
+        "curl": (1, 8),
         "cost": 2,
         }
         {"seal": 20260906200320, "type": "data/python", "path": [0, 0]}
@@ -76,7 +76,7 @@ class MarkerTests(unittest.TestCase):
         "type": "linkage",
         "port": (0,0,2),
         "link": (1,0,6),
-        "spin": (1, 4),
+        "curl": (1, 4),
         }
         {"seal": 20260906200320, "type": "data/python", "path": [0, 0]}
         # Centre square, SE
@@ -84,7 +84,7 @@ class MarkerTests(unittest.TestCase):
         "type": "linkage",
         "port": (0,0,3),
         "link": (1,-1,7),
-        "spin": (3, 8),
+        "curl": (3, 8),
         "cost": 2,
         }
         {"seal": 20260906200320, "type": "data/python", "path": [0, 0]}
@@ -93,7 +93,7 @@ class MarkerTests(unittest.TestCase):
         "type": "linkage",
         "port": (0,0,4),
         "link": (0,-1,0),
-        "spin": (1, 2),
+        "curl": (1, 2),
         }
         {"seal": 20260906200320, "type": "data/python", "path": [0, 0]}
         # Centre square, SW
@@ -101,7 +101,7 @@ class MarkerTests(unittest.TestCase):
         "type": "linkage",
         "port": (0,0,5),
         "link": (-1,-1,1),
-        "spin": (5, 8),
+        "curl": (5, 8),
         "cost": 2,
         }
         {"seal": 20260906200320, "type": "data/python", "path": [0, 0]}
@@ -110,7 +110,7 @@ class MarkerTests(unittest.TestCase):
         "type": "linkage",
         "port": (0,0,6),
         "link": (-1,0,2),
-        "spin": (3, 4),
+        "curl": (3, 4),
         }
         {"seal": 20260906200320, "type": "data/python", "path": [0, 0]}
         # Centre square, NW
@@ -118,7 +118,7 @@ class MarkerTests(unittest.TestCase):
         "type": "linkage",
         "port": (0,0,7),
         "link": (-1,1,3),
-        "spin": (7, 8),
+        "curl": (7, 8),
         "cost": 2,
         }
         {"seal": 20260906200320, "type": "data/python", "path": [0, 1]}
@@ -127,7 +127,7 @@ class MarkerTests(unittest.TestCase):
         "type": "linkage",
         "port": (0,1,2),
         "link": (1,1,6),
-        "spin": (1, 4),
+        "curl": (1, 4),
         }
         {"seal": 20260906200320, "type": "data/python", "path": [0, 1]}
         # North square, S
@@ -135,7 +135,7 @@ class MarkerTests(unittest.TestCase):
         "type": "linkage",
         "port": (0,1,4),
         "link": (0,0,0),
-        "spin": (1, 2),
+        "curl": (1, 2),
         }
         {"seal": 20260906200320, "type": "data/python", "path": [0, 1]}
         # North square, W
@@ -143,7 +143,7 @@ class MarkerTests(unittest.TestCase):
         "type": "linkage",
         "port": (0,1,6),
         "link": (-1,1,2),
-        "spin": (3, 4),
+        "curl": (3, 4),
         }
         {"seal": 20260906200320, "type": "data/python", "path": [1, 1]}
         # NorthEast square, S
@@ -151,7 +151,7 @@ class MarkerTests(unittest.TestCase):
         "type": "linkage",
         "port": (1,1,4),
         "link": (1,0,0),
-        "spin": (1, 2),
+        "curl": (1, 2),
         }
         {"seal": 20260906200320, "type": "data/python", "path": [1, 1]}
         # NorthEast square, SW
@@ -159,7 +159,7 @@ class MarkerTests(unittest.TestCase):
         "type": "linkage",
         "port": (1,1,5),
         "link": (0,0,1),
-        "spin": (5, 8),
+        "curl": (5, 8),
         "cost": 2,
         }
         {"seal": 20260906200320, "type": "data/python", "path": [1, 1]}
@@ -168,7 +168,7 @@ class MarkerTests(unittest.TestCase):
         "type": "linkage",
         "port": (1,1,6),
         "link": (0,1,2),
-        "spin": (3, 4),
+        "curl": (3, 4),
         }
         {"seal": 20260906200320, "type": "data/python", "path": [1, 0]}
         # East square, N
@@ -176,7 +176,7 @@ class MarkerTests(unittest.TestCase):
         "type": "linkage",
         "port": (1,0,0),
         "link": (1,1,4),
-        "spin": (0, 1),
+        "curl": (0, 1),
         }
         {"seal": 20260906200320, "type": "data/python", "path": [1, 0]}
         # East square, W
@@ -184,7 +184,7 @@ class MarkerTests(unittest.TestCase):
         "type": "linkage",
         "port": (1,0,6),
         "link": (0,0,2),
-        "spin": (3, 4),
+        "curl": (3, 4),
         }
         {"seal": 20260906200320, "type": "data/python", "path": [1, 0]}
         # East square, S
@@ -192,7 +192,7 @@ class MarkerTests(unittest.TestCase):
         "type": "linkage",
         "port": (1,0,4),
         "link": (1,-1,0),
-        "spin": (1, 2),
+        "curl": (1, 2),
         }
         {"seal": 20260906200320, "type": "data/python", "path": [1, -1]}
         # SouthEast square, N
@@ -200,7 +200,7 @@ class MarkerTests(unittest.TestCase):
         "type": "linkage",
         "port": (1,-1,0),
         "link": (1,0,4),
-        "spin": (0, 1),
+        "curl": (0, 1),
         }
         {"seal": 20260906200320, "type": "data/python", "path": [1, -1]}
         # SouthEast square, W
@@ -208,7 +208,7 @@ class MarkerTests(unittest.TestCase):
         "type": "linkage",
         "port": (1,-1,6),
         "link": (0,-1,2),
-        "spin": (3, 4),
+        "curl": (3, 4),
         }
         {"seal": 20260906200320, "type": "data/python", "path": [1, -1]}
         # SouthEast square, NW
@@ -216,7 +216,7 @@ class MarkerTests(unittest.TestCase):
         "type": "linkage",
         "port": (1,-1,7),
         "link": (0,0,3),
-        "spin": (7, 8),
+        "curl": (7, 8),
         "cost": 2,
         }
         {"seal": 20260906200320, "type": "data/python", "path": [0, -1]}
@@ -225,7 +225,7 @@ class MarkerTests(unittest.TestCase):
         "type": "linkage",
         "port": (0,-1,0),
         "link": (0,0,4),
-        "spin": (0, 1),
+        "curl": (0, 1),
         }
         {"seal": 20260906200320, "type": "data/python", "path": [0, -1]}
         # South square, E
@@ -233,7 +233,7 @@ class MarkerTests(unittest.TestCase):
         "type": "linkage",
         "port": (0,-1,2),
         "link": (1,-1,6),
-        "spin": (1, 4),
+        "curl": (1, 4),
         }
         {"seal": 20260906200320, "type": "data/python", "path": [0, -1]}
         # South square, W
@@ -241,7 +241,7 @@ class MarkerTests(unittest.TestCase):
         "type": "linkage",
         "port": (0,-1,6),
         "link": (-1,-1,2),
-        "spin": (3, 4),
+        "curl": (3, 4),
         }
         {"seal": 20260906200320, "type": "data/python", "path": [-1, -1]}
         # SouthWest square, N
@@ -249,7 +249,7 @@ class MarkerTests(unittest.TestCase):
         "type": "linkage",
         "port": (-1,-1,0),
         "link": (-1,0,4),
-        "spin": (0, 1),
+        "curl": (0, 1),
         }
         {"seal": 20260906200320, "type": "data/python", "path": [-1, -1]}
         # SouthWest square, NE
@@ -257,7 +257,7 @@ class MarkerTests(unittest.TestCase):
         "type": "linkage",
         "port": (-1,-1,1),
         "link": (0,0,5),
-        "spin": (1, 8),
+        "curl": (1, 8),
         "cost": 2,
         }
         {"seal": 20260906200320, "type": "data/python", "path": [-1, -1]}
@@ -266,7 +266,7 @@ class MarkerTests(unittest.TestCase):
         "type": "linkage",
         "port": (-1,-1,2),
         "link": (0,-1,6),
-        "spin": (1, 4),
+        "curl": (1, 4),
         }
         {"seal": 20260906200320, "type": "data/python", "path": [-1, 0]}
         # West square, N
@@ -274,7 +274,7 @@ class MarkerTests(unittest.TestCase):
         "type": "linkage",
         "port": (-1,0,0),
         "link": (-1,1,4),
-        "spin": (0, 1),
+        "curl": (0, 1),
         }
         {"seal": 20260906200320, "type": "data/python", "path": [-1, 0]}
         # West square, E
@@ -282,7 +282,7 @@ class MarkerTests(unittest.TestCase):
         "type": "linkage",
         "port": (-1,0,2),
         "link": (0,0,6),
-        "spin": (1, 4),
+        "curl": (1, 4),
         }
         {"seal": 20260906200320, "type": "data/python", "path": [-1, 0]}
         # West square, S
@@ -290,7 +290,7 @@ class MarkerTests(unittest.TestCase):
         "type": "linkage",
         "port": (-1,0,4),
         "link": (-1,-1,2),
-        "spin": (1, 2),
+        "curl": (1, 2),
         }
         {"seal": 20260906200320, "type": "data/python", "path": [-1, 1]}
         # NorthWest square, E
@@ -298,7 +298,7 @@ class MarkerTests(unittest.TestCase):
         "type": "linkage",
         "port": (-1,1,2),
         "link": (0,1,6),
-        "spin": (1, 4),
+        "curl": (1, 4),
         }
         {"seal": 20260906200320, "type": "data/python", "path": [-1, 1]}
         # NorthWest square, SE
@@ -306,7 +306,7 @@ class MarkerTests(unittest.TestCase):
         "type": "linkage",
         "port": (-1,1,3),
         "link": (0,0,7),
-        "spin": (3, 8),
+        "curl": (3, 8),
         "cost": 2,
         }
         {"seal": 20260906200320, "type": "data/python", "path": [-1, 1]}
@@ -315,7 +315,7 @@ class MarkerTests(unittest.TestCase):
         "type": "linkage",
         "port": (-1,1,4),
         "link": (-1,0,0),
-        "spin": (1, 2),
+        "curl": (1, 2),
         }
         """).lstrip()
 
@@ -402,7 +402,7 @@ class MarkerTests(unittest.TestCase):
         branches = journal.branches((0, 0))
         self.assertEqual(len(branches), 8)
 
-        options = {pair[1].path: pair[0].spin for pair in branches}
+        options = {pair[1].path: pair[0].curl for pair in branches}
         marker = journal.marking["world_focus"]
 
         self.assertIs(marker, journal.adaptor.data[()][0])
@@ -412,10 +412,10 @@ class MarkerTests(unittest.TestCase):
 
         path = (1, 1)
         with self.subTest(path=path):
-            spin = options[path]
-            rv = marker.jump(path, spin=spin)
+            curl = options[path]
+            rv = marker.jump(path, curl=curl)
             self.assertEqual(rv["tick"], 1)
-            self.assertEqual(rv["face"], spin)
+            self.assertEqual(rv["face"], curl)
 
     def test_marker_move(self):
         adaptor = Multipart(
@@ -433,23 +433,23 @@ class MarkerTests(unittest.TestCase):
         path = (1, 1)
         with self.subTest(path=path):
             branches = journal.branches(marker.mark)
-            options = {pair[1].path: pair[0].spin for pair in branches}
-            spin = options[path]
-            rv = marker.move(path, spin=spin)
+            options = {pair[1].path: pair[0].curl for pair in branches}
+            curl = options[path]
+            rv = marker.move(path, curl=curl)
             self.assertEqual(rv["tick"], 1)
-            self.assertEqual(rv["face"], spin)
+            self.assertEqual(rv["face"], curl)
 
             self.assertEqual(marker.tick, 1)
-            self.assertEqual(marker.face, spin)
+            self.assertEqual(marker.face, curl)
             self.assertEqual(marker.mark, (1, 1))
 
         marker.twist = True
         path = (1, 0)
         with self.subTest(path=path):
             branches = journal.branches(marker.mark)
-            options = {pair[1].path: pair[0].spin for pair in branches}
-            spin = options[path]
-            rv = marker.move(path, spin=spin)
+            options = {pair[1].path: pair[0].curl for pair in branches}
+            curl = options[path]
+            rv = marker.move(path, curl=curl)
             self.assertEqual(rv["tick"], 2)
             self.assertEqual(rv["face"], (5, 8))  # 1/8 turn + 1/2 turn
 

@@ -45,17 +45,17 @@ class Marker:
         self.type = ElementType.MARKING.value
         self.memo = Counter(self.memo)
 
-    def jump(self, path: tuple, cost: Number=0, spin: tuple = None, **kwargs) -> dict:
+    def jump(self, path: tuple, cost: Number=0, curl: tuple = None, **kwargs) -> dict:
         if cost > self.span:
             return {}
-        if self.twist and spin is not None:
-            face = Fraction(*self.face) + Fraction(*spin)
+        if self.twist and curl is not None:
+            face = Fraction(*self.face) + Fraction(*curl)
             return dict(mark=path, tick=self.tick + 1, face=(face.numerator, face.denominator))
         else:
-            return dict(mark=path, tick=self.tick + 1, face=spin or self.face)
+            return dict(mark=path, tick=self.tick + 1, face=curl or self.face)
 
-    def move(self, path: tuple, cost: Number=0, spin: tuple = None, **kwargs):
-        jump = self.jump(path, cost=cost, spin=spin, **kwargs)
+    def move(self, path: tuple, cost: Number=0, curl: tuple = None, **kwargs):
+        jump = self.jump(path, cost=cost, curl=curl, **kwargs)
         for k, v in jump.items():
             setattr(self, k, v)
         self.memo[path] += 1
