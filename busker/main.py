@@ -16,9 +16,6 @@
 # If not, see <https://www.gnu.org/licenses/>.
 
 import argparse
-from collections import UserDict
-from collections import UserList
-from collections import UserString
 from collections.abc import Callable
 import difflib
 import inspect
@@ -41,8 +38,6 @@ except ModuleNotFoundError:
 from spiki.speechmark import SpeechMark
 
 from busker.engine.engine import Engine
-from busker.model.journal import Journal
-from busker.model.multipart import Multipart
 
 # <@0> xxx  # Route to engine index 0
 # <> xxx    # Route to console
@@ -73,7 +68,7 @@ class Console:
         self.index = None
 
         try:
-            self.engines.append(self.build_engine(*lenses, path=args.input))
+            self.engines.append(Engine.build(*lenses, path=args.input))
             self.index = len(self.engines) - 1
         except IndexError as err:
             self.logger.warning(f"Error building engine from {args.input}")
@@ -82,16 +77,6 @@ class Console:
     @staticmethod
     def one_cue_per_line(text: str) -> str:
         return "\n".join(i.strip() for i in text.split(";"))
-
-    def build_engine(self, *args, path: pathlib.Path, **kwargs) -> Engine:
-        self.logger.info("Building engine...")
-        adaptor = Multipart(factory={dict: UserDict, list: UserList, str: UserString})
-        journal = Journal(adaptor, uri=path)
-        journal.attach(*args)
-        for event in journal.scan(**kwargs):
-            self.logger.debug(event)
-        engine = Engine(journal)
-        return engine.run()
 
     @property
     def methods(self):

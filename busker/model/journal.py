@@ -43,6 +43,7 @@ class Journal:
         3. scan
 
         """
+        self.logger = logging.getLogger(self.__class__.__name__)
         self.uri = pathlib.Path(uri)
         self.write_lock = threading.RLock()
         self.registry = defaultdict(set)
@@ -147,4 +148,5 @@ class Journal:
         with self.write_lock:
             adaptor = self.adaptor
             data = adaptor.load(self.uri)
+            self.logger.debug(f"{data=}")
             return list(adaptor.scan(data, **kwargs))

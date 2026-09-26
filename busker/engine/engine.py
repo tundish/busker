@@ -15,6 +15,9 @@
 # You should have received a copy of the GNU General Public License along with busker.
 # If not, see <https://www.gnu.org/licenses/>.
 
+from collections import UserDict
+from collections import UserList
+from collections import UserString
 from concurrent.futures import ThreadPoolExecutor
 import contextvars
 import difflib
@@ -33,6 +36,10 @@ except ModuleNotFoundError:
     tk = None
     ttk = None
     tkfont = None
+
+from busker.engine.marker import Marker
+from busker.model.journal import Journal
+from busker.model.multipart import Multipart
 
 # https://python-patterns.guide/
 # https://streamkap.com/resources-and-guides/streaming-api-design-patterns
@@ -156,6 +163,19 @@ class Engine(Resident):
         """
         pass
 
+    @classmethod
+    def build(cls, *lenses, path: pathlib.Path, **kwargs) -> Engine:
+        logger = logging.getLogger(cls.__name__)
+        adaptor = Multipart(
+            factory={dict: UserDict, list: UserList, str: UserString, "marking": Marker}
+        )
+        journal = Journal(adaptor, uri=path)
+        journal.attach(*lenses)
+        for event in journal.scan(**kwargs):
+            logger.debug(event)
+        engine = cls(journal)
+        return engine.run()
+
     def __init__(self, journal: Journal = None):
         self.logger = logging.getLogger(self.__class__.__name__)
         self.queues = (queue.Queue(maxsize=1), queue.Queue())
@@ -207,8 +227,6 @@ class Engine(Resident):
                     self.logger.debug(f"FRAME at path {path}:")
                     for item in values:
                         self.logger.debug(item)
-                        bit = (getattr(item, "type", None) == ElementType.MARKING.value)
-                        self.logger.debug(f"Marker? {bit}")
 
             stream.append(marking)
 
