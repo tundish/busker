@@ -55,6 +55,7 @@ class Console:
     plugin_classes = [
         "busker.engine.engine:Engine",
     ]
+    delay_prompt = 0.1
 
     def __init__(self, args: argparse.Namespace, *lenses):
         self.logger = logging.getLogger("console")
@@ -97,6 +98,7 @@ class Console:
         n = 0
         loop = True
         while loop:
+            time.sleep(self.delay_prompt)
             line = input(self.prompt)
             text = self.one_cue_per_line(line)
             self.parser.loads(text)
@@ -128,21 +130,22 @@ class Console:
                         self.logger.debug(f"Submitting '{cmd}' to {engine}")
                         engine.queues[0].put(cmd, block=True, timeout=2)
                     except queue.Full:
-                        # Ehat now?
+                        # What now?
                         pass
 
-                        self.logger.debug(f"Waiting for complete")
-                        engine.queues[0].join()
+                    self.logger.debug(f"Waiting for complete")
+                    engine.queues[0].join()
 
                     while True:
                         try:
-                            item = engine.queues[1].get(block=True, timeout=2)
+                            item = engine.queues[1].get(block=False)
                             print(item, file=self.streams[1])
+                            self.streams[1].flush()
                         except queue.Empty:
                             break
 
                 else:
-                    print(f"Processing locally...", file=self.streams[2])
+                    self.logger.debug("Processing locally")
                     if not self.handle_local(**cue):
                         loop = False
                         break
@@ -160,6 +163,7 @@ class Console:
             method = getattr(self, pick[0])
             return method(*words[1:], **parameters)
         except (IndexError,) as err:
+            print("No local handler for command '{0}'".format(" ".join(words)), file=self.streams[2])
             self.logger.debug(f"{words=}", exc_info=True)
             return True
 
@@ -239,7 +243,7 @@ def run():
     args = p.parse_args()
     level = logging.DEBUG if args.debug else logging.INFO
     logging.basicConfig(
-        format="{asctime}| {levelname:>8}| {name:<18} | {message}",
+        format="{relativeCreated:>10,.0f}| {levelname:>8}| {name:<18} | {message}",
         datefmt="",
         style="{",
         stream=sys.stderr,

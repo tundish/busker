@@ -195,10 +195,13 @@ class Engine(Resident):
 
             self.logger.debug(f"{cmd=}")
 
+            stream = []
             # TODO:
             # * read markers
+            marking = self.journal.marking
+            stream.append(marking)
+
             # * check actions
-            stream = []
             try:
                 stream.append(self.journal.actions)
             except AttributeError:
@@ -207,8 +210,6 @@ class Engine(Resident):
 
             # * call action, or
             # * call unknown
-            marking = self.journal.marking
-            stream.append(marking)
 
             for item in stream:
                 try:
