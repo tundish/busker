@@ -199,6 +199,10 @@ class Engine(Resident):
             # TODO:
             # * read markers
             marking = self.journal.marking
+            if not marking:
+                # TODO: Invoke DRC plugin?
+                self.logger.warning(f"Journal has no marking")
+
             stream.append(marking)
 
             # * check actions

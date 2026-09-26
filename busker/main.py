@@ -46,7 +46,7 @@ from busker.model.multipart import Multipart
 
 class Console:
     intro = "Type '<> help' for more instructions.\n"
-    prompt = "> "
+    prompt = "\n> "
     journal_lenses = [
         "busker.model.search:Search",
         "busker.model.syntax:Syntax",
@@ -241,9 +241,9 @@ def parser():
 def run():
     p = parser()
     args = p.parse_args()
-    level = logging.DEBUG if args.debug else logging.INFO
+    level = logging.DEBUG if args.debug else logging.WARNING
     logging.basicConfig(
-        format="{relativeCreated:>10,.0f}| {levelname:>8}| {name:<18} | {message}",
+        format="{levelname:>8}| {relativeCreated:>10,.0f} | {name:<18} | {message}",
         datefmt="",
         style="{",
         stream=sys.stderr,
