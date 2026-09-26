@@ -185,10 +185,7 @@ class Engine(Resident):
         # TODO: Need a buffer so most recent contents
         # can be reviewed.
 
-        """
-        if journal:
-            self.clocks = dict(self.set_clocks(journal))
-        """
+        # TODO: Make Engine the owner of notes/comments/issues related to play
 
     @property
     def stats(self):
@@ -222,15 +219,17 @@ class Engine(Resident):
             # * read markers
             marking = self.journal.marking
             if not marking:
-                from busker.model.types import ElementType
                 # TODO: Invoke DRC plugin?
                 self.logger.warning(f"Journal has no marking")
                 for path, values in self.journal.adaptor.data.items():
                     self.logger.debug(f"FRAME at path {path}:")
                     for item in values:
                         self.logger.debug(item)
+                        continue
 
-            stream.append(marking)
+            marked = [i.mark for i in marking.values()]
+
+            stream.append(marked)
 
             # * check actions
             try:
