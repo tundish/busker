@@ -193,11 +193,30 @@ class Engine(Resident):
             except queue.Empty:
                 continue
 
+            self.logger.debug(f"{cmd=}")
+
             # TODO:
+            # * read markers
             # * check actions
+            stream = []
+            try:
+                stream.append(self.journal.actions)
+            except AttributeError:
+                # No Syntax lens. What now?
+                pass
+
             # * call action, or
             # * call unknown
-            self.logger.debug(f"{cmd=}")
+            marking = self.journal.marking
+            stream.append(marking)
+
+            for item in stream:
+                try:
+                    self.queues[1].put(item, block=False)
+                except queue.Full:
+                    # TODO: Roll back?
+                    pass
+
             self.queues[0].task_done()
 
     def run(self, **kwargs):
@@ -213,6 +232,9 @@ class Engine(Resident):
             self.logger.debug(future.result())
         except Exception as err:
             self.logger.warning(err, exc_info=True)
+
+
+# NOTE: use for ideas.
 
     @staticmethod
     def split_to_words(text: str, preserver=".", discard=None):

@@ -26,13 +26,14 @@ import logging
 import math
 import pathlib
 import pkgutil
+import queue
 import re
 import sys
 import time
 
 from spiki.speechmark import SpeechMark
 
-from busker.engine.base import Engine
+from busker.engine.engine import Engine
 from busker.model.journal import Journal
 from busker.model.multipart import Multipart
 
@@ -52,7 +53,7 @@ class Console:
         "busker.model.travel:Travel",
     ]
     plugin_classes = [
-        "busker.engine.base:Engine",
+        "busker.engine.engine:Engine",
     ]
 
     def __init__(self, args: argparse.Namespace, *lenses):
@@ -126,12 +127,23 @@ class Console:
                     try:
                         self.logger.debug(f"Submitting '{cmd}' to {engine}")
                         engine.queues[0].put(cmd, block=True, timeout=2)
-                    except:
+                    except queue.Full:
+                        # Ehat now?
                         pass
+
+                        self.logger.debug(f"Waiting for complete")
+                        engine.queues[0].join()
+
+                    while True:
+                        try:
+                            item = engine.queues[1].get(block=True, timeout=2)
+                            print(item, file=self.streams[1])
+                        except queue.Empty:
+                            break
 
                 else:
                     print(f"Processing locally...", file=self.streams[2])
-                    if not self.handle_cue(**cue):
+                    if not self.handle_local(**cue):
                         loop = False
                         break
 
@@ -141,7 +153,7 @@ class Console:
             time.sleep(0)
         return
 
-    def handle_cue(self, words: list, mode: str = "", parameters: dict = {}, directives: list = [], **kwargs):
+    def handle_local(self, words: list, mode: str = "", parameters: dict = {}, directives: list = [], **kwargs):
         self.logger.debug(f"{words=}")
         try:
             pick = difflib.get_close_matches(f"do_{words[0]}", self.methods, n=1)
