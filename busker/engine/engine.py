@@ -183,6 +183,7 @@ class Engine(Resident):
     def __init__(self, journal: Journal = None):
         self.logger = logging.getLogger(self.__class__.__name__)
         self.queues = (queue.Queue(maxsize=1), queue.Queue())
+        self.scene = queue.PriorityQueue()
         self.journal = journal
         self.future = None
         self.listen = True
@@ -216,7 +217,6 @@ class Engine(Resident):
             except queue.Empty:
                 continue
 
-            stream = []
             marking = self.journal.marking
             if not marking:
                 # TODO: Invoke DRC plugin?
@@ -253,15 +253,13 @@ class Engine(Resident):
                     self.execute(element, path, marker, **kwargs)
 
                 context = self.journal.context(path)
-                # TODO: Prologue, Dialogue, Epilogue from CONTENT elements
-                # Use spiki to check first
-                # bisect? priority queue for stream?
-                # stream.append(element)
+                # TODO: Use spiki to check first
 
-            for item in stream:
+            while not self.scene.empty():
                 try:
+                    item = self.scene.get(block=False)
                     self.queues[1].put(item, block=False)
-                except queue.Full:
+                except (queue.Empty, queue.Full):
                     # TODO: Roll back?
                     pass
 
