@@ -20,6 +20,7 @@ from collections.abc import MutableSequence
 from collections.abc import Set
 import functools
 import itertools
+import logging
 
 from busker.model.types import Chain
 from busker.model.types import Element
@@ -71,6 +72,7 @@ class Syntax(Lens):
         return body
 
     def __init__(self, journal: object):
+        self.logger = logging.getLogger(self.__class__.__name__)
         self.journal = journal
 
     def context(self, path: tuple) -> Chain:

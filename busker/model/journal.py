@@ -76,14 +76,14 @@ class Journal:
         with self.write_lock:
             for helper in helpers:
                 self.register(helper)
-        self.model  # Re-initialize model
+        _ = self.model  # Re-initialize model
 
     def remove(self, *helpers: Adaptor | Selector | Lens):
         with self.write_lock:
             for helper in helpers:
                 for registered in self.registry.values():
                     registered.discard(helper)
-        self.model  # Re-initialize model
+        _ = self.model  # Re-initialize model
 
     @property
     def adaptor(self):
@@ -168,4 +168,6 @@ class Journal:
             adaptor = self.adaptor
             data = adaptor.load(self.uri)
             self.logger.debug(f"{data=}")
-            return list(adaptor.scan(data, **kwargs))
+            rv = list(adaptor.scan(data, **kwargs))
+            _ = self.model  # Re-initialize model
+            return rv

@@ -212,11 +212,7 @@ class Engine(Resident):
             except queue.Empty:
                 continue
 
-            self.logger.debug(f"{cmd=}")
-
             stream = []
-            # TODO:
-            # * read markers
             marking = self.journal.marking
             if not marking:
                 # TODO: Invoke DRC plugin?
@@ -227,16 +223,19 @@ class Engine(Resident):
                         self.logger.debug(item)
                         continue
 
-            marked = [i.mark for i in marking.values()]
+            for marker in reversed(marking.values()):
+                try:
+                    path = marker.mark
+                    actions = self.journal.actions(path)
+                    stream.append(actions)
+                except AttributeError as err:
+                    self.logger.warning("Journal does not support action syntax")
+                    self.logger.debug(err, exc_info=True)
+                    # No Syntax lens. What now?
+                    pass
 
-            stream.append(marked)
+            # * TODO local actions? help? hint? A Guide mixin?
 
-            # * check actions
-            try:
-                stream.append(self.journal.actions)
-            except AttributeError:
-                # No Syntax lens. What now?
-                pass
 
             # * call action, or
             # * call unknown

@@ -150,7 +150,7 @@ class Console:
         return
 
     def handle_local(self, words: list, mode: str = "", parameters: dict = {}, directives: list = [], **kwargs):
-        self.logger.debug(f"{words=}")
+        self.logger.debug(f"Handling local {words=}")
         try:
             pick = difflib.get_close_matches(f"do_{words[0]}", self.methods, n=1)
             method = getattr(self, pick[0])
