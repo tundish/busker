@@ -20,8 +20,10 @@ from collections import defaultdict
 from collections import ChainMap
 from collections import UserDict
 from collections import UserList
+import dataclasses
 import enum
 import pathlib
+import textwrap
 import warnings
 
 
@@ -120,3 +122,23 @@ class Element(UserDict):
     def refresh(self, parent=None):
         self.parent = parent
         return self
+
+
+class Rank(enum.IntEnum):
+    READBACK =  2
+    ELLIPSIS =  4
+    PROLOGUE =  6
+    LIBRETTO =  8
+    DIALOGUE = 10
+    EPILOGUE = 12
+    GLOSSARY = 14
+
+
+@dataclasses.dataclass(order=True)
+class Text:
+    text: str = dataclasses.field(compare=False)
+    rank: int = Rank.DIALOGUE
+
+    def __post_init__(self):
+        self.text = textwrap.dedent(self.text).lstrip()
+

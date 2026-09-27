@@ -42,6 +42,8 @@ except ModuleNotFoundError:
 from busker.engine.marker import Marker
 from busker.model.journal import Journal
 from busker.model.multipart import Multipart
+from busker.model.types import Rank
+from busker.model.types import Text
 
 # https://python-patterns.guide/
 # https://streamkap.com/resources-and-guides/streaming-api-design-patterns
@@ -325,7 +327,7 @@ class Engine(Resident):
 
         code = compile(element.handler, format(marker.parent.path), mode="exec")
         l = dict(kwargs, journal=self.rht, marker=marker)
-        g = dict(logging=logging, Exclamation=self.Exclamation)
+        g = dict(logging=logging, Exclamation=self.Exclamation, Rank=Rank, Text=Text)
         try:
             exec(code, locals=l, globals=g)
         except self.Exclamation as report:

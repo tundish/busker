@@ -19,6 +19,8 @@ import unittest
 
 
 from busker.model.types import Accumulator
+from busker.model.types import Rank
+from busker.model.types import Text
 
 
 class AccumulatorTests(unittest.TestCase):
@@ -29,3 +31,22 @@ class AccumulatorTests(unittest.TestCase):
         self.assertIsInstance(rv, complex)
         self.assertEqual(rv, 0)
         self.assertFalse(rv)
+
+
+class TextTests(unittest.TestCase):
+
+    def test_ranking(self):
+        data = [
+            Text("<> Two"),
+            Text("""
+            <> One
+            """, rank=Rank.PROLOGUE),
+            Text("""
+            <> Three
+            """),
+        ]
+        items = sorted(data)
+        self.assertEqual(
+            [i.text for i in items],
+            ["<> One\n", "<> Two", "<> Three\n"]
+        )
