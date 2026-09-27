@@ -167,7 +167,6 @@ class Journal:
         with self.write_lock:
             adaptor = self.adaptor
             data = adaptor.load(self.uri)
-            self.logger.debug(f"{data=}")
             rv = list(adaptor.scan(data, **kwargs))
             _ = self.model  # Re-initialize model
             return rv

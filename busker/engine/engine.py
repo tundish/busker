@@ -22,7 +22,9 @@ from concurrent.futures import ThreadPoolExecutor
 import contextvars
 import difflib
 import logging
+import math
 import queue
+import random
 import time
 from types import SimpleNamespace as SN
 import sched
@@ -208,7 +210,7 @@ class Engine(Resident):
     def __call__(self, timeout=2, **kwargs):
         while self.listen:
             try:
-                cmd = self.queues[0].get(block=True, timeout=timeout)
+                text = self.queues[0].get(block=True, timeout=timeout)
             except queue.Empty:
                 continue
 
@@ -223,18 +225,30 @@ class Engine(Resident):
                         self.logger.debug(item)
                         continue
 
+            # * TODO: local actions. help? hint? A Guide mixin?
+            actions = dict(help=self.do_help)
             for marker in reversed(marking.values()):
                 try:
                     path = marker.mark
-                    actions = self.journal.actions(path)
-                    stream.append(actions)
+                    actions.update(self.journal.actions(path))
                 except AttributeError as err:
                     self.logger.warning("Journal does not support action syntax")
                     self.logger.debug(err, exc_info=True)
                     # No Syntax lens. What now?
                     pass
 
-            # * TODO local actions? help? hint? A Guide mixin?
+                matches = self.match_text_to_phrases(text, actions)
+                try:
+                    self.logger.debug(f"Selecting first of matches {matches}")
+                    element, kwargs = actions[matches[0]]
+                    self.logger.debug(f"Map to {element.parent.path}: {kwargs=} {element=}")
+                except IndexError:
+                    self.logger.debug(f"No match for text '{text}'")
+                    pass
+                else:
+                    self.execute(element, path, marker, **kwargs)
+
+            # stream.append(element)
 
 
             # * call action, or
@@ -248,6 +262,21 @@ class Engine(Resident):
                     pass
 
             self.queues[0].task_done()
+
+    def match_text_to_phrases(self, text: str, phrases: list[str], precision=0.95):
+        return difflib.get_close_matches(text, phrases, cutoff=precision)
+
+    def execute(self, element: Element, path: tuple, marker: Marker, **kwargs):
+        code = compile(element.handler, format(path), mode="exec")
+        l = dict(kwargs, engine=self, marker=marker)
+        # TODO: Configure globals
+        g = dict(logging=logging, math=math, random=random, Exclamation=self.Exclamation)
+        try:
+            exec(code, locals=l, globals=g)
+        except self.Exclamation as report:
+            self.logger.info(report)
+        except Exception as err:
+            self.logger.warning(err, exc_info=True)
 
     def run(self, **kwargs):
         if not self.journal:
@@ -263,6 +292,8 @@ class Engine(Resident):
         except Exception as err:
             self.logger.warning(err, exc_info=True)
 
+    def do_help(self):
+        self.logger.info("Help!")
 
 # NOTE: use for ideas.
 
@@ -274,13 +305,6 @@ class Engine(Resident):
             for i in text.rstrip(preserver).lower().split()
             if i not in discard or text.endswith(preserver)
         ]
-
-    def match_text_to_phrases(self, text: str, phrases: list[str], precision=0.95):
-        words = self.split_to_words(text, discard=self.ignored_words)
-        print(f"{words=}")
-        return difflib.get_close_matches(
-            " ".join(words), phrases, cutoff=precision
-        ) or difflib.get_close_matches(text.strip(), phrases, cutoff=precision)
 
     @staticmethod
     def set_clocks(journal):

@@ -44,9 +44,9 @@ letters in their names.
 # Move the marker to a new path
 logger = logging.getLogger(format(marker.parent.path))
 logger.info(f"{heading=}")
-branches = journal.branches(tuple(marker["path"]))
+branches = engine.journal.branches(tuple(marker.mark))
 options = {pair[0].curl: pair for pair in branches}
-context = journal.context(marker.parent.path)
+context = engine.journal.context(marker.parent.path)
 logger.debug(f"{options=}")
 raise Exclamation("All done!")
 
