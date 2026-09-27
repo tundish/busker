@@ -48,8 +48,11 @@ branches = engine.journal.branches(tuple(marker.mark))
 options = {pair[0].curl: pair for pair in branches}
 context = engine.journal.context(marker.parent.path)
 logger.debug(f"{options=}")
-raise Exclamation("All done!")
-
+pair = options[heading[1]]
+path = pair[1].path
+curl = pair[0].curl
+jump = marker.move(path, curl=curl)
+raise Exclamation(f"All done! {jump}")
 {"seal": 20260829125737, "type": "text/x-python", "path": ["world", "forest", "crossroads", "centre"]}
 {
 "type": "linkage",

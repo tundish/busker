@@ -46,7 +46,7 @@ class Marker:
         self.memo = Counter(self.memo)
 
     def jump(self, path: tuple, cost: Number=0, curl: tuple = None, **kwargs) -> dict:
-        if cost > self.span:
+        if self.span is not None and cost > self.span:
             return {}
         if self.twist and curl is not None:
             axis = Fraction(*self.axis) + Fraction(*curl)

@@ -248,6 +248,8 @@ class Engine(Resident):
                 else:
                     self.execute(element, path, marker, **kwargs)
 
+            # TODO: Prologue, Dialogue, Epilogue from CONTENT elements
+            # bisect? priority queue for stream?
             # stream.append(element)
 
 
