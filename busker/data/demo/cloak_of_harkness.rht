@@ -48,7 +48,10 @@ letters in their names.
 # Move the marker to a new path
 logger = logging.getLogger(format(marker.parent.path))
 context = engine.journal.context(marker.parent.path)
-logger.debug(f"{context=}")
+logger.debug(f"Marker context: {context}")
+
+context = engine.journal.context(marker.mark)
+logger.debug(f"Handler context: {context}")
 
 logger.info(f"Checking if {heading=} possible")
 branches = engine.journal.branches(tuple(marker.mark))

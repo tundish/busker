@@ -228,14 +228,15 @@ class Engine(Resident):
             # * TODO: local actions. help? hint? A Guide mixin?
             actions = dict(help=self.do_help)
             for marker in reversed(marking.values()):
+                path = marker.mark
+
                 try:
-                    path = marker.mark
                     actions.update(self.journal.actions(path))
                 except AttributeError as err:
                     self.logger.warning("Journal does not support action syntax")
                     self.logger.debug(err, exc_info=True)
                     # No Syntax lens. What now?
-                    pass
+                    break
 
                 matches = self.match_text_to_phrases(text, actions)
                 try:
@@ -244,17 +245,16 @@ class Engine(Resident):
                     self.logger.debug(f"Map to {element.parent.path}: {kwargs=} {element=}")
                 except IndexError:
                     self.logger.debug(f"No match for text '{text}'")
+                    # TODO: Call unknown
                     pass
                 else:
                     self.execute(element, path, marker, **kwargs)
 
-            # TODO: Prologue, Dialogue, Epilogue from CONTENT elements
-            # bisect? priority queue for stream?
-            # stream.append(element)
-
-
-            # * call action, or
-            # * call unknown
+                context = self.journal.context(path)
+                # TODO: Prologue, Dialogue, Epilogue from CONTENT elements
+                # Use spiki to check first
+                # bisect? priority queue for stream?
+                # stream.append(element)
 
             for item in stream:
                 try:
