@@ -274,7 +274,10 @@ class Engine(Resident):
         code = compile(element.handler, format(path), mode="exec")
         l = dict(kwargs, engine=self, marker=marker)
         # TODO: Configure globals
-        g = dict(logging=logging, math=math, random=random, Exclamation=self.Exclamation)
+        g = dict(
+            logging=logging, math=math, random=random,
+            Exclamation=self.Exclamation, Rank=Rank, Text=Text,
+        )
         try:
             exec(code, locals=l, globals=g)
         except self.Exclamation as report:
