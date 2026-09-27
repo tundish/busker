@@ -142,3 +142,6 @@ class Text:
     def __post_init__(self):
         self.text = textwrap.dedent(self.text).lstrip()
 
+
+class Exclamation(Exception):
+    pass

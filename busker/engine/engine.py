@@ -42,6 +42,7 @@ except ModuleNotFoundError:
 from busker.engine.marker import Marker
 from busker.model.journal import Journal
 from busker.model.multipart import Multipart
+from busker.model.types import Exclamation
 from busker.model.types import Rank
 from busker.model.types import Text
 
@@ -149,9 +150,6 @@ class Engine(Resident):
 
     ignored_words = ("a", "an", "any", "her", "his", "my", "some", "the", "their")
 
-    class Exclamation(Exception):
-        pass
-
     class BusyError(Exception):
         "Call add_note as to why"
         pass
@@ -231,6 +229,7 @@ class Engine(Resident):
             actions = dict(help=self.do_help)
             for marker in reversed(marking.values()):
                 path = marker.mark
+                context = self.journal.context(path)
 
                 try:
                     actions.update(self.journal.actions(path))
@@ -249,10 +248,18 @@ class Engine(Resident):
                     self.logger.debug(f"No match for text '{text}'")
                     # TODO: Call unknown
                     pass
+                except TypeError:
+                    fn = actions[matches[0]]
+                    try:
+                        fn(text, marker=marker, marking=marking)
+                    except Exclamation as report:
+                        self.logger.info(report)
+                    except Exception as err:
+                        self.logger.warning(err)
+                        self.logger.debug(err, exc_info=True)
                 else:
                     self.execute(element, path, marker, **kwargs)
 
-                context = self.journal.context(path)
                 # TODO: Use spiki to check first
 
             while not self.scene.empty():
@@ -274,11 +281,11 @@ class Engine(Resident):
         # TODO: Configure globals
         g = dict(
             logging=logging, math=math, random=random,
-            Exclamation=self.Exclamation, Rank=Rank, Text=Text,
+            Exclamation=Exclamation, Rank=Rank, Text=Text,
         )
         try:
             exec(code, locals=l, globals=g)
-        except self.Exclamation as report:
+        except Exclamation as report:
             self.logger.info(report)
         except Exception as err:
             self.logger.warning(err, exc_info=True)
@@ -297,8 +304,8 @@ class Engine(Resident):
         except Exception as err:
             self.logger.warning(err, exc_info=True)
 
-    def do_help(self):
-        self.logger.info("Help!")
+    def do_help(self, *args, marker=None, **kwargs):
+        self.logger.info(f"No help from {marker}!")
 
 # NOTE: use for ideas.
 
@@ -328,10 +335,10 @@ class Engine(Resident):
 
         code = compile(element.handler, format(marker.parent.path), mode="exec")
         l = dict(kwargs, journal=self.rht, marker=marker)
-        g = dict(logging=logging, Exclamation=self.Exclamation, Rank=Rank, Text=Text)
+        g = dict(logging=logging, Exclamation=Exclamation, Rank=Rank, Text=Text)
         try:
             exec(code, locals=l, globals=g)
-        except self.Exclamation as report:
+        except Exclamation as report:
             self.logger.info(report)
         except Exception as err:
             self.logger.warning(err, exc_info=True)
