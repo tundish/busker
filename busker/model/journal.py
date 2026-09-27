@@ -107,17 +107,6 @@ class Journal:
             for v in reversed(sorted(store[k], key=lambda m: m.name))
         )
         return dict(reversed(picks.items()))
-        return {
-            k: next(iter(sorted(store[k], key=operator.attrgetter("name"))))
-            for k in sorted(store)
-        }
-
-        return {
-            getattr(element, "name", None): element
-            for frame in self.adaptor.data.values()
-            for element in frame
-            if getattr(element, "type", None) == ElementType.MARKING.value
-        }
 
     @property
     def model(self) -> Mapping:
@@ -150,6 +139,7 @@ class Journal:
                         continue
                     finally:
                         frame[n].parent = frame
+                        frame[n].index = n
 
                     try:
                         frame[n].type = ElementType[obj["type"].upper()]

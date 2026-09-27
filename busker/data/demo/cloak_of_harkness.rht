@@ -26,7 +26,10 @@ letters in their names.
 {
 "type": "context",
 "compass": [
-    ("north", (0, 1))
+    ("north", (0, 1)),
+    ("east", (1, 4)),
+    ("south", (1, 2)),
+    ("west", (3, 4)),
 ]
 }
 {"seal": 20260829125737, "type": "application/json", "path": ["world"]}
@@ -37,22 +40,29 @@ letters in their names.
     "heading": "$['compass'][*]"
 },
 "terms": [
-    "{heading[0]}", "Go {heading[0]}"
+    "{heading[0]}", "Go {heading[0]}",
+    "{heading[0][0]}", "Go {heading[0][0]}"
 ]
 }
 {"seal": 20260829125737, "type": "application/x-python", "path": ["world"]}
 # Move the marker to a new path
 logger = logging.getLogger(format(marker.parent.path))
-logger.info(f"{heading=}")
+context = engine.journal.context(marker.parent.path)
+logger.debug(f"{context=}")
+
+logger.info(f"Checking if {heading=} possible")
 branches = engine.journal.branches(tuple(marker.mark))
 options = {pair[0].curl: pair for pair in branches}
-context = engine.journal.context(marker.parent.path)
-logger.debug(f"{options=}")
-pair = options[heading[1]]
+try:
+    pair = options[heading[1]]
+except KeyError:
+    raise Exclamation(f"Can't go {heading[0]}!")
+
 path = pair[1].path
 curl = pair[0].curl
 jump = marker.move(path, curl=curl)
 raise Exclamation(f"All done! {jump}")
+
 {"seal": 20260829125737, "type": "text/x-python", "path": ["world", "forest", "crossroads", "centre"]}
 {
 "type": "linkage",
