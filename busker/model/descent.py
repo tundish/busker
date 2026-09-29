@@ -71,40 +71,38 @@ class Descent(Lens):
                     stack.append((body[k].copy(), v))
         return body
 
-    @staticmethod
-    def context(journal: Journal, path: tuple) -> Chain:
-        "Build a view of the document as seen from the supplied path"
-        levels = [path[0: n] for n in range(len(path) + 1)]
-        frames = [journal.adaptor.data.get(level, []) for level in levels]
-        chains = [
-            Chain(*(i for i in frame if getattr(i, "type", None) == ElementType.CONTEXT.value))
-            for frame in reversed(frames)
-        ]
-        return functools.reduce(Descent.merge, chains)
-
     def __init__(self, journal: object):
         self.logger = logging.getLogger(self.__class__.__name__)
         self.journal = journal
 
-    def actions(self, path: tuple) -> dict:
+    def context(self, path: tuple) -> Chain:
+        "Build a view of the document as seen from the supplied path"
+        levels = [path[0: n] for n in range(len(path) + 1)]
+        frames = [self.journal.adaptor.data.get(level, []) for level in levels]
+        chains = [
+            Chain(*(i for i in frame if getattr(i, "type", None) == ElementType.CONTEXT.value))
+            for frame in reversed(frames)
+        ]
+        return functools.reduce(self.merge, chains)
+
+    def events(self, path: tuple) -> dict:
         levels = [path[0: n] for n in range(len(path) + 1)]
         frames = [self.journal.adaptor.data.get(level, []) for level in levels]
         elements = [
             i for frame in frames for i in frame
             if isinstance(i, Element) and i.handler
         ]
-        context = self.context(self.journal, path)
+        context = self.context(path)
 
-        rv = dict()
+        rv = list()
         for element in elements:
             results = {
                 k: self.journal.search(v, context)
                 for k, v in element.get("params", {}).items()
             }
             products = set(itertools.product(*results.values()))
-            for term in element.get("terms", []):
-                for product in products:
-                    kwargs = dict(zip(element["params"], product))
-                    phrase = term.format(**kwargs)
-                    rv[phrase.lower()] = (element, kwargs)
+            if not element.get("terms"):
+                rv.append(element)
+
+        # TODO: sort by rank
         return rv

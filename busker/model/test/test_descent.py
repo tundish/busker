@@ -66,14 +66,11 @@ class DescentTests(unittest.TestCase):
         {
         "type": "handler",
         "description": "Carry shopping",
+        "rank": 10,
         "params": {
             "goods": "$['goods'][*]",
             "place": "$['route'][*]"
         },
-        "terms": [
-            "Carry {goods} {place}",
-            "Drop off {goods} at {place}"
-        ]
         }
         {"seal": 127416676279376, "type": "application/x-python"}
         context = journal.context(path)
@@ -84,11 +81,12 @@ class DescentTests(unittest.TestCase):
         """)
         text = TravelTests.texts[2] + action_text
         journal = self.build_journal(text)
-        syntax = list(journal.registry[Lens])[0]
+        descent = list(journal.registry[Lens])[0]
         path = ("b", 1)
-        actions = syntax.actions(path)
-        self.assertIsInstance(actions, dict)
-        rv = actions.get("drop off milk at work")
+        events = descent.events(path)
+        self.assertIsInstance(events, list)
+        self.assertTrue(events)
+        rv = events[0]
         self.assertIsInstance(rv, tuple)
         self.assertEqual(len(rv), 2)
         self.assertIsInstance(rv[0], Element)
@@ -96,7 +94,7 @@ class DescentTests(unittest.TestCase):
         self.assertEqual(rv[0].handler, journal.model[()][-1])
         self.assertEqual(rv[1], dict(goods="milk", place="work"))
 
-        self.assertEqual(Descent.context(journal, path).get("goods", None), {"crumpets", "milk"})
+        self.assertEqual(descent.context(journal, path).get("goods", None), {"crumpets", "milk"})
         code = compile(rv[0].handler, format(path), mode="exec")
         l = dict(rv[1], journal=journal, path=path)
         g = dict(logging=logging)
@@ -105,4 +103,4 @@ class DescentTests(unittest.TestCase):
 
         self.assertTrue(check.output)
         self.assertIn("Removed goods 'milk' from context", check.output[0])
-        self.assertEqual(syntax.context(path).get("goods", None), {"crumpets"})
+        self.assertEqual(descent.context(path).get("goods", None), {"crumpets"})
