@@ -24,6 +24,8 @@ import platform
 import textwrap
 import unittest
 
+from busker.engine.engine import Engine
+from busker.engine.marker import Marker
 from busker.model.journal import Journal
 from busker.model.multipart import Multipart
 from busker.model.search import Search
@@ -91,9 +93,10 @@ class DescentTests(unittest.TestCase):
         """)
         text = TravelTests.texts[2] + action_text
         journal = self.build_journal(text)
+        engine = Engine(journal)
         descent = list(journal.registry[Lens])[0]
-        mark = ("b", 1)
-        events = descent.events(mark)
+        marker = Marker(name="Test", mark=("b", 1))
+        events = descent.events(marker.mark)
         self.assertIsInstance(events, list)
         self.assertEqual(len(events), 2, events)
         rv = events[0]
@@ -104,15 +107,16 @@ class DescentTests(unittest.TestCase):
 
         self.assertEqual(rv, journal.model[()][-2])
         self.assertEqual(rv.handler, journal.model[()][-1])
-        self.assertEqual(rv, dict(goods="milk", place="work"))
 
-        self.assertEqual(descent.context(journal, path).get("goods", None), {"crumpets", "milk"})
-        code = compile(rv[0].handler, format(path), mode="exec")
-        l = dict(rv[1], journal=journal, path=path)
-        g = dict(logging=logging)
-        with self.assertLogs(format(path), logging.DEBUG) as check:
-            exec(code, locals=l, globals=g)
+        self.assertEqual(descent.context(marker.mark).get("chord", None), ("C", "F", "G"))
+        code = compile(rv.handler, format(marker.mark), mode="exec")
 
-        self.assertTrue(check.output)
-        self.assertIn("Removed goods 'milk' from context", check.output[0])
-        self.assertEqual(descent.context(path).get("goods", None), {"crumpets"})
+        for params in rv.grid:
+            l = dict(params, engine=engine, marker=marker)
+            g = dict(logging=logging)
+            with self.assertLogs(format(marker.mark), logging.DEBUG) as check:
+                exec(code, locals=l, globals=g)
+
+            self.assertTrue(check.output)
+            self.assertIn("Removed goods 'milk' from context", check.output[0])
+            self.assertEqual(descent.context(path).get("goods", None), {"crumpets"})
