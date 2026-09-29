@@ -80,15 +80,15 @@ class DescentTests(unittest.TestCase):
         "description": "Play an extra note in the Wednesday chord",
         "rank": 5,
         "params": {
-            "chord": "$['chord'][?@['day'] == 'Wednesday']",
+            "chords": "$['chord']",
         },
         }
         {"seal": 127416676279376, "type": "code/python"}
         if not marker.tick % 4:
             context = engine.journal.context(marker.mark)
-            context["goods"].remove(goods)
-            logging.getLogger(format(path)).debug(
-                f"Played '{chord}' in context '{path}'"
+            extended = (*chords[0], chords[0][0])
+            logging.getLogger(format(marker.mark)).debug(
+                f"Playing '{extended}' in context '{marker.mark}'"
             )
         """)
         text = TravelTests.texts[2] + action_text
@@ -118,5 +118,4 @@ class DescentTests(unittest.TestCase):
                 exec(code, locals=l, globals=g)
 
             self.assertTrue(check.output)
-            self.assertIn("Removed goods 'milk' from context", check.output[0])
-            self.assertEqual(descent.context(path).get("goods", None), {"crumpets"})
+            self.assertIn("Playing '('C', 'F', 'G', 'C')'", check.output[0])
