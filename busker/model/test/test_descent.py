@@ -62,22 +62,39 @@ class DescentTests(unittest.TestCase):
     @unittest.skipIf(platform.python_version() < "3.13", "new eval semantics")
     def test_compile_exec_action(self):
         action_text = textwrap.dedent("""
-        {"seal": 127416676279376, "type": "application/json", "path": []}
+        {"seal": 127416676279376, "type": "data/python", "path": []}
         {
         "type": "handler",
-        "description": "Carry shopping",
+        "description": "Change order of goods",
         "rank": 10,
         "params": {
             "goods": "$['goods'][*]",
             "place": "$['route'][*]"
         },
         }
-        {"seal": 127416676279376, "type": "application/x-python"}
-        context = journal.context(path)
-        context["goods"].remove(goods)
-        logging.getLogger(format(path)).debug(
-            f"Removed goods '{goods}' from context '{path}'"
-        )
+        {"seal": 127416676279376, "type": "code/python"}
+        if not marker.tick % 5:
+            context = engine.journal.context(marker.mark)
+            context["goods"].remove(goods)
+            logging.getLogger(format(path)).debug(
+                f"Jumbled goods '{goods}' in context '{path}'"
+            )
+        {"seal": 127416676279376, "type": "data/python", "path": []}
+        {
+        "type": "handler",
+        "description": "Play an extra note in the bass",
+        "rank": 10,
+        "params": {
+            "chord": "$['chord'][?@['day'] == 'Wednesday']",
+        },
+        }
+        {"seal": 127416676279376, "type": "code/python"}
+        if not marker.tick % 4:
+            context = engine.journal.context(marker.mark)
+            context["goods"].remove(goods)
+            logging.getLogger(format(path)).debug(
+                f"Played '{chord}' in context '{path}'"
+            )
         """)
         text = TravelTests.texts[2] + action_text
         journal = self.build_journal(text)
