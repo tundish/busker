@@ -65,7 +65,7 @@ class DescentTests(unittest.TestCase):
         {"seal": 127416676279376, "type": "data/python", "path": []}
         {
         "type": "handler",
-        "description": "After visiting a path 3 times, change the order of goods",
+        "description": "After visiting a path 3 times, discard one of the goods",
         "rank": 10,
         }
         {"seal": 127416676279376, "type": "code/python"}
@@ -92,17 +92,19 @@ class DescentTests(unittest.TestCase):
         text = TravelTests.texts[2] + action_text
         journal = self.build_journal(text)
         descent = list(journal.registry[Lens])[0]
-        path = ("b", 1)
-        events = descent.events(path)
+        mark = ("b", 1)
+        events = descent.events(mark)
         self.assertIsInstance(events, list)
-        self.assertTrue(events)
+        self.assertEqual(len(events), 2, events)
         rv = events[0]
-        self.assertIsInstance(rv, tuple)
-        self.assertEqual(len(rv), 2)
-        self.assertIsInstance(rv[0], Element)
-        self.assertEqual(rv[0], journal.model[()][-2])
-        self.assertEqual(rv[0].handler, journal.model[()][-1])
-        self.assertEqual(rv[1], dict(goods="milk", place="work"))
+        self.assertIsInstance(rv, Element)
+        self.assertTrue(rv.handler)
+        self.assertEqual(len(rv.grid), 1)
+        self.assertEqual(rv.rank, 5)
+
+        self.assertEqual(rv, journal.model[()][-2])
+        self.assertEqual(rv.handler, journal.model[()][-1])
+        self.assertEqual(rv, dict(goods="milk", place="work"))
 
         self.assertEqual(descent.context(journal, path).get("goods", None), {"crumpets", "milk"})
         code = compile(rv[0].handler, format(path), mode="exec")

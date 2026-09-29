@@ -21,6 +21,7 @@ from collections.abc import Set
 import functools
 import itertools
 import logging
+import operator
 
 from busker.model.types import Chain
 from busker.model.types import Element
@@ -96,13 +97,15 @@ class Descent(Lens):
 
         rv = list()
         for element in elements:
+            if element.get("terms"):
+                continue
             results = {
                 k: self.journal.search(v, context)
                 for k, v in element.get("params", {}).items()
             }
-            products = set(itertools.product(*results.values()))
-            if not element.get("terms"):
-                rv.append(element)
+            element.grid = (results,) if len(results) == 1 else tuple(
+                itertools.product(*results.values())
+            )
+            rv.append(element)
 
-        # TODO: sort by rank
-        return rv
+        return sorted(rv, key=operator.attrgetter("rank"))

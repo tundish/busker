@@ -45,6 +45,16 @@ class ElementType(enum.StrEnum):
     TRIGGER = enum.auto()
 
 
+class Rank(enum.IntEnum):
+    READBACK =  2
+    ELLIPSIS =  4
+    PROLOGUE =  6
+    LIBRETTO =  8
+    DIALOGUE = 10
+    EPILOGUE = 12
+    GLOSSARY = 14
+
+
 Accumulator = lambda: defaultdict(complex)
 
 
@@ -117,21 +127,12 @@ class Element(UserDict):
             warnings.warn(f"Expecting code at path {self.parent.path} after pos: {pos}")
             return
 
+        self.rank = self.data.get("rank", Rank.ELLIPSIS)
         return rv
 
     def refresh(self, parent=None):
         self.parent = parent
         return self
-
-
-class Rank(enum.IntEnum):
-    READBACK =  2
-    ELLIPSIS =  4
-    PROLOGUE =  6
-    LIBRETTO =  8
-    DIALOGUE = 10
-    EPILOGUE = 12
-    GLOSSARY = 14
 
 
 @dataclasses.dataclass(order=True)
