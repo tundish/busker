@@ -65,25 +65,18 @@ class DescentTests(unittest.TestCase):
         {"seal": 127416676279376, "type": "data/python", "path": []}
         {
         "type": "handler",
-        "description": "Change order of goods",
+        "description": "After visiting a path 3 times, change the order of goods",
         "rank": 10,
-        "params": {
-            "goods": "$['goods'][*]",
-            "place": "$['route'][*]"
-        },
         }
         {"seal": 127416676279376, "type": "code/python"}
-        if not marker.tick % 5:
-            context = engine.journal.context(marker.mark)
-            context["goods"].remove(goods)
-            logging.getLogger(format(path)).debug(
-                f"Jumbled goods '{goods}' in context '{path}'"
-            )
+        if not marker.memo[marker.mark].real % 3:
+            random.shuffle(goods := context["goods"])
+            logging.getLogger(format(marker.mark)).debug(f"Jumbled goods '{goods}'")
         {"seal": 127416676279376, "type": "data/python", "path": []}
         {
         "type": "handler",
-        "description": "Play an extra note in the bass",
-        "rank": 10,
+        "description": "Play an extra note in the Wednesday chord",
+        "rank": 5,
         "params": {
             "chord": "$['chord'][?@['day'] == 'Wednesday']",
         },
