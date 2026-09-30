@@ -86,7 +86,7 @@ class Descent(Lens):
         ]
         return functools.reduce(self.merge, chains)
 
-    def events(self, path: tuple) -> dict:
+    def events(self, path: tuple) -> list:
         levels = [path[0: n] for n in range(len(path) + 1)]
         frames = [self.journal.adaptor.data.get(level, []) for level in levels]
         elements = [

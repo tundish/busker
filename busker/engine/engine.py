@@ -15,6 +15,7 @@
 # You should have received a copy of the GNU General Public License along with busker.
 # If not, see <https://www.gnu.org/licenses/>.
 
+import bisect
 import calendar
 import cmath
 from collections import UserDict
@@ -28,6 +29,7 @@ import fractions
 import difflib
 import logging
 import math
+import operator
 import platform
 import queue
 import random
@@ -250,7 +252,7 @@ class Engine(Resident):
             actions = dict(help=self.do_help)
             for marker in reversed(marking.values()):
                 path = marker.mark
-                context = self.journal.context(path)
+                events = self.journal.events(path)
 
                 try:
                     actions.update(self.journal.actions(path))
@@ -279,6 +281,9 @@ class Engine(Resident):
                         self.logger.warning(err)
                         self.logger.debug(err, exc_info=True)
                 else:
+                    bisect.insort_right(events, element, key=operator.attrgetter("rank"))
+
+                for element in events:
                     self.execute(element, path, marker, **kwargs)
 
                 # TODO: Use spiki to check first
