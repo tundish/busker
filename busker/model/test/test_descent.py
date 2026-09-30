@@ -21,6 +21,7 @@ from collections import UserString
 import logging
 import pathlib
 import platform
+import random
 import textwrap
 import unittest
 
@@ -77,19 +78,20 @@ class DescentTests(unittest.TestCase):
         {"seal": 127416676279376, "type": "data/python", "path": []}
         {
         "type": "handler",
-        "description": "Play an extra note in the Wednesday chord",
+        "description": "Play an extra note in every fourth chord",
         "rank": 5,
-        "params": {
-            "chords": "$['chord']",
-        },
         }
         {"seal": 127416676279376, "type": "code/python"}
         if not marker.tick % 4:
-            context = engine.journal.context(marker.mark)
-            extended = (*chords[0], chords[0][0])
-            logging.getLogger(format(marker.mark)).debug(
-                f"Playing '{extended}' in context '{marker.mark}'"
-            )
+            logger = logging.getLogger(format(marker.mark))
+            try:
+                chord = context["chord"]
+            except KeyError as err:
+                logger.warning(f"{chord=}")
+                pass
+            else:
+                extended = (*chord, chord[0])
+                logger.debug(f"Playing '{extended}' in context '{marker.mark}'")
         """)
         text = TravelTests.texts[2] + action_text
         journal = self.build_journal(text)
@@ -99,10 +101,10 @@ class DescentTests(unittest.TestCase):
         events = descent.events(marker.mark)
         self.assertIsInstance(events, list)
         self.assertEqual(len(events), 2, events)
+
         rv = events[0]
         self.assertIsInstance(rv, Element)
         self.assertTrue(rv.handler)
-        self.assertEqual(len(rv.grid), 1)
         self.assertEqual(rv.rank, 5)
 
         self.assertEqual(rv, journal.model[()][-2])
@@ -111,11 +113,11 @@ class DescentTests(unittest.TestCase):
         self.assertEqual(descent.context(marker.mark).get("chord", None), ("C", "F", "G"))
         code = compile(rv.handler, format(marker.mark), mode="exec")
 
-        for params in rv.grid:
-            l = dict(params, engine=engine, marker=marker)
-            g = dict(logging=logging)
-            with self.assertLogs(format(marker.mark), logging.DEBUG) as check:
-                exec(code, locals=l, globals=g)
+        context = descent.context(marker.mark)
+        l = dict(engine=engine, context=context, marker=marker)
+        g = dict(logging=logging, random=random)
+        with self.assertLogs(format(marker.mark), logging.DEBUG) as check:
+            exec(code, locals=l, globals=g)
 
-            self.assertTrue(check.output)
-            self.assertIn("Playing '('C', 'F', 'G', 'C')'", check.output[0])
+        self.assertTrue(check.output)
+        self.assertIn("Playing '('C', 'F', 'G', 'C')'", check.output[0])

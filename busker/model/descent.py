@@ -92,20 +92,6 @@ class Descent(Lens):
         elements = [
             i for frame in frames for i in frame
             if isinstance(i, Element) and i.handler
+            and not (i.get("params") or i.get("terms"))
         ]
-        context = self.context(path)
-
-        rv = list()
-        for element in elements:
-            if element.get("terms"):
-                continue
-            results = {
-                k: self.journal.search(v, context)
-                for k, v in element.get("params", {}).items()
-            }
-            element.grid = (results,) if len(results) == 1 else tuple(
-                itertools.product(*results.values())
-            )
-            rv.append(element)
-
-        return sorted(rv, key=operator.attrgetter("rank"))
+        return sorted(elements, key=operator.attrgetter("rank"))
