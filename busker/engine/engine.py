@@ -248,7 +248,9 @@ class Engine(Resident):
                         self.logger.debug(item)
                         continue
 
-            # * TODO: local actions. help? hint? A Guide mixin?
+            replica = []
+
+            # * TODO: A Guide mixin?
             actions = dict(help=self.do_help)
             for marker in reversed(marking.values()):
                 path = marker.mark
@@ -288,13 +290,15 @@ class Engine(Resident):
 
                 # TODO: Use spiki to check first
 
-            while not self.scene.empty():
-                try:
-                    item = self.scene.get(block=False)
-                    self.queues[1].put(item, block=False)
-                except (queue.Empty, queue.Full):
-                    # TODO: Roll back?
-                    pass
+                while not self.scene.empty():
+                    try:
+                        item = self.scene.get(block=False)
+                        # TODO Spiki substitution with context, guarding, rank.
+                        replica.append(item)
+                        self.queues[1].put(item, block=False)
+                    except (queue.Empty, queue.Full):
+                        # TODO: Roll back?
+                        pass
 
             self.queues[0].task_done()
 
