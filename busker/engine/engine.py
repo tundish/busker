@@ -15,19 +15,31 @@
 # You should have received a copy of the GNU General Public License along with busker.
 # If not, see <https://www.gnu.org/licenses/>.
 
+import calendar
+import cmath
 from collections import UserDict
 from collections import UserList
 from collections import UserString
 from concurrent.futures import ThreadPoolExecutor
 import contextvars
+import copy
+import decimal
+import fractions
 import difflib
 import logging
 import math
+import platform
 import queue
 import random
-import time
-from types import SimpleNamespace as SN
+import re
 import sched
+import statistics
+import time
+import textwrap
+from types import SimpleNamespace as SN
+import uuid
+import warnings
+import zoneinfo
 
 try:
     import tkinter as tk
@@ -149,6 +161,15 @@ class Resident:
 class Engine(Resident):
 
     ignored_words = ("a", "an", "any", "her", "his", "my", "some", "the", "their")
+    global_modules = dict(
+        calendar=calendar, cmath=cmath, copy=copy,
+        decimal=decimal, fractions=fractions,
+        logging=logging, math=math, platform=platform,
+        random=random, re=re, statistics=statistics,
+        time=time, textwrap=textwrap, uuid=uuid,
+        warnings=warnings, zoneinfo=zoneinfo,
+        Exclamation=Exclamation, Rank=Rank, Text=Text,
+    )
 
     class BusyError(Exception):
         "Call add_note as to why"
@@ -276,15 +297,12 @@ class Engine(Resident):
         return difflib.get_close_matches(text, phrases, cutoff=precision)
 
     def execute(self, element: Element, path: tuple, marker: Marker, **kwargs):
+        context = self.journal.context(path)
         code = compile(element.handler, format(path), mode="exec")
-        l = dict(kwargs, engine=self, marker=marker)
+        l = dict(kwargs, engine=self, context=context, marker=marker)
         # TODO: Configure globals
-        g = dict(
-            logging=logging, math=math, random=random,
-            Exclamation=Exclamation, Rank=Rank, Text=Text,
-        )
         try:
-            exec(code, locals=l, globals=g)
+            exec(code, locals=l, globals=self.global_modules)
         except Exclamation as report:
             self.logger.info(report)
         except Exception as err:
