@@ -73,8 +73,8 @@ class DescentTests(unittest.TestCase):
         }
         {"seal": 127416676279376, "type": "code/python"}
         if not marker.memo[marker.mark].real % 3:
-            random.shuffle(goods := context["goods"])
-            logging.getLogger(format(marker.mark)).debug(f"Jumbled goods '{goods}'")
+            taken = context["goods"].pop()
+            logging.getLogger(format(marker.mark)).debug(f"Removed {taken} from set of goods")
         {"seal": 127416676279376, "type": "data/python", "path": []}
         {
         "type": "handler",
@@ -88,7 +88,6 @@ class DescentTests(unittest.TestCase):
                 chord = context["chord"]
             except KeyError as err:
                 logger.warning(f"{chord=}")
-                pass
             else:
                 extended = (*chord, chord[0])
                 logger.debug(f"Playing '{extended}' in context '{marker.mark}'")
@@ -121,3 +120,24 @@ class DescentTests(unittest.TestCase):
 
         self.assertTrue(check.output)
         self.assertIn("Playing '('C', 'F', 'G', 'C')'", check.output[0])
+
+        rv = events[1]
+        self.assertIsInstance(rv, Element)
+        self.assertTrue(rv.handler)
+        self.assertEqual(rv.rank, 10)
+
+        self.assertEqual(rv, journal.model[()][-4])
+        self.assertEqual(rv.handler, journal.model[()][-3])
+
+        code = compile(rv.handler, format(marker.mark), mode="exec")
+        context = descent.context(marker.mark)
+        goods = context["goods"].copy()
+        l = dict(engine=engine, context=context, marker=marker)
+        g = dict(logging=logging, random=random)
+        with self.assertLogs(format(marker.mark), logging.DEBUG) as check:
+            exec(code, locals=l, globals=g)
+
+        missing = goods - context["goods"]
+        self.assertTrue(missing)
+        self.assertTrue(check.output)
+        self.assertIn(missing.pop(), check.output[0])
