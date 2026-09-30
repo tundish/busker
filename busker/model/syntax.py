@@ -30,60 +30,12 @@ from busker.model.types import Lens
 
 class Syntax(Lens):
     """
-    Access to Resource HyperTree (.rht) data.
+    Combinatorial synthesis of syntax
 
     """
-
-    @staticmethod
-    def merge(body: dict, item: dict):
-        """
-        Merge a new item (by copy) into the context body.
-        Chains are built from the leaf up toward the root.
-        Consequently ordered sequences are built first in, last out.
-
-        """
-        stack = [(body.copy(), item.copy())]
-        while stack:
-            body, item = stack.pop(0)
-            for k, v in item.items():
-                if isinstance(v, Set):
-                    try:
-                        body[k] = body[k].union(v)
-                    except AttributeError:
-                        v = list(v)
-                    except KeyError:
-                        body[k] = v
-                        continue
-
-                if isinstance(v, MutableSequence):
-                    try:
-                        # FILO
-                        body[k] = v.copy() + body[k]
-                    except AttributeError:
-                        v = tuple(v)
-                    except KeyError:
-                        body[k] = v
-                        continue
-
-                if k not in body:
-                    body[k] = v
-                elif isinstance(body[k], Mapping):
-                    stack.append((body[k].copy(), v))
-        return body
-
     def __init__(self, journal: object):
         self.logger = logging.getLogger(self.__class__.__name__)
         self.journal = journal
-
-    def context(self, path: tuple) -> Chain:
-        "Build a view of the document as seen from the supplied path"
-        levels = [path[0: n] for n in range(len(path) + 1)]
-        frames = [self.journal.adaptor.data.get(level, []) for level in levels]
-        chains = [
-            Chain(*(i for i in frame if getattr(i, "type", None) == ElementType.CONTEXT.value))
-            for frame in reversed(frames)
-        ]
-        return functools.reduce(self.merge, chains)
 
     def actions(self, path: tuple) -> dict:
         levels = [path[0: n] for n in range(len(path) + 1)]
@@ -92,7 +44,7 @@ class Syntax(Lens):
             i for frame in frames for i in frame
             if isinstance(i, Element) and i.handler
         ]
-        context = self.context(path)
+        context = self.journal.context(path)
 
         rv = dict()
         for element in elements:

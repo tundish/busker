@@ -26,6 +26,7 @@ import unittest
 
 from busker.model.journal import Journal
 from busker.model.multipart import Multipart
+from busker.model.descent import Descent
 from busker.model.search import Search
 from busker.model.syntax import Syntax
 from busker.model.types import Chain
@@ -42,7 +43,7 @@ class SyntaxTests(unittest.TestCase):
     def build_journal(text):
         adaptor = Multipart(factory={dict: UserDict, list: UserList, str: UserString})
         list(adaptor.scan(text))
-        journal = Journal(adaptor, Search, Syntax, uri=pathlib.Path("test.rht"))
+        journal = Journal(adaptor, Descent, Search, Syntax, uri=pathlib.Path("test.rht"))
         return journal
 
     def test_journal_context(self):
@@ -84,7 +85,7 @@ class SyntaxTests(unittest.TestCase):
         """)
         text = TravelTests.texts[2] + action_text
         journal = self.build_journal(text)
-        syntax = list(journal.registry[Lens])[0]
+        syntax = next(i for i in journal.registry[Lens] if isinstance(i, Syntax))
         path = ("b", 1)
         actions = syntax.actions(path)
         self.assertIsInstance(actions, dict)
@@ -96,7 +97,7 @@ class SyntaxTests(unittest.TestCase):
         self.assertEqual(rv[0].handler, journal.model[()][-1])
         self.assertEqual(rv[1], dict(goods="milk", place="work"))
 
-        self.assertEqual(syntax.context(path).get("goods", None), {"crumpets", "milk"})
+        self.assertEqual(journal.context(path).get("goods", None), {"crumpets", "milk"})
         code = compile(rv[0].handler, format(path), mode="exec")
         l = dict(rv[1], journal=journal, path=path)
         g = dict(logging=logging)
@@ -105,4 +106,4 @@ class SyntaxTests(unittest.TestCase):
 
         self.assertTrue(check.output)
         self.assertIn("Removed goods 'milk' from context", check.output[0])
-        self.assertEqual(syntax.context(path).get("goods", None), {"crumpets"})
+        self.assertEqual(journal.context(path).get("goods", None), {"crumpets"})

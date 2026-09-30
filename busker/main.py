@@ -50,6 +50,7 @@ class Console:
     intro = "Type '<> help' for more instructions.\n"
     prompt = "\n> "
     journal_lenses = [
+        "busker.model.descent:Descent",
         "busker.model.search:Search",
         "busker.model.syntax:Syntax",
         "busker.model.travel:Travel",

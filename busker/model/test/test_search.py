@@ -21,6 +21,7 @@ from collections import UserString
 import pathlib
 import unittest
 
+from busker.model.descent import Descent
 from busker.model.journal import Journal
 from busker.model.multipart import Multipart
 from busker.model.search import Search
@@ -37,7 +38,7 @@ class SearchTests(unittest.TestCase):
     def build_journal(text):
         adaptor = Multipart(factory={dict: UserDict, list: UserList, str: UserString})
         list(adaptor.scan(text))
-        journal = Journal(adaptor, Search, Syntax, uri=pathlib.Path("test.rht"))
+        journal = Journal(adaptor, Descent, Search, Syntax, uri=pathlib.Path("test.rht"))
         return journal
 
     def test_search_context_key(self):
