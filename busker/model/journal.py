@@ -21,6 +21,7 @@
 from collections import defaultdict
 from collections import UserString
 from collections.abc import Mapping
+import functools
 import logging
 import operator
 import pathlib
@@ -51,6 +52,10 @@ class Journal:
         self.attach(*args)
 
     def __getattr__(self, name):
+        return self.lookup_lens(name)
+
+    @functools.lru_cache
+    def lookup_lens(self, name):
         try:
             return next(
                 getattr(i, name)
@@ -70,6 +75,7 @@ class Journal:
                 helper.journal = self
                 self.registry[cls].add(helper)
                 rv = helper
+        self.lookup_lens.cache_clear()
         return rv
 
     def attach(self, *helpers: Adaptor | Selector | Lens):
