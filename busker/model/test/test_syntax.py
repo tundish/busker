@@ -25,8 +25,8 @@ import textwrap
 import unittest
 
 from busker.model.journal import Journal
-from busker.model.multipart import Multipart
 from busker.model.descent import Descent
+from busker.model.multipart import Multipart
 from busker.model.search import Search
 from busker.model.syntax import Syntax
 from busker.model.types import Chain

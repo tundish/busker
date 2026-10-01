@@ -19,11 +19,18 @@ from collections import UserDict
 from collections import UserList
 from collections import UserString
 import importlib.resources
+import queue
+import time
 import unittest
 
 from busker.engine.engine import Engine
+from busker.engine.marker import Marker
 from busker.model.journal import Journal
+from busker.model.descent import Descent
 from busker.model.multipart import Multipart
+from busker.model.search import Search
+from busker.model.syntax import Syntax
+from busker.model.travel import Travel
 
 
 class EngineTests(unittest.TestCase):
@@ -31,11 +38,21 @@ class EngineTests(unittest.TestCase):
     def setUp(self):
         with importlib.resources.path("busker.data", "demo/cloak_of_harkness.rht") as path:
             self.assertTrue(path.exists(), path)
-            adapter = Multipart(factory={dict: UserDict, list: UserList, str: UserString})
-            journal = Journal(adapter, uri=path)
-            self.engine = Engine(journal)
+            lenses = (Descent, Search, Syntax, Travel)
+            self.engine = Engine.build(*lenses, path=path)
+
+    def tearDown(self):
+        self.engine.listen = False
+        time.sleep(0)
 
     def test_world_marker(self):
-        events = self.engine.put("go north")
-        done = self.engine.step()
-        self.fail(done)
+        self.engine.queues[0].put("go north")
+        self.engine.queues[0].join()
+        scene = []
+        while True:
+            try:
+                scene.append(self.engine.queues[1].get(block=False))
+            except queue.Empty:
+                break
+        print(*scene, sep="\n")
+

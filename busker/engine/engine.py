@@ -47,11 +47,12 @@ try:
     import tkinter as tk
     from tkinter import ttk
     from tkinter import font as tkfont
-    from busker.model.journal import Journal
 except ModuleNotFoundError:
     tk = None
     ttk = None
     tkfont = None
+
+from spiki.speechmark import SpeechMark
 
 from busker.engine.marker import Marker
 from busker.model.journal import Journal
@@ -232,6 +233,7 @@ class Engine(Resident):
         )
 
     def __call__(self, timeout=2, **kwargs):
+        "Engine execution assumes threaded concurrency"
         while self.listen:
             try:
                 text = self.queues[0].get(block=True, timeout=timeout)
