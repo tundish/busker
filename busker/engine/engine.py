@@ -290,7 +290,9 @@ class Engine(Resident):
                 for element in events:
                     self.execute(element, path, marker, **kwargs)
 
-                # TODO: Use spiki to check first
+                for item in self.journal.content(path):
+                    print(item)
+                    # TODO: Use spiki to check first
 
                 while not self.scene.empty():
                     try:

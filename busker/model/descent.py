@@ -95,3 +95,11 @@ class Descent(Lens):
             and not (i.get("params") or i.get("terms"))
         ]
         return sorted(elements, key=operator.attrgetter("rank"))
+
+    def content(self, path: tuple) -> list:
+        levels = [path[0: n] for n in range(len(path) + 1)]
+        frames = [self.journal.adaptor.data.get(level, []) for level in levels]
+        return [
+            i for frame in frames for i in frame
+            if getattr(i, "type", None) == ElementType.CONTENT
+        ]

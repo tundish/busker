@@ -100,7 +100,8 @@ class Multipart(Adaptor):
         text: str,
         header_length=255,
         code_types=set(("application/x-python-code", "application/x-python", "application/python", "code/python")),
-        data_types=set(("application/json", "text/json", "data/json", "text/python", "text/x-python", "data/python"))
+        data_types=set(("application/json", "text/json", "data/json", "text/python", "text/x-python", "data/python")),
+        text_types=set(("text/plain", "text/markdown", "text/speechmark"))
     ) -> Generator[dict]:
         delimiters = list(self.mark_regex.finditer(text))
         if not delimiters:
