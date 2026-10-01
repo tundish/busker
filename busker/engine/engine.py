@@ -52,7 +52,7 @@ except ModuleNotFoundError:
     ttk = None
     tkfont = None
 
-from spiki.speechmark import SpeechMark
+from spiki.conditions import Conditions
 
 from busker.engine.marker import Marker
 from busker.model.journal import Journal
@@ -209,6 +209,7 @@ class Engine(Resident):
         self.journal = journal
         self.future = None
         self.listen = True
+        self.censor = Conditions()
         # TODO: Need a buffer so most recent contents
         # can be reviewed.
 
@@ -290,9 +291,11 @@ class Engine(Resident):
                 for element in events:
                     self.execute(element, path, marker, **kwargs)
 
+                context = self.journal.context(path)
                 for item in self.journal.content(path):
-                    print(item)
-                    # TODO: Use spiki to check first
+                    if all(self.censor.verdict(item, context)):
+                        text = Text(self.censor.fix(item, context))
+                        self.scene.put(text)
 
                 while not self.scene.empty():
                     try:
