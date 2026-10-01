@@ -75,13 +75,13 @@ class Journal:
                 helper.journal = self
                 self.registry[cls].add(helper)
                 rv = helper
-        self.lookup_lens.cache_clear()
         return rv
 
     def attach(self, *helpers: Adaptor | Selector | Lens):
         with self.write_lock:
             for helper in helpers:
                 self.register(helper)
+            self.lookup_lens.cache_clear()
         _ = self.model  # Re-initialize model
 
     def remove(self, *helpers: Adaptor | Selector | Lens):
@@ -89,6 +89,7 @@ class Journal:
             for helper in helpers:
                 for registered in self.registry.values():
                     registered.discard(helper)
+            self.lookup_lens.cache_clear()
         _ = self.model  # Re-initialize model
 
     @property
