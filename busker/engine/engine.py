@@ -300,7 +300,6 @@ class Engine(Resident):
                 while not self.scene.empty():
                     try:
                         item = self.scene.get(block=False)
-                        # TODO Spiki substitution with context, guarding, rank.
                         replica.append(item)
                         self.queues[1].put(item, block=False)
                     except (queue.Empty, queue.Full):
