@@ -50,8 +50,8 @@ class PresenterTests(unittest.TestCase):
     def test_rotate_cue(self):
         presenter = Presenter()
         marker = Marker(name="test_marker")
-        html5 = presenter.fix(self.text, {})
-        print(f"{html5=}")
-        rv = presenter.select_fragment(html5, marker=marker)
-        self.fail(rv)
+        for n, cue in enumerate(presenter.split_cues(self.text)):
+            rv = presenter.rotate_cue(cue, marker=marker)
+            self.assertTrue(rv[0] == "<")
+            self.fail(rv)
 
