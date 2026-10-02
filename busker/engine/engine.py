@@ -52,9 +52,8 @@ except ModuleNotFoundError:
     ttk = None
     tkfont = None
 
-from spiki.conditions import Conditions
-
 from busker.engine.marker import Marker
+from busker.engine.presenter import Presenter
 from busker.model.journal import Journal
 from busker.model.multipart import Multipart
 from busker.model.types import Exclamation
@@ -209,7 +208,7 @@ class Engine(Resident):
         self.journal = journal
         self.future = None
         self.listen = True
-        self.censor = Conditions()
+        self.presenter = Presenter()
         # TODO: Need a buffer so most recent contents
         # can be reviewed.
 
@@ -291,11 +290,13 @@ class Engine(Resident):
                 for element in events:
                     self.execute(element, path, marker, **kwargs)
 
-                context = self.journal.context(path)
+                context = dict(self.journal.context(path), marker=marker)
                 for item in self.journal.content(path):
-                    if all(self.censor.verdict(item, context)):
-                        text = Text(self.censor.fix(item, context))
-                        self.scene.put(text)
+                    for cue in self.presenter.split_cues(item):
+                        if all(self.presenter.verdict(cue, context)):
+                            content = self.processor.rotate_cue(marker=marker)
+                            text = Text(self.presenter.fix(content, context))
+                            self.scene.put(text)
 
                 while not self.scene.empty():
                     try:

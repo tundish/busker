@@ -44,4 +44,15 @@ class Presenter(Conditions):
         return ["\n".join(lines[begin:end]).rstrip() for begin, end in blocks]
 
     def rotate_cue(self, text: str, marker=None):
-        return text
+        html5 = self.processor.loads(text)
+        if not self.processor.cues:
+            return text
+        cue = self.processor.cues[0]
+        if "!" not in cue["fragments"]:
+            return text
+        if not cue["lines"]:
+            return text
+        index = marker.memo[marker.mark]
+        rv = "\n".join((cue["lines"][0], cue["items"][int(index.imag)]))
+        marker.memo[marker.mark] = index + 1j
+        return rv

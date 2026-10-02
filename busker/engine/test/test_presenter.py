@@ -51,7 +51,7 @@ class PresenterTests(unittest.TestCase):
         presenter = Presenter()
         marker = Marker(name="test_marker")
         for n, cue in enumerate(presenter.split_cues(self.text)):
-            rv = presenter.rotate_cue(cue, marker=marker)
-            self.assertTrue(rv[0] == "<")
-            self.fail(rv)
-
+            with self.subTest(n=n, cue=cue):
+                rv = presenter.rotate_cue(cue, marker=marker)
+                self.assertTrue(rv[0] == "<")
+                self.assertIn(["One", "Four", "B", "D"][n], rv)
