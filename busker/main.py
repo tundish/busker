@@ -45,10 +45,14 @@ from busker.engine.engine import Engine
 #
 # Request actions, if none, then call `unknown` method.
 
+# TODO:
+# §	 00A7 section
+# ¶	 00B6 paragraph
+
 
 class Console:
     intro = "Type '<> help' for more instructions.\n"
-    prompt = "\n> "
+    prompt = "\u2022\n> "
     journal_lenses = [
         "busker.model.descent:Descent",
         "busker.model.search:Search",
