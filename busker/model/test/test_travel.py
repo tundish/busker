@@ -157,6 +157,7 @@ class TravelTests(unittest.TestCase):
         "port": 20260813201422,
         "link": 20260813201319,
         "curl": [5, 8],
+        "tags": ["back"],
         "cost": 0
         }
         {"seal": 127416676279376, "type": "application/json", "path": ["spots", "kitchen", "door"]}
@@ -165,6 +166,7 @@ class TravelTests(unittest.TestCase):
         "port": 20260813191208,
         "link": 20260813191107,
         "curl": [1, 8],
+        "tags": ["north"],
         "cost": Infinity
         }
         {"seal": 127416676279376, "type": "application/json", "path": ["spots", "kitchen"]}
@@ -179,6 +181,7 @@ class TravelTests(unittest.TestCase):
         "port": 20260813192820,
         "link": 20260813202041,
         "curl": [1, 2],
+        "tags": ["back"],
         "cost": 3
         }
         """).lstrip(),
