@@ -7,4 +7,5 @@ Story Arc wrt to NPC:
 3. Detachment
 
 How to trigger transitions? From speech?
+<NARRATOR.confirming> match to label of LINKAGE.
 An event with access to Engine.presenter.processor.cues?
