@@ -257,11 +257,10 @@ class Engine(Resident):
             # * TODO: A Guide mixin?
             actions = dict(help=self.do_help)
             for marker in reversed(marking.values()):
-                path = marker.mark
-                events = self.journal.events(path)
+                events = self.journal.events(marker.mark)
 
                 try:
-                    actions.update(self.journal.actions(path))
+                    actions.update(self.journal.actions(marker.mark))
                 except AttributeError as err:
                     self.logger.warning("Journal does not support action syntax")
                     self.logger.debug(err, exc_info=True)
@@ -291,10 +290,10 @@ class Engine(Resident):
 
                 # Activate pre-dialogue handlers
                 for element in itertools.takewhile(lambda el: el.rank < Rank.DIALOGUE, events):
-                    self.execute(element, path, marker, **kwargs)
+                    self.execute(element, marker, **kwargs)
 
-                context = dict(self.journal.context(path), marker=marker)
-                for item in self.journal.content(path):
+                context = dict(self.journal.context(marker.mark), marker=marker)
+                for item in self.journal.content(marker.mark):
                     for cue_text in self.presenter.split_cues(item):
                         if all(self.presenter.verdict(cue_text, context)):
                             self.directives.extend(
@@ -306,7 +305,7 @@ class Engine(Resident):
 
                 # Activate post-dialogue handlers
                 for element in itertools.dropwhile(lambda el: el.rank < Rank.DIALOGUE, events):
-                    self.execute(element, path, marker, **kwargs)
+                    self.execute(element, marker, **kwargs)
 
                 while not self.scene.empty():
                     try:
@@ -314,6 +313,7 @@ class Engine(Resident):
                         html5 = self.presenter.processor.loads(item.text)
                         self.logger.debug(f"{text=}")
                         replica.append(html5)
+                        # TODO: Data structure with cue, lines, words, etc
                         self.queues[1].put(html5, block=False)
                     except (queue.Empty, queue.Full):
                         # TODO: Roll back?
@@ -324,7 +324,8 @@ class Engine(Resident):
     def match_text_to_phrases(self, text: str, phrases: list[str], precision=0.95):
         return difflib.get_close_matches(text, phrases, cutoff=precision)
 
-    def execute(self, element: Element, path: tuple, marker: Marker, **kwargs):
+    def execute(self, element: Element, marker: Marker, **kwargs):
+        path = marker.mark
         context = self.journal.context(path)
         code = compile(element.handler, format(path), mode="exec")
         l = dict(kwargs, engine=self, context=context, marker=marker)
