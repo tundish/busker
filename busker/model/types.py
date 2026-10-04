@@ -52,7 +52,8 @@ class Rank(enum.IntEnum):
     LIBRETTO =  8
     DIALOGUE = 10
     EPILOGUE = 12
-    GLOSSARY = 14
+    ANALYSIS = 14
+    GLOSSARY = 16
 
 
 Accumulator = lambda: defaultdict(complex)
