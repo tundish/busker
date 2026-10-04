@@ -311,8 +311,10 @@ class Engine(Resident):
                 while not self.scene.empty():
                     try:
                         item = self.scene.get(block=False)
-                        replica.append(item)
-                        self.queues[1].put(item, block=False)
+                        html5 = self.presenter.processor.loads(item.text)
+                        self.logger.debug(f"{text=}")
+                        replica.append(html5)
+                        self.queues[1].put(html5, block=False)
                     except (queue.Empty, queue.Full):
                         # TODO: Roll back?
                         pass

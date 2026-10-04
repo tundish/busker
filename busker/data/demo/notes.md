@@ -8,3 +8,4 @@ Story Arc wrt to NPC:
 
 How to trigger transitions? From speech?
 <.confirming> match to tags of LINKAGE.
+Event uses engine.directives to pick linkage via tags.

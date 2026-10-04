@@ -83,7 +83,7 @@ class Console:
             while True:
                 try:
                     item = self.engines[-1].queues[1].get(block=True, timeout=2)
-                    print(item.text, file=self.streams[1])
+                    print(item, file=self.streams[1])
                     self.streams[1].flush()
                 except queue.Empty:
                     break
@@ -145,8 +145,8 @@ class Console:
 
                     while True:
                         try:
-                            item = engine.queues[1].get(block=False)
-                            print(item.text, file=self.streams[1])
+                            item = engine.queues[1].get(block=True, timeout=2)
+                            print(item, file=self.streams[1])
                             self.streams[1].flush()
                         except queue.Empty:
                             break
