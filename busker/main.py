@@ -74,10 +74,19 @@ class Console:
 
         try:
             self.engines.append(Engine.build(*lenses, path=args.input))
+            self.engines[-1].queues[0].put("", block=True, timeout=2)
             self.index = len(self.engines) - 1
         except IndexError as err:
             self.logger.warning(f"Error building engine from {args.input}")
             self.logger.debug(err, exc_info=True)
+        else:
+            while True:
+                try:
+                    item = self.engines[-1].queues[1].get(block=True, timeout=2)
+                    print(item.text, file=self.streams[1])
+                    self.streams[1].flush()
+                except queue.Empty:
+                    break
 
     @staticmethod
     def one_cue_per_line(text: str) -> str:
@@ -137,7 +146,7 @@ class Console:
                     while True:
                         try:
                             item = engine.queues[1].get(block=False)
-                            print(item, file=self.streams[1])
+                            print(item.text, file=self.streams[1])
                             self.streams[1].flush()
                         except queue.Empty:
                             break

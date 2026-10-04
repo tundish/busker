@@ -8,4 +8,3 @@ Story Arc wrt to NPC:
 
 How to trigger transitions? From speech?
 <.confirming> match to tags of LINKAGE.
-An event with access to Engine.presenter.processor.cues?

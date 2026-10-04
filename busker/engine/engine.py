@@ -295,12 +295,12 @@ class Engine(Resident):
 
                 context = dict(self.journal.context(path), marker=marker)
                 for item in self.journal.content(path):
-                    for cue in self.presenter.split_cues(item):
-                        if all(self.presenter.verdict(cue, context)):
+                    for cue_text in self.presenter.split_cues(item):
+                        if all(self.presenter.verdict(cue_text, context)):
                             self.directives.extend(
-                                [i for i in self.processor.cues if i["directives"]]
+                                [i for i in self.presenter.processor.cues if i["directives"]]
                             )
-                            content = self.processor.rotate_cue(marker=marker)
+                            content = self.presenter.rotate_cue(cue_text, marker=marker)
                             text = Text(self.presenter.fix(content, context))
                             self.scene.put(text)
 
