@@ -27,6 +27,7 @@ import copy
 import decimal
 import fractions
 import difflib
+import itertools
 import logging
 import math
 import operator
@@ -209,6 +210,7 @@ class Engine(Resident):
         self.future = None
         self.listen = True
         self.presenter = Presenter()
+        self.directives = []
         # TODO: Need a buffer so most recent contents
         # can be reviewed.
 
@@ -287,21 +289,28 @@ class Engine(Resident):
                 else:
                     bisect.insort_right(events, element, key=operator.attrgetter("rank"))
 
-                for element in events:
+                # Activate pre-dialogue handlers
+                for element in itertools.takewhile(lambda el: el.rank < Rank.DIALOGUE, events):
                     self.execute(element, path, marker, **kwargs)
 
                 context = dict(self.journal.context(path), marker=marker)
                 for item in self.journal.content(path):
                     for cue in self.presenter.split_cues(item):
                         if all(self.presenter.verdict(cue, context)):
+                            self.directives.extend(
+                                [i for i in self.processor.cues if i["directives"]]
+                            )
                             content = self.processor.rotate_cue(marker=marker)
                             text = Text(self.presenter.fix(content, context))
                             self.scene.put(text)
 
+                # Activate post-dialogue handlers
+                for element in itertools.dropwhile(lambda el: el.rank < Rank.DIALOGUE, events):
+                    self.execute(element, path, marker, **kwargs)
+
                 while not self.scene.empty():
                     try:
                         item = self.scene.get(block=False)
-                        # TODO: Process cue directives
                         replica.append(item)
                         self.queues[1].put(item, block=False)
                     except (queue.Empty, queue.Full):
