@@ -165,4 +165,4 @@ raise Exclamation(f"All done! {jump}")
 ],
 }
 {"seal": 20260829125737, "type": "text/speechmark", "path": ["world", "forest", "crossroads", "centre"]}
-You are in some sort of game.
+<NARRATOR> You are in some sort of game.

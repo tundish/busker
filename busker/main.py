@@ -145,8 +145,8 @@ class Console:
 
                     while True:
                         try:
-                            item = engine.queues[1].get(block=True, timeout=2)
-                            print(item, file=self.streams[1])
+                            cue = engine.queues[1].get(block=True, timeout=2)
+                            print(cue.text, file=self.streams[1])
                             self.streams[1].flush()
                         except queue.Empty:
                             break

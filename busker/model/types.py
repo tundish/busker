@@ -137,7 +137,7 @@ class Element(UserDict):
 
 
 @dataclasses.dataclass(order=True)
-class Text:
+class Shot:
     text: str = dataclasses.field(compare=False)
     rank: int = Rank.DIALOGUE
 

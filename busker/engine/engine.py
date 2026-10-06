@@ -18,6 +18,7 @@
 import bisect
 import calendar
 import cmath
+from collections import namedtuple
 from collections import UserDict
 from collections import UserList
 from collections import UserString
@@ -59,7 +60,7 @@ from busker.model.journal import Journal
 from busker.model.multipart import Multipart
 from busker.model.types import Exclamation
 from busker.model.types import Rank
-from busker.model.types import Text
+from busker.model.types import Shot
 
 # https://python-patterns.guide/
 # https://streamkap.com/resources-and-guides/streaming-api-design-patterns
@@ -171,7 +172,7 @@ class Engine(Resident):
         random=random, re=re, statistics=statistics,
         time=time, textwrap=textwrap, uuid=uuid,
         warnings=warnings, zoneinfo=zoneinfo,
-        Exclamation=Exclamation, Rank=Rank, Text=Text,
+        Exclamation=Exclamation, Rank=Rank, Shot=Shot,
     )
 
     class BusyError(Exception):
@@ -188,6 +189,12 @@ class Engine(Resident):
 
         """
         pass
+
+    Cue = namedtuple(
+        "Cue",
+        ["text", "html5", "rank", "lines", "words", "role", "details", "directives", "mode", "parameters", "fragments"],
+        defaults=(None,) * 8,
+    )
 
     @classmethod
     def build(cls, *lenses, path: pathlib.Path, **kwargs) -> Engine:
@@ -210,7 +217,7 @@ class Engine(Resident):
         self.future = None
         self.listen = True
         self.presenter = Presenter()
-        self.directives = []
+        self.cues = []
         # TODO: Need a buffer so most recent contents
         # can be reviewed.
 
@@ -251,8 +258,6 @@ class Engine(Resident):
                     for item in values:
                         self.logger.debug(item)
                         continue
-
-            replica = []
 
             # * TODO: A Guide mixin?
             actions = dict(help=self.do_help)
@@ -295,12 +300,11 @@ class Engine(Resident):
                 context = dict(self.journal.context(marker.mark), marker=marker)
                 for item in self.journal.content(marker.mark):
                     for cue_text in self.presenter.split_cues(item):
+                        if not cue_text:
+                            continue
                         if all(self.presenter.verdict(cue_text, context)):
-                            self.directives.extend(
-                                [i for i in self.presenter.processor.cues if i["directives"]]
-                            )
                             content = self.presenter.rotate_cue(cue_text, marker=marker)
-                            text = Text(self.presenter.fix(content, context))
+                            text = Shot(self.presenter.fix(content, context))
                             self.scene.put(text)
 
                 # Activate post-dialogue handlers
@@ -311,10 +315,19 @@ class Engine(Resident):
                     try:
                         item = self.scene.get(block=False)
                         html5 = self.presenter.processor.loads(item.text)
-                        self.logger.debug(f"{text=}")
-                        replica.append(html5)
-                        # TODO: Data structure with cue, lines, words, etc
-                        self.queues[1].put(html5, block=False)
+                        cues = [
+                            self.Cue(
+                                item.text, html5, item.rank,
+                                **{k: v.copy() if hasattr(v, "copy") else v for k, v in cue.items()}
+                            )
+                            for cue in self.presenter.processor.cues
+                        ]
+                        self.cues.extend(cues)
+                        for cue in cues:
+                            self.queues[1].put(cue, block=False)
+                    except IndexError:
+                        # Empty cues
+                        pass
                     except (queue.Empty, queue.Full):
                         # TODO: Roll back?
                         pass
@@ -382,7 +395,7 @@ class Engine(Resident):
 
         code = compile(element.handler, format(marker.parent.path), mode="exec")
         l = dict(kwargs, journal=self.rht, marker=marker)
-        g = dict(logging=logging, Exclamation=Exclamation, Rank=Rank, Text=Text)
+        g = dict(logging=logging, Exclamation=Exclamation, Rank=Rank, Shot=Shot)
         try:
             exec(code, locals=l, globals=g)
         except Exclamation as report:
