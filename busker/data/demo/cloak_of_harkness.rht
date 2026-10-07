@@ -166,3 +166,10 @@ raise Exclamation(f"All done! {jump}")
 }
 {"seal": 20260829125737, "type": "text/speechmark", "path": ["world", "forest", "crossroads", "centre"]}
 <NARRATOR> You are in some sort of game.
+<NARRATOR> You are at a crossroads on a lightly wooded island.
+{"seal": 20260829125737, "type": "text/speechmark", "path": ["world", "forest", "crossroads", "north"]}
+<NARRATOR> In the shade of the trees.
+{"seal": 20260829125737, "type": "text/speechmark", "path": ["world", "forest", "crossroads", "east"]}
+<NARRATOR> An open patch of grass.
+{"seal": 20260829125737, "type": "text/speechmark", "path": ["world", "forest", "crossroads", "west"]}
+<NARRATOR> On a path which ends in a gate.
