@@ -47,11 +47,7 @@ letters in their names.
 {"seal": 20260829125737, "type": "application/x-python", "path": ["world"]}
 # Move the marker to a new path
 logger = logging.getLogger(format(marker.parent.path))
-context = engine.journal.context(marker.parent.path)
 logger.debug(f"Marker context: {context}")
-
-context = engine.journal.context(marker.mark)
-logger.debug(f"Handler context: {context}")
 
 logger.info(f"Checking if {heading=} possible")
 branches = engine.journal.branches(tuple(marker.mark))
@@ -59,12 +55,21 @@ options = {pair[0].curl: pair for pair in branches}
 try:
     pair = options[heading[1]]
 except KeyError:
-    raise Exclamation(f"Can't go {heading[0]}!")
+    shot = Shot(f"""
+    <#!>
+    + There is no way {heading[0]}.
+    + You can't go {heading[0]}.
+    + {heading[0].title()} is not possible.
+    """,
+    rank=Rank.PROLOGUE
+    )
+    engine.scene.put(shot)
+    raise Exclamation(f"No route via {heading[0]}")
 
 path = pair[1].path
 curl = pair[0].curl
 jump = marker.move(path, curl=curl)
-raise Exclamation(f"All done! {jump}")
+logger.info(f"Move complete: {jump}")
 
 {"seal": 20260829125737, "type": "text/x-python", "path": ["world", "forest", "crossroads", "centre"]}
 {

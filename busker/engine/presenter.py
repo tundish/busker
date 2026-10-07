@@ -53,6 +53,7 @@ class Presenter(Conditions):
         if not cue["lines"]:
             return text
         index = marker.memo[marker.mark]
-        rv = "\n".join((cue["lines"][0], cue["items"][int(index.imag)]))
+        n = int(index.imag) % len(cue["items"])
+        rv = "\n".join((cue["lines"][0].replace("!", str(n)), cue["items"][n]))
         marker.memo[marker.mark] = index + 1j
         return rv

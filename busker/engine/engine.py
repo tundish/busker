@@ -192,8 +192,8 @@ class Engine(Resident):
 
     Cue = namedtuple(
         "Cue",
-        ["text", "html5", "rank", "lines", "words", "role", "details", "directives", "mode", "parameters", "fragments"],
-        defaults=(None,) * 8,
+        ["text", "html5", "rank", "lines", "words", "role", "details", "directives", "mode", "parameters", "fragments", "items"],
+        defaults=(None,) * 9,
     )
 
     @classmethod
@@ -314,10 +314,11 @@ class Engine(Resident):
                 while not self.scene.empty():
                     try:
                         item = self.scene.get(block=False)
-                        html5 = self.presenter.processor.loads(item.text)
+                        text = self.presenter.rotate_cue(item.text, marker=marker)
+                        html5 = self.presenter.processor.loads(text)
                         cues = [
                             self.Cue(
-                                item.text, html5, item.rank,
+                                text, html5, item.rank,
                                 **{k: v.copy() if hasattr(v, "copy") else v for k, v in cue.items()}
                             )
                             for cue in self.presenter.processor.cues
