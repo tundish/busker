@@ -1,6 +1,11 @@
 History
 =======
 
+0.38.0
+------
+
+* Basic console working.
+
 0.36.0
 ------
 
