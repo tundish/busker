@@ -49,7 +49,7 @@ letters in their names.
 logger = logging.getLogger(format(marker.parent.path))
 logger.debug(f"Marker context: {context}")
 
-logger.info(f"Checking if {heading=} possible")
+logger.info(f"Checking if {heading=} is possible")
 branches = engine.journal.branches(tuple(marker.mark))
 options = {pair[0].curl: pair for pair in branches}
 try:
