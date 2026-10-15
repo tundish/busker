@@ -9,3 +9,6 @@ Story Arc wrt to NPC:
 How to trigger transitions? From speech?
 <.confirming> match to tags of LINKAGE.
 Event uses engine.directives to pick linkage via tags.
+
+What were themes and styles in Balladeer are now defined by the stage mark.
+Use htmx head swapping to serve the active stage styling assets.
