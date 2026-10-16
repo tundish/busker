@@ -55,7 +55,7 @@ except ModuleNotFoundError:
     tkfont = None
 
 from busker.engine.marker import Marker
-from busker.engine.presenter import Presenter
+from busker.engine.mechanism import Mechanism
 from busker.model.journal import Journal
 from busker.model.multipart import Multipart
 from busker.model.types import Exclamation
@@ -216,7 +216,7 @@ class Engine(Resident):
         self.journal = journal
         self.future = None
         self.listen = True
-        self.presenter = Presenter()
+        self.mechanism = Mechanism()
         self.cues = []
         # TODO: Need a buffer so most recent contents
         # can be reviewed.
@@ -299,12 +299,12 @@ class Engine(Resident):
 
                 context = dict(self.journal.context(marker.mark), marker=marker)
                 for item in self.journal.content(marker.mark):
-                    for cue_text in self.presenter.split_cues(item):
+                    for cue_text in self.mechanism.split_cues(item):
                         if not cue_text:
                             continue
-                        if all(self.presenter.verdict(cue_text, context)):
-                            content = self.presenter.rotate_cue(cue_text, marker=marker)
-                            text = Shot(self.presenter.fix(content, context))
+                        if all(self.mechanism.verdict(cue_text, context)):
+                            content = self.mechanism.rotate_cue(cue_text, marker=marker)
+                            text = Shot(self.mechanism.fix(content, context))
                             self.scene.put(text)
 
                 # Activate post-dialogue handlers
@@ -314,14 +314,14 @@ class Engine(Resident):
                 while not self.scene.empty():
                     try:
                         item = self.scene.get(block=False)
-                        text = self.presenter.rotate_cue(item.text, marker=marker)
-                        html5 = self.presenter.processor.loads(text)
+                        text = self.mechanism.rotate_cue(item.text, marker=marker)
+                        html5 = self.mechanism.processor.loads(text)
                         cues = [
                             self.Cue(
                                 text, html5, item.rank,
                                 **{k: v.copy() if hasattr(v, "copy") else v for k, v in cue.items()}
                             )
-                            for cue in self.presenter.processor.cues
+                            for cue in self.mechanism.processor.cues
                         ]
                         self.cues.extend(cues)
                         for cue in cues:

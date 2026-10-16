@@ -19,10 +19,10 @@ import textwrap
 import unittest
 
 from busker.engine.marker import Marker
-from busker.engine.presenter import Presenter
+from busker.engine.mechanism import Mechanism
 
 
-class PresenterTests(unittest.TestCase):
+class MechanismTests(unittest.TestCase):
 
     def setUp(self):
         self.text = textwrap.dedent("""
@@ -42,16 +42,16 @@ class PresenterTests(unittest.TestCase):
         """).lstrip()
 
     def test_split_cues(self):
-        presenter = Presenter()
-        cues = presenter.split_cues(self.text)
+        mechanism = Mechanism()
+        cues = mechanism.split_cues(self.text)
         self.assertEqual(len(cues), 4)
         self.assertTrue(all(cue[0] == "<" for cue in cues))
 
     def test_rotate_cue(self):
-        presenter = Presenter()
+        mechanism = Mechanism()
         marker = Marker(name="test_marker")
-        for n, cue in enumerate(presenter.split_cues(self.text)):
+        for n, cue in enumerate(mechanism.split_cues(self.text)):
             with self.subTest(n=n, cue=cue):
-                rv = presenter.rotate_cue(cue, marker=marker)
+                rv = mechanism.rotate_cue(cue, marker=marker)
                 self.assertTrue(rv[0] == "<")
                 self.assertIn(["One", "Four", "B", "D"][n], rv)

@@ -24,7 +24,7 @@ from spiki.conditions import Conditions
 from busker.model.types import Accumulator
 
 
-class Presenter(Conditions):
+class Mechanism(Conditions):
 
     def split_cues(self, text: str):
         self.processor.reset()
