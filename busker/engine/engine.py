@@ -154,6 +154,9 @@ class Engine(Resident):
 
     def __call__(self, timeout=0.2, limit=sys.maxsize, **kwargs):
         "Engine execution assumes threaded concurrency"
+        if not self.validate_journal():
+            return
+
         while self.listen and self.turns < limit:
             try:
                 text = self.queues[0].get(block=True, timeout=timeout)
@@ -161,16 +164,6 @@ class Engine(Resident):
                 continue
 
             marking = self.journal.marking
-            if not marking:
-                # TODO: Invoke DRC plugin?
-                self.logger.warning(f"Journal has no marking")
-                for path, values in self.journal.adaptor.data.items():
-                    self.logger.debug(f"FRAME at path {path}:")
-                    for item in values:
-                        self.logger.debug(item)
-                        continue
-
-            # * TODO: A Guide mixin?
             actions = dict(help=self.do_help)
             for marker in reversed(marking.values()):
                 events = self.journal.events(marker.mark)
@@ -224,6 +217,17 @@ class Engine(Resident):
 
             self.queues[0].task_done()
             self.turns += 1
+
+    def validate_journal(self) -> bool:
+        if not self.journal.marking:
+            self.logger.warning(f"Journal has no marking")
+            for path, values in self.journal.adaptor.data.items():
+                self.logger.debug(f"FRAME at path {path}:")
+                for item in values:
+                    self.logger.debug(item)
+            return False
+        else:
+            return True
 
     def match_text_to_phrases(self, text: str, phrases: list[str], precision=0.95):
         return difflib.get_close_matches(text, phrases, cutoff=precision)
