@@ -62,7 +62,7 @@ except KeyError:
     + {heading[0].title()} is not possible.
     """
     engine.insert_text(text, marker=marker, rank=Rank.PROLOGUE)
-    raise Exclamation(f"No route via {heading[0]}")
+    raise Exclamation(f"No route to the {heading[0]}")
 
 path = pair[1].path
 bend = pair[0].bend
