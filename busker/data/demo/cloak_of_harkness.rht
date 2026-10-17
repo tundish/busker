@@ -51,7 +51,7 @@ logger.debug(f"Marker context: {context}")
 
 logger.info(f"Checking if {heading=} is possible")
 branches = engine.journal.branches(tuple(marker.mark))
-options = {pair[0].curl: pair for pair in branches}
+options = {pair[0].bend: pair for pair in branches}
 try:
     pair = options[heading[1]]
 except KeyError:
@@ -67,8 +67,8 @@ except KeyError:
     raise Exclamation(f"No route via {heading[0]}")
 
 path = pair[1].path
-curl = pair[0].curl
-jump = marker.move(path, curl=curl)
+bend = pair[0].bend
+jump = marker.move(path, bend=bend)
 logger.info(f"Move complete: {jump}")
 
 {"seal": 20260829125737, "type": "text/x-python", "path": ["world", "forest", "crossroads", "centre"]}
@@ -76,7 +76,7 @@ logger.info(f"Move complete: {jump}")
 "type": "linkage",
 "port": 20260829173009,
 "link": 20260829173041,
-"curl": [1, 4],
+"bend": [1, 4],
 "cost": 0
 }
 {"seal": 20260829125737, "type": "text/x-python", "path": ["world", "forest", "crossroads", "centre"]}
@@ -84,7 +84,7 @@ logger.info(f"Move complete: {jump}")
 "type": "linkage",
 "port": 20260829173153,
 "link": 20260829173200,
-"curl": [3, 4],
+"bend": [3, 4],
 "cost": 0
 }
 {"seal": 20260829125737, "type": "text/x-python", "path": ["world", "forest", "crossroads", "centre"]}
@@ -92,7 +92,7 @@ logger.info(f"Move complete: {jump}")
 "type": "linkage",
 "port": 20260829173414,
 "link": 20260829173419,
-"curl": [0, 1],
+"bend": [0, 1],
 "cost": 0
 }
 {"seal": 20260829125737, "type": "text/x-python", "path": ["world", "forest", "crossroads", "east"]}
@@ -100,7 +100,7 @@ logger.info(f"Move complete: {jump}")
 "type": "linkage",
 "port": 20260829173041,
 "link": 20260829173009,
-"curl": [3, 4],
+"bend": [3, 4],
 "cost": 0
 }
 {"seal": 20260829125737, "type": "text/x-python", "path": ["world", "forest", "crossroads", "west"]}
@@ -108,7 +108,7 @@ logger.info(f"Move complete: {jump}")
 "type": "linkage",
 "port": 20260829173200,
 "link": 20260829173153,
-"curl": [1, 4],
+"bend": [1, 4],
 "cost": 0
 }
 {"seal": 20260829125737, "type": "text/x-python", "path": ["world", "forest", "crossroads", "west"]}
@@ -116,7 +116,7 @@ logger.info(f"Move complete: {jump}")
 "type": "linkage",
 "port": 20260830120040,
 "link": 20260830120047,
-"curl": [3, 4],
+"bend": [3, 4],
 "cost": 0
 }
 {"seal": 20260829125737, "type": "text/x-python", "path": ["world", "river", "bridge"]}
@@ -124,7 +124,7 @@ logger.info(f"Move complete: {jump}")
 "type": "linkage",
 "port": 20260830120047,
 "link": 20260830120040,
-"curl": [1, 4],
+"bend": [1, 4],
 "cost": 0
 }
 {"seal": 20260829125737, "type": "text/x-python", "path": ["world", "forest", "crossroads", "north"]}
@@ -132,7 +132,7 @@ logger.info(f"Move complete: {jump}")
 "type": "linkage",
 "port": 20260829173419,
 "link": 20260829173414,
-"curl": [1, 2],
+"bend": [1, 2],
 "cost": 0
 }
 {"seal": 20260829125737, "type": "text/x-python", "path": ["world"]}

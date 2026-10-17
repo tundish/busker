@@ -99,38 +99,6 @@ with closing(some_sync_generator(path)) as tmp:
 # CSS variables conventions:
 #
 #
-"""
---color-ink-gravity: hsl(282.86, 0%, 6.12%);
---color-ink-shadows: hsl(293.33, 0%, 22.75%);
---color-ink-lolight: hsl(203.39, 0%, 31.96%);
---color-ink-midtone: hsl(203.39, 0%, 41.96%);
---color-ink-hilight: hsl(203.06, 0%, 56.47%);
---color-ink-washout: hsl(66.77, 0%, 82.75%);
---color-ink-glamour: hsl(50.00, 0%, 100%);
-
---param-ink-gravity-hue-pick-1: 282.86
---param-ink-shadows-hue-pick-1: 293.33
---param-ink-lolight-hue-pick-1: 203.39
---param-ink-midtone-hue-pick-1: 203.39
---param-ink-hilight-hue-pick-1: 203.06
---param-ink-washout-hue-pick-1: 66.77
---param-ink-glamour-hue-pick-1: 50.00
-
-Use these for collections of related parameters:
-
-... -pair-1
-... -pair-2
-... -trio-1
-... -trio-2
-... -trio-3
-... -quad-1
-... -quad-2
-... -quad-3
-... -quad-4
-
-etc.
-
-"""
 
 class Resident:
     "A core-resident actor"

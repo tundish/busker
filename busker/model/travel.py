@@ -31,7 +31,7 @@ class Travel(Lens):
     """
 
     Point = namedtuple(
-        "Point", ["path", "port", "curl", "cost", "tags"], defaults=[0, 0, tuple()]
+        "Point", ["path", "port", "cost", "bend", "tags"], defaults=[0, 0, tuple()]
     )
 
     def __init__(self, journal: object):
@@ -63,12 +63,14 @@ class Travel(Lens):
             yield (
                 self.Point(
                     elem.parent.path, elem["port"],
-                    tuple(elem.get("curl", [0, 1])), elem.get("cost", 0),
+                    elem.get("cost", 0),
+                    tuple(elem.get("bend", [0, 1])),
                     tuple(elem.get("tags", []))
                 ),
                 self.Point(
                     twin.parent.path, twin["port"],
-                    tuple(twin.get("curl", [0, 1])), twin.get("cost", 0),
+                    elem.get("cost", 0),
+                    tuple(twin.get("bend", [0, 1])),
                     tuple(elem.get("tags", []))
                 ),
             )
