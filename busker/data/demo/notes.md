@@ -6,6 +6,8 @@ Story Arc wrt to NPC:
 2. Curiosity
 3. Detachment
 
+
+pulse - allow eg: (0, 1E99) for one-shots?
 How to trigger transitions? From speech?
 <.confirming> match to tags of LINKAGE.
 Event uses engine.directives to pick linkage via tags.

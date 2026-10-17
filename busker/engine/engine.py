@@ -62,72 +62,14 @@ from busker.model.types import Exclamation
 from busker.model.types import Rank
 from busker.model.types import Shot
 
-# https://python-patterns.guide/
-# https://streamkap.com/resources-and-guides/streaming-api-design-patterns
-# https://anyio.readthedocs.io/en/stable/why.html
-# https://four.htmx.org/
-# https://www.youtube.com/watch?v=lASLZ9TgXyc
-# https://vorpus.org/blog/some-thoughts-on-asynchronous-api-design-in-a-post-asyncawait-world/
-
-"""
-def some_sync_generator(path):
-    with open(path) as ...:
-        yield ...
-
-# DON'T do this
-for obj in some_sync_generator(path):
-    ...
-
-# DO do this
-from contextlib import closing
-with closing(some_sync_generator(path)) as tmp:
-    for obj in tmp:
-
-"""
-
-# Order of implementation
-# Marker
-# + visit counter for every path
-#
-# Content
-# + style
-# + theme
-# + pulse - allow eg: (0, 1E99) for one-shots
-#
-# types text/speechmark or text/plain so factory param required
-
-# CSS variables conventions:
-#
-#
 
 class Resident:
     "A core-resident actor"
+    # https://streamkap.com/resources-and-guides/streaming-api-design-patterns
 
     # Shared among subclasses within the same thread
     shared = contextvars.ContextVar("shared")
-
     executor = ThreadPoolExecutor()
-
-    """
-    def __init__(self, cmd_queue: asyncio.Queue() = None, msg_queue: asyncio.Queue() = None):
-        self.cmd_queue = cmd_queue or asyncio.Queue()
-        self.msg_queue = msg_queue or asyncio.Queue()
-
-    def __iter__(self):
-        "Or is __aiter__ a better fit?"
-        return
-        yield
-
-    async def __aiter__(self):
-        "async for i in ... means client code must be async too."
-        for n in range(10):
-            await asyncio.sleep(0.5)
-            yield n
-
-    async def __call__(self, **kwargs):
-        async with asyncio.TaskGroup() as tasks:
-            ...
-    """
 
 
 class Engine(Resident):
@@ -186,9 +128,7 @@ class Engine(Resident):
         self.listen = True
         self.mechanism = Mechanism()
         self.cues = []
-        # TODO: Need a buffer so most recent contents
-        # can be reviewed.
-
+        # TODO: Need a buffer so most recent contents can be reviewed.
         # TODO: Make Engine the owner of notes/comments/issues related to play
 
     @property
@@ -335,58 +275,3 @@ class Engine(Resident):
 
     def do_help(self, *args, marker=None, **kwargs):
         self.logger.info(f"No help from {marker}!")
-
-# NOTE: use for ideas.
-
-    @staticmethod
-    def split_to_words(text: str, preserver=".", discard=None):
-        discard = discard or set()
-        return [
-            i.strip()
-            for i in text.rstrip(preserver).lower().split()
-            if i not in discard or text.endswith(preserver)
-        ]
-
-    @staticmethod
-    def set_clocks(journal):
-        for marker in journal.marking:
-            marker.scheduler = sched.scheduler()
-            yield marker["name"], marker
-
-    def cmd(self, text: str, marker: dict, precision=0.95, **kwargs):
-        actions = self.rht.actions(marker.parent.path)
-        matches = self.match_text_to_phrases(text, actions)
-        if not matches:
-            self.logger.debug(f"No match for text '{text}'")
-            return
-        self.logger.info(f"Selecting first of matches {matches}")
-        element, kwargs = actions[matches[0]]
-
-        code = compile(element.handler, format(marker.parent.path), mode="exec")
-        l = dict(kwargs, journal=self.rht, marker=marker)
-        g = dict(logging=logging, Exclamation=Exclamation, Rank=Rank, Shot=Shot)
-        try:
-            exec(code, locals=l, globals=g)
-        except Exclamation as report:
-            self.logger.info(report)
-        except Exception as err:
-            self.logger.warning(err, exc_info=True)
-        # Advance tick
-
-    def put(self, *args, delay=0, **kwargs):
-        return [
-            marker.scheduler.enter(
-                delay, n, self.cmd, argument=(arg, marker), kwargs=kwargs
-            )
-            for n, arg in enumerate(args)
-            for marker in self.clocks.values()
-        ]
-
-    def step(self, **kwargs):
-        import time
-        for marker in self.clocks.values():
-            delta = 0
-            then = time.time()
-            while delta is not None:
-                time.sleep(delta)
-                delta = marker.scheduler.run(blocking=False)
