@@ -47,12 +47,6 @@ class EngineTests(unittest.TestCase):
 
     def test_world_marker(self):
         self.engine.queues[0].put("go north")
+        self.engine(limit=1)
         self.engine.queues[0].join()
-        scene = []
-        while True:
-            try:
-                scene.append(self.engine.queues[1].get(block=False))
-            except queue.Empty:
-                break
-        print(*scene, sep="\n")
-
+        self.assertTrue(self.engine.cues)

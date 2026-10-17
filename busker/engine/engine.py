@@ -38,6 +38,7 @@ import random
 import re
 import sched
 import statistics
+import sys
 import time
 import textwrap
 from types import SimpleNamespace as SN
@@ -127,6 +128,7 @@ class Engine(Resident):
         self.future = None
         self.listen = True
         self.mechanism = Mechanism()
+        self.turns = 0
         self.cues = []
         # TODO: Need a buffer so most recent contents can be reviewed.
         # TODO: Make Engine the owner of notes/comments/issues related to play
@@ -149,9 +151,9 @@ class Engine(Resident):
             f" {stats.size}"
         )
 
-    def __call__(self, timeout=2, **kwargs):
+    def __call__(self, timeout=2, limit=sys.maxsize, **kwargs):
         "Engine execution assumes threaded concurrency"
-        while self.listen:
+        while self.listen and self.turns < limit:
             try:
                 text = self.queues[0].get(block=True, timeout=timeout)
             except queue.Empty:
@@ -219,6 +221,7 @@ class Engine(Resident):
                 for element in itertools.dropwhile(lambda el: el.rank < Rank.DIALOGUE, events):
                     self.execute(element, marker, **kwargs)
 
+                # TODO: self.cues.extend(list(self.play_scene))
                 while not self.scene.empty():
                     try:
                         item = self.scene.get(block=False)
@@ -242,6 +245,7 @@ class Engine(Resident):
                         pass
 
             self.queues[0].task_done()
+            self.turns += 1
 
     def match_text_to_phrases(self, text: str, phrases: list[str], precision=0.95):
         return difflib.get_close_matches(text, phrases, cutoff=precision)
