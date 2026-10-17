@@ -167,16 +167,9 @@ class Engine(Resident):
             actions = dict(help=self.do_help)
             for marker in reversed(marking.values()):
                 events = self.journal.events(marker.mark)
-
-                try:
-                    actions.update(self.journal.actions(marker.mark))
-                except AttributeError as err:
-                    self.logger.warning("Journal does not support action syntax")
-                    self.logger.debug(err, exc_info=True)
-                    # No Syntax lens. What now?
-                    break
-
+                actions.update(self.journal.actions(marker.mark))
                 matches = self.match_text_to_phrases(text, actions)
+
                 try:
                     self.logger.debug(f"Selecting first of matches {matches}")
                     element, kwargs = actions[matches[0]]
@@ -226,8 +219,16 @@ class Engine(Resident):
                 for item in values:
                     self.logger.debug(item)
             return False
-        else:
-            return True
+
+        marker = next(iter(self.journal.marking.values()))
+        try:
+            _ = self.journal.actions(marker.mark)
+        except AttributeError as err:
+            self.logger.warning("Journal does not support action syntax")
+            self.logger.debug(err, exc_info=True)
+            return False
+
+        return True
 
     def match_text_to_phrases(self, text: str, phrases: list[str], precision=0.95):
         return difflib.get_close_matches(text, phrases, cutoff=precision)
