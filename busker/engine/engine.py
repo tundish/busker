@@ -152,7 +152,7 @@ class Engine(Resident):
             f" {stats.size}"
         )
 
-    def __call__(self, timeout=2, limit=sys.maxsize, **kwargs):
+    def __call__(self, timeout=0.2, limit=sys.maxsize, **kwargs):
         "Engine execution assumes threaded concurrency"
         while self.listen and self.turns < limit:
             try:
@@ -193,6 +193,7 @@ class Engine(Resident):
                     # TODO: Call unknown
                     pass
                 except TypeError:
+                    # The action is a local method
                     fn = actions[matches[0]]
                     try:
                         fn(text, marker=marker, marking=marking)
@@ -208,15 +209,10 @@ class Engine(Resident):
                 for element in itertools.takewhile(lambda el: el.rank < Rank.DIALOGUE, events):
                     self.execute_handler(element, marker, **kwargs)
 
+                # Insert content
                 context = dict(self.journal.context(marker.mark), marker=marker)
-                for item in self.journal.content(marker.mark):
-                    for cue_text in self.mechanism.split_cues(item):
-                        if not cue_text:
-                            continue
-                        if all(self.mechanism.verdict(cue_text, context)):
-                            content = self.mechanism.rotate_cue(cue_text, marker=marker)
-                            text = Shot(self.mechanism.fix(content, context))
-                            self.scene.put(text)
+                for text in self.journal.content(marker.mark):
+                    self.insert_text(text, context=context, marker=marker)
 
                 # Activate post-dialogue handlers
                 for element in itertools.dropwhile(lambda el: el.rank < Rank.DIALOGUE, events):

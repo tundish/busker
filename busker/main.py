@@ -74,7 +74,7 @@ class Console:
 
         try:
             self.engines.append(Engine.build(*lenses, path=args.input))
-            self.engines[-1].queues[0].put("", block=True, timeout=2)
+            self.engines[-1].queues[0].put("", block=True, timeout=5)
             self.index = len(self.engines) - 1
         except IndexError as err:
             self.logger.warning(f"Error building engine from {args.input}")
@@ -82,7 +82,7 @@ class Console:
         else:
             while True:
                 try:
-                    item = self.engines[-1].queues[1].get(block=True, timeout=2)
+                    item = self.engines[-1].queues[1].get(block=True, timeout=0.2)
                     print(item.text, file=self.streams[1])
                     self.streams[1].flush()
                 except queue.Empty:
@@ -145,7 +145,7 @@ class Console:
 
                     while True:
                         try:
-                            cue = engine.queues[1].get(block=True, timeout=2)
+                            cue = engine.queues[1].get(block=True, timeout=0.2)
                             print(cue.text, file=self.streams[1])
                             self.streams[1].flush()
                         except queue.Empty:
