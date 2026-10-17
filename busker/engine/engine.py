@@ -222,15 +222,32 @@ class Engine(Resident):
                 for element in itertools.dropwhile(lambda el: el.rank < Rank.DIALOGUE, events):
                     self.execute_handler(element, marker, **kwargs)
 
-                for cue in self.play_scene(self.scene, marker):
-                    self.queues[1].put(cue, block=False)
-                    self.cues.append(cue)
+            for cue in self.play_scene(self.scene):
+                self.queues[1].put(cue, block=False)
+                self.cues.append(cue)
 
             self.queues[0].task_done()
             self.turns += 1
 
     def match_text_to_phrases(self, text: str, phrases: list[str], precision=0.95):
         return difflib.get_close_matches(text, phrases, cutoff=precision)
+
+    def insert_text(self, text: str, rank: int = Rank.DIALOGUE, context: dict = None, marker: Marker = None):
+        """Back-end method for use by handlers."""
+        if context is None:
+            cue_strs = [text]
+        else:
+            cue_strs = [
+                self.mechanism.fix(cue_str, context)
+                for cue_str in self.mechanism.split_cues(text)
+                if all(self.mechanism.verdict(cue_str, context))
+            ]
+
+        for cue_str in cue_strs:
+            cue_str = textwrap.dedent(cue_str).lstrip()
+            if marker is not None:
+                cue_str = self.mechanism.rotate_cue(cue_str, marker=marker)
+            self.scene.put(Shot(cue_str, rank=rank))
 
     def execute_handler(self, element: Element, marker: Marker, **kwargs):
         path = marker.mark
@@ -245,16 +262,15 @@ class Engine(Resident):
         except Exception as err:
             self.logger.warning(err, exc_info=True)
 
-    def play_scene(self, scene: queue.Queue, marker: Marker) -> Generator[Cue]:
-        """Consume the scene defined by the marker, and generate cues for output."""
+    def play_scene(self, scene: queue.Queue) -> Generator[Cue]:
+        """Consume the contents of a scene, and generate cues for output."""
         while not scene.empty():
             try:
                 item = scene.get(block=False)
-                text = self.mechanism.rotate_cue(item.text, marker=marker)
-                html5 = self.mechanism.processor.loads(text)
+                html5 = self.mechanism.processor.loads(item.text)
                 yield from (
                     self.Cue(
-                        text, html5, item.rank,
+                        item.text, html5, item.rank,
                         **{k: v.copy() if hasattr(v, "copy") else v for k, v in cue.items()}
                     )
                     for cue in self.mechanism.processor.cues

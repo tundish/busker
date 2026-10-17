@@ -55,15 +55,13 @@ options = {pair[0].bend: pair for pair in branches}
 try:
     pair = options[heading[1]]
 except KeyError:
-    shot = Shot(f"""
+    text = f"""
     <#!>
     + There is no way {heading[0]}.
     + You can't go {heading[0]}.
     + {heading[0].title()} is not possible.
-    """,
-    rank=Rank.PROLOGUE
-    )
-    engine.scene.put(shot)
+    """
+    engine.insert_text(text, marker=marker, rank=Rank.PROLOGUE)
     raise Exclamation(f"No route via {heading[0]}")
 
 path = pair[1].path
