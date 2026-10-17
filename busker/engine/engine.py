@@ -22,6 +22,7 @@ from collections import namedtuple
 from collections import UserDict
 from collections import UserList
 from collections import UserString
+from collections.abc import Generator
 from concurrent.futures import ThreadPoolExecutor
 import contextvars
 import copy
@@ -205,7 +206,7 @@ class Engine(Resident):
 
                 # Activate pre-dialogue handlers
                 for element in itertools.takewhile(lambda el: el.rank < Rank.DIALOGUE, events):
-                    self.execute(element, marker, **kwargs)
+                    self.execute_handler(element, marker, **kwargs)
 
                 context = dict(self.journal.context(marker.mark), marker=marker)
                 for item in self.journal.content(marker.mark):
@@ -219,30 +220,11 @@ class Engine(Resident):
 
                 # Activate post-dialogue handlers
                 for element in itertools.dropwhile(lambda el: el.rank < Rank.DIALOGUE, events):
-                    self.execute(element, marker, **kwargs)
+                    self.execute_handler(element, marker, **kwargs)
 
-                # TODO: self.cues.extend(list(self.play_scene))
-                while not self.scene.empty():
-                    try:
-                        item = self.scene.get(block=False)
-                        text = self.mechanism.rotate_cue(item.text, marker=marker)
-                        html5 = self.mechanism.processor.loads(text)
-                        cues = [
-                            self.Cue(
-                                text, html5, item.rank,
-                                **{k: v.copy() if hasattr(v, "copy") else v for k, v in cue.items()}
-                            )
-                            for cue in self.mechanism.processor.cues
-                        ]
-                        self.cues.extend(cues)
-                        for cue in cues:
-                            self.queues[1].put(cue, block=False)
-                    except IndexError:
-                        # Empty cues
-                        pass
-                    except (queue.Empty, queue.Full):
-                        # TODO: Roll back?
-                        pass
+                for cue in self.play_scene(self.scene, marker):
+                    self.queues[1].put(cue, block=False)
+                    self.cues.append(cue)
 
             self.queues[0].task_done()
             self.turns += 1
@@ -250,7 +232,7 @@ class Engine(Resident):
     def match_text_to_phrases(self, text: str, phrases: list[str], precision=0.95):
         return difflib.get_close_matches(text, phrases, cutoff=precision)
 
-    def execute(self, element: Element, marker: Marker, **kwargs):
+    def execute_handler(self, element: Element, marker: Marker, **kwargs):
         path = marker.mark
         context = self.journal.context(path)
         code = compile(element.handler, format(path), mode="exec")
@@ -262,6 +244,27 @@ class Engine(Resident):
             self.logger.info(report)
         except Exception as err:
             self.logger.warning(err, exc_info=True)
+
+    def play_scene(self, scene: queue.Queue, marker: Marker) -> Generator[Cue]:
+        """Consume the scene defined by the marker, and generate cues for output."""
+        while not scene.empty():
+            try:
+                item = scene.get(block=False)
+                text = self.mechanism.rotate_cue(item.text, marker=marker)
+                html5 = self.mechanism.processor.loads(text)
+                yield from (
+                    self.Cue(
+                        text, html5, item.rank,
+                        **{k: v.copy() if hasattr(v, "copy") else v for k, v in cue.items()}
+                    )
+                    for cue in self.mechanism.processor.cues
+                )
+            except IndexError:
+                # Empty cues
+                pass
+            except (queue.Empty, queue.Full):
+                # TODO: Roll back?
+                pass
 
     def run(self, **kwargs):
         if not self.journal:
