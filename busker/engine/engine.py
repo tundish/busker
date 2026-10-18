@@ -62,7 +62,7 @@ from busker.model.journal import Journal
 from busker.model.multipart import Multipart
 from busker.model.types import Exclamation
 from busker.model.types import Rank
-from busker.model.types import Shot
+from busker.model.types import Script
 
 
 class Resident:
@@ -84,7 +84,7 @@ class Engine(Resident):
         random=random, re=re, statistics=statistics,
         time=time, textwrap=textwrap, uuid=uuid,
         warnings=warnings, zoneinfo=zoneinfo,
-        Exclamation=Exclamation, Rank=Rank, Shot=Shot,
+        Exclamation=Exclamation, Rank=Rank, Script=Script,
     )
 
     class BusyError(Exception):
@@ -244,11 +244,11 @@ class Engine(Resident):
                 if all(self.mechanism.verdict(cue_str, context))
             ]
 
-        for cue_str in cue_strs:
+        for n, cue_str in enumerate(cue_strs):
             cue_str = textwrap.dedent(cue_str).lstrip()
             if marker is not None:
                 cue_str = self.mechanism.rotate_cue(cue_str, marker=marker)
-            self.scene.put(Shot(cue_str, rank=rank))
+            self.scene.put(Script(cue_str, rank=rank))
 
     def execute_handler(self, element: Element, marker: Marker, **kwargs):
         path = marker.mark

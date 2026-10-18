@@ -24,6 +24,7 @@ import dataclasses
 import enum
 import pathlib
 import textwrap
+import typing
 import warnings
 
 
@@ -137,7 +138,7 @@ class Element(UserDict):
 
 
 @dataclasses.dataclass(order=True)
-class Shot:
+class Script:
     text: str = dataclasses.field(compare=False)
     rank: int = Rank.DIALOGUE
 

@@ -164,9 +164,22 @@ logger.info(f"Move complete: {jump}")
 logger = logging.getLogger(format(marker.parent.path))
 logger.debug(f"Looking around {context}")
 items = context["entities"].get(tuple(marker.mark), [])
+if not items:
+    engine.insert_text(
+        random.choice((
+            "There's nothing here.",
+            "Nothing to see here.",
+            "There's nothing much else to see.",
+            "No, nothing to see.",
+        )),
+        rank=Rank.EPILOGUE
+    )
+
 for n, item in enumerate(items):
     # TODO: Random misses?
     logger.debug(f"{item}")
+    if n == 0:
+        engine.insert_text("Looking around.", rank=Rank.EPILOGUE)
     engine.insert_text(
         f"A {random.choice(item['names'])}. It's {random.choice(item['aspects'])}.",
         rank=Rank.EPILOGUE
