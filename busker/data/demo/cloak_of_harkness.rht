@@ -61,7 +61,7 @@ logger = logging.getLogger(format(marker.parent.path))
 logger.debug(f"Marker context: {context}")
 
 logger.info(f"Checking if {heading=} is possible")
-branches = engine.journal.branches(tuple(marker.mark))
+branches = engine.journal.branches(marker.mark)
 options = {pair[0].bend: pair for pair in branches}
 try:
     pair = options[heading[1]]
@@ -163,7 +163,7 @@ logger.info(f"Move complete: {jump}")
 {"seal": 20260829125737, "type": "code/python", "path": ["world"]}
 logger = logging.getLogger(format(marker.parent.path))
 logger.debug(f"Looking around {context}")
-items = context["entities"].get(tuple(marker.mark), [])
+items = context["entities"].get(marker.mark, [])
 if not items:
     engine.insert_text(
         random.choice((
