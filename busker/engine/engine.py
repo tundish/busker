@@ -268,7 +268,12 @@ class Engine(Resident):
         while not scene.empty():
             try:
                 item = scene.get(block=False)
-                html5 = self.mechanism.processor.loads(item.text)
+                if not item.text.startswith("<"):
+                    text = f"<> {item.text}"
+                else:
+                    text = item.text
+
+                html5 = self.mechanism.processor.loads(text)
                 yield from (
                     self.Cue(
                         item.text, html5, item.rank,

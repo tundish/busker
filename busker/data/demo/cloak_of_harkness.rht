@@ -169,7 +169,7 @@ for n, item in enumerate(items):
     logger.debug(f"{item}")
     engine.insert_text(
         f"A {random.choice(item['names'])}. It's {random.choice(item['aspects'])}.",
-        context=context, rank=Rank.EPILOGUE
+        rank=Rank.EPILOGUE
     )
 
 {"seal": 20260829125737, "type": "text/x-python", "path": ["story"]}
