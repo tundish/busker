@@ -55,7 +55,7 @@ class Syntax(Lens):
             products = set(itertools.product(*results.values()))
             for term in element.get("terms", []):
                 for product in products:
-                    kwargs = dict(zip(element["params"], product))
+                    kwargs = dict(zip(element.get("params", []), product))
                     phrase = term.format(**kwargs)
-                    rv[phrase.lower()] = (element, kwargs)
+                    rv[phrase.casefold()] = (element, kwargs)
         return rv

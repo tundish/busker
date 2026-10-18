@@ -30,7 +30,18 @@ letters in their names.
     ("east", (1, 4)),
     ("south", (1, 2)),
     ("west", (3, 4)),
-]
+],
+"entities": {
+    ("world", "forest", "crossroads", "east"): [
+        {
+            "names": ["Can", "Beer can"], "types": {"junk"},
+            "states": {"presence": "lost"},
+            "aspects": ["empty", "crumpled", "slightly sticky"],
+        },
+    ],
+    ("stage", "inventory"): [
+    ],
+}
 }
 {"seal": 20260829125737, "type": "application/json", "path": ["world"]}
 {
@@ -143,6 +154,24 @@ logger.info(f"Move complete: {jump}")
 "span": None,
 "tick": 0
 }
+{"seal": 20260829125737, "type": "data/python", "path": ["world"]}
+{
+"type": "handler",
+"description": "looking around",
+"terms": ["look"],
+}
+{"seal": 20260829125737, "type": "application/x-python", "path": ["world"]}
+logger = logging.getLogger(format(marker.parent.path))
+logger.debug(f"Looking around {context}")
+items = context["entities"].get(tuple(marker.mark), [])
+for n, item in enumerate(items):
+    # TODO: Random misses?
+    logger.debug(f"{item}")
+    engine.insert_text(
+        f"A {random.choice(item['names'])}. It's {random.choice(item['aspects'])}.",
+        context=context, rank=Rank.EPILOGUE
+    )
+
 {"seal": 20260829125737, "type": "text/x-python", "path": ["story"]}
 {
 "type": "marking",
