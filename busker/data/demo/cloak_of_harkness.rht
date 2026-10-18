@@ -43,7 +43,7 @@ letters in their names.
     ],
 }
 }
-{"seal": 20260829125737, "type": "application/json", "path": ["world"]}
+{"seal": 20260829125737, "type": "data/python", "path": ["world"]}
 {
 "type": "handler",
 "description": "Travel",
@@ -55,7 +55,7 @@ letters in their names.
     "{heading[0][0]}", "Go {heading[0][0]}"
 ]
 }
-{"seal": 20260829125737, "type": "application/x-python", "path": ["world"]}
+{"seal": 20260829125737, "type": "code/python", "path": ["world"]}
 # Move the marker to a new path
 logger = logging.getLogger(format(marker.parent.path))
 logger.debug(f"Marker context: {context}")
@@ -80,7 +80,7 @@ bend = pair[0].bend
 jump = marker.move(path, bend=bend)
 logger.info(f"Move complete: {jump}")
 
-{"seal": 20260829125737, "type": "text/x-python", "path": ["world", "forest", "crossroads", "centre"]}
+{"seal": 20260829125737, "type": "data/python", "path": ["world", "forest", "crossroads", "centre"]}
 {
 "type": "linkage",
 "port": 20260829173009,
@@ -88,7 +88,7 @@ logger.info(f"Move complete: {jump}")
 "bend": [1, 4],
 "cost": 0
 }
-{"seal": 20260829125737, "type": "text/x-python", "path": ["world", "forest", "crossroads", "centre"]}
+{"seal": 20260829125737, "type": "data/python", "path": ["world", "forest", "crossroads", "centre"]}
 {
 "type": "linkage",
 "port": 20260829173153,
@@ -96,7 +96,7 @@ logger.info(f"Move complete: {jump}")
 "bend": [3, 4],
 "cost": 0
 }
-{"seal": 20260829125737, "type": "text/x-python", "path": ["world", "forest", "crossroads", "centre"]}
+{"seal": 20260829125737, "type": "data/python", "path": ["world", "forest", "crossroads", "centre"]}
 {
 "type": "linkage",
 "port": 20260829173414,
@@ -104,7 +104,7 @@ logger.info(f"Move complete: {jump}")
 "bend": [0, 1],
 "cost": 0
 }
-{"seal": 20260829125737, "type": "text/x-python", "path": ["world", "forest", "crossroads", "east"]}
+{"seal": 20260829125737, "type": "data/python", "path": ["world", "forest", "crossroads", "east"]}
 {
 "type": "linkage",
 "port": 20260829173041,
@@ -112,7 +112,7 @@ logger.info(f"Move complete: {jump}")
 "bend": [3, 4],
 "cost": 0
 }
-{"seal": 20260829125737, "type": "text/x-python", "path": ["world", "forest", "crossroads", "west"]}
+{"seal": 20260829125737, "type": "data/python", "path": ["world", "forest", "crossroads", "west"]}
 {
 "type": "linkage",
 "port": 20260829173200,
@@ -120,7 +120,7 @@ logger.info(f"Move complete: {jump}")
 "bend": [1, 4],
 "cost": 0
 }
-{"seal": 20260829125737, "type": "text/x-python", "path": ["world", "forest", "crossroads", "west"]}
+{"seal": 20260829125737, "type": "data/python", "path": ["world", "forest", "crossroads", "west"]}
 {
 "type": "linkage",
 "port": 20260830120040,
@@ -128,7 +128,7 @@ logger.info(f"Move complete: {jump}")
 "bend": [3, 4],
 "cost": 0
 }
-{"seal": 20260829125737, "type": "text/x-python", "path": ["world", "river", "bridge"]}
+{"seal": 20260829125737, "type": "data/python", "path": ["world", "river", "bridge"]}
 {
 "type": "linkage",
 "port": 20260830120047,
@@ -136,7 +136,7 @@ logger.info(f"Move complete: {jump}")
 "bend": [1, 4],
 "cost": 0
 }
-{"seal": 20260829125737, "type": "text/x-python", "path": ["world", "forest", "crossroads", "north"]}
+{"seal": 20260829125737, "type": "data/python", "path": ["world", "forest", "crossroads", "north"]}
 {
 "type": "linkage",
 "port": 20260829173419,
@@ -144,7 +144,7 @@ logger.info(f"Move complete: {jump}")
 "bend": [1, 2],
 "cost": 0
 }
-{"seal": 20260829125737, "type": "text/x-python", "path": ["world"]}
+{"seal": 20260829125737, "type": "data/python", "path": ["world"]}
 {
 "type": "marking",
 "name": "world",
@@ -160,7 +160,7 @@ logger.info(f"Move complete: {jump}")
 "description": "looking around",
 "terms": ["look"],
 }
-{"seal": 20260829125737, "type": "application/x-python", "path": ["world"]}
+{"seal": 20260829125737, "type": "code/python", "path": ["world"]}
 logger = logging.getLogger(format(marker.parent.path))
 logger.debug(f"Looking around {context}")
 items = context["entities"].get(tuple(marker.mark), [])
@@ -185,7 +185,7 @@ for n, item in enumerate(items):
         rank=Rank.EPILOGUE
     )
 
-{"seal": 20260829125737, "type": "text/x-python", "path": ["story"]}
+{"seal": 20260829125737, "type": "data/python", "path": ["story"]}
 {
 "type": "marking",
 "name": "story",
@@ -193,7 +193,7 @@ for n, item in enumerate(items):
 "mark": ["story", "act", 0],
 "tick": 0
 }
-{"seal": 20260829125737, "type": "text/x-python", "path": ["stage"]}
+{"seal": 20260829125737, "type": "data/python", "path": ["stage"]}
 {
 "type": "context",
 "entities": [
