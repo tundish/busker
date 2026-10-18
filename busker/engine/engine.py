@@ -129,7 +129,7 @@ class Engine(Resident):
         self.future = None
         self.listen = True
         self.mechanism = Mechanism()
-        self.turns = 0
+        self.turn = 0
         self.clip = 0
         self.cues = []
         # TODO: Need a buffer so most recent contents can be reviewed.
@@ -158,7 +158,7 @@ class Engine(Resident):
         if not self.validate_journal():
             return
 
-        while self.listen and self.turns < limit:
+        while self.listen and self.turn < limit:
             try:
                 text = self.queues[0].get(block=True, timeout=timeout)
             except queue.Empty:
@@ -210,7 +210,7 @@ class Engine(Resident):
                 self.cues.append(cue)
 
             self.queues[0].task_done()
-            self.turns += 1
+            self.turn += 1
 
     def validate_journal(self) -> bool:
         if not self.journal.marking:
