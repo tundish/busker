@@ -104,7 +104,7 @@ class Engine(Resident):
 
     Cue = namedtuple(
         "Cue",
-        ["text", "html5", "rank", "para", "lines", "words", "role", "details", "directives", "mode", "parameters", "fragments", "items"],
+        ["text", "html5", "rank", "clip", "lines", "words", "role", "details", "directives", "mode", "parameters", "fragments", "items"],
         defaults= (0, ) + (None,) * 9,
     )
 
@@ -130,7 +130,7 @@ class Engine(Resident):
         self.listen = True
         self.mechanism = Mechanism()
         self.turns = 0
-        self.para = 0
+        self.clip = 0
         self.cues = []
         # TODO: Need a buffer so most recent contents can be reviewed.
         # TODO: Make Engine the owner of notes/comments/issues related to play
@@ -250,8 +250,8 @@ class Engine(Resident):
             if marker is not None:
                 cue_str = self.mechanism.rotate_cue(cue_str, marker=marker)
 
-            self.para += 1
-            self.scene.put(Note(cue_str, rank=rank, para=self.para))
+            self.clip += 1
+            self.scene.put(Note(cue_str, rank=rank, clip=self.clip))
 
     def execute_handler(self, element: Element, marker: Marker, **kwargs):
         path = marker.mark
@@ -279,7 +279,7 @@ class Engine(Resident):
                 html5 = self.mechanism.processor.loads(text)
                 yield from (
                     self.Cue(
-                        item.text, html5, item.rank, item.para,
+                        item.text, html5, item.rank, item.clip,
                         **{k: v.copy() if hasattr(v, "copy") else v for k, v in cue.items()}
                     )
                     for cue in self.mechanism.processor.cues

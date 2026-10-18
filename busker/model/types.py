@@ -141,7 +141,7 @@ class Element(UserDict):
 class Note:
     text: str = dataclasses.field(compare=False)
     rank: int = Rank.DIALOGUE
-    para: int = 0
+    clip: int = 0
 
     def __post_init__(self):
         self.text = textwrap.dedent(self.text).lstrip()
