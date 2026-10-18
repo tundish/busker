@@ -20,7 +20,7 @@ import unittest
 
 from busker.model.types import Accumulator
 from busker.model.types import Rank
-from busker.model.types import Script
+from busker.model.types import Note
 
 
 class AccumulatorTests(unittest.TestCase):
@@ -33,15 +33,15 @@ class AccumulatorTests(unittest.TestCase):
         self.assertFalse(rv)
 
 
-class ShotTests(unittest.TestCase):
+class NoteTests(unittest.TestCase):
 
     def test_ranking(self):
         data = [
-            Script("<> Two"),
-            Script("""
+            Note("<> Two"),
+            Note("""
             <> One
             """, rank=Rank.PROLOGUE),
-            Script("""
+            Note("""
             <> Three
             """),
         ]

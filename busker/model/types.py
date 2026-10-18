@@ -138,7 +138,7 @@ class Element(UserDict):
 
 
 @dataclasses.dataclass(order=True)
-class Script:
+class Note:
     text: str = dataclasses.field(compare=False)
     rank: int = Rank.DIALOGUE
     para: int = 0

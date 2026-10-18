@@ -61,8 +61,8 @@ from busker.engine.mechanism import Mechanism
 from busker.model.journal import Journal
 from busker.model.multipart import Multipart
 from busker.model.types import Exclamation
+from busker.model.types import Note
 from busker.model.types import Rank
-from busker.model.types import Script
 
 
 class Resident:
@@ -84,7 +84,7 @@ class Engine(Resident):
         random=random, re=re, statistics=statistics,
         time=time, textwrap=textwrap, uuid=uuid,
         warnings=warnings, zoneinfo=zoneinfo,
-        Exclamation=Exclamation, Rank=Rank, Script=Script,
+        Exclamation=Exclamation, Note=Note, Rank=Rank,
     )
 
     class BusyError(Exception):
@@ -251,7 +251,7 @@ class Engine(Resident):
                 cue_str = self.mechanism.rotate_cue(cue_str, marker=marker)
 
             self.para += 1
-            self.scene.put(Script(cue_str, rank=rank, para=self.para))
+            self.scene.put(Note(cue_str, rank=rank, para=self.para))
 
     def execute_handler(self, element: Element, marker: Marker, **kwargs):
         path = marker.mark
