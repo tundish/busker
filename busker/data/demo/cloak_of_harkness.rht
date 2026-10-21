@@ -166,9 +166,9 @@ logger.info(f"Move complete: {jump}")
 }
 {"seal": 20260829125737, "type": "code/python", "path": ["stage"]}
 logger = logging.getLogger(format(marker.parent.path))
-logger.debug(f"{engine.journal.marking=}")
 logger.debug(f"Looking around {context}")
-items = context["entities"].get(marker.mark, [])
+world_mark = engine.journal.marking["world"].mark
+items = context["entities"].get(world_mark, [])
 if not items:
     engine.insert_text(
         random.choice((
