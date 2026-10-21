@@ -165,9 +165,9 @@ class Engine(Resident):
                 continue
 
             marking = self.journal.marking
-            actions = dict(help=self.do_help)
             for marker in reversed(marking.values()):
                 events = self.journal.events(marker.mark)
+                actions = dict(help=self.do_help)
                 actions.update(self.journal.actions(marker.mark))
                 matches = self.match_text_to_phrases(text, actions)
 

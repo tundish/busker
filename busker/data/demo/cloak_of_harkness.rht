@@ -31,17 +31,6 @@ letters in their names.
     ("south", (1, 2)),
     ("west", (3, 4)),
 ],
-"entities": {
-    ("world", "forest", "crossroads", "east"): [
-        {
-            "names": ["Can", "Beer can"], "types": {"junk"},
-            "states": {"presence": "lost"},
-            "aspects": ["empty", "crumpled", "slightly sticky"],
-        },
-    ],
-    ("stage", "inventory"): [
-    ],
-}
 }
 {"seal": 20260829125737, "type": "data/python", "path": ["world"]}
 {
@@ -154,14 +143,30 @@ logger.info(f"Move complete: {jump}")
 "span": None,
 "tick": 0
 }
-{"seal": 20260829125737, "type": "data/python", "path": ["world"]}
+{"seal": 20260829125737, "type": "data/python", "path": ["stage"]}
+{
+"type": "context",
+"entities": {
+    ("world", "forest", "crossroads", "east"): [
+        {
+            "names": ["Can", "Beer can"], "types": {"junk"},
+            "states": {"presence": "lost"},
+            "aspects": ["empty", "crumpled", "slightly sticky"],
+        },
+    ],
+    ("stage", "inventory"): [
+    ],
+},
+}
+{"seal": 20260829125737, "type": "data/python", "path": ["stage"]}
 {
 "type": "handler",
 "description": "looking around",
 "terms": ["look"],
 }
-{"seal": 20260829125737, "type": "code/python", "path": ["world"]}
+{"seal": 20260829125737, "type": "code/python", "path": ["stage"]}
 logger = logging.getLogger(format(marker.parent.path))
+logger.debug(f"{engine.journal.marking=}")
 logger.debug(f"Looking around {context}")
 items = context["entities"].get(marker.mark, [])
 if not items:
@@ -184,7 +189,14 @@ for n, item in enumerate(items):
         f"A {random.choice(item['names'])}. It's {random.choice(item['aspects'])}.",
         rank=Rank.EPILOGUE
     )
-
+{"seal": 20260829125737, "type": "data/python", "path": ["stage"]}
+{
+"type": "marking",
+"name": "stage",
+"rank": 2,
+"mark": ["stage"],
+"tick": 0
+}
 {"seal": 20260829125737, "type": "data/python", "path": ["story"]}
 {
 "type": "marking",
@@ -192,22 +204,6 @@ for n, item in enumerate(items):
 "rank": 2,
 "mark": ["story", "act", 0],
 "tick": 0
-}
-{"seal": 20260829125737, "type": "data/python", "path": ["stage"]}
-{
-"type": "context",
-"entities": [
-    {
-        "names": [],
-        "states": {
-            "exit": (),
-            "home": (),
-            "into": (),
-            "spot": (),
-        },
-        "tags": {},
-    },
-],
 }
 {"seal": 20260829125737, "type": "text/speechmark", "path": ["world", "forest", "crossroads", "centre"]}
 <NARRATOR> You are in some sort of game.
