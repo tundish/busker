@@ -208,6 +208,20 @@ for n, item in enumerate(seen):
         f"A {random.choice(item['names'])}. It's {random.choice(item['aspects'])}.",
         rank=Rank.EPILOGUE
     )
+{"seal": 20260829125737, "type": "data/python", "path": ["stage"]}
+{
+"type": "handler",
+"description": "kicking things",
+"terms": ["kick"],
+"params": {
+    "entity": "$['entities']..[?@['types']>=['can']]"
+},
+}
+{"seal": 20260829125737, "type": "code/python", "path": ["stage"]}
+logger = logging.getLogger(format(marker.parent.path))
+logger.debug(f"{context=}")
+world_mark = engine.journal.marking["world"].mark
+items = context["entities"].get(world_mark, [])
 
 {"seal": 20260829125737, "type": "data/python", "path": ["stage"]}
 {

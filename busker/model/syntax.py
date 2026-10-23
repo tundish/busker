@@ -52,6 +52,7 @@ class Syntax(Lens):
                 k: self.journal.search(v, context)
                 for k, v in element.get("params", {}).items()
             }
+            self.logger.debug(f"{results=}")
             products = set(itertools.product(*results.values()))
             for term in element.get("terms", []):
                 for product in products:
