@@ -153,6 +153,21 @@ logger.info(f"Move complete: {jump}")
             "states": {"presence": "lost"},
             "aspects": ["empty", "crumpled", "slightly sticky"],
         },
+        {
+            "names": ["Can", "Beer can"], "types": {"junk"},
+            "states": {"presence": "lost"},
+            "aspects": ["empty", "charred"],
+        },
+        {
+            "names": ["Can", "Beer can"], "types": {"junk"},
+            "states": {"presence": "lost"},
+            "aspects": ["empty", "crumpled"],
+        },
+        {
+            "names": ["Pack of Rizlas", "Pack of Cigarette papers"], "types": {"junk"},
+            "states": {"seen": False},
+            "aspects": ["damp", "unusable"],
+        },
     ],
     ("stage", "inventory"): [
     ],
@@ -180,8 +195,12 @@ if not items:
         rank=Rank.EPILOGUE
     )
 
-for n, item in enumerate(items):
-    # TODO: Random misses?
+unseen = [i for i in items if not i["states"].get("seen")]
+pick = random.choice(unseen)
+pick["states"]["seen"] = True
+
+seen = [i for i in items if i["states"].get("seen")]
+for n, item in enumerate(seen):
     logger.debug(f"{item}")
     if n == 0:
         engine.insert_text("Looking around.", rank=Rank.EPILOGUE)
@@ -189,6 +208,7 @@ for n, item in enumerate(items):
         f"A {random.choice(item['names'])}. It's {random.choice(item['aspects'])}.",
         rank=Rank.EPILOGUE
     )
+
 {"seal": 20260829125737, "type": "data/python", "path": ["stage"]}
 {
 "type": "marking",
