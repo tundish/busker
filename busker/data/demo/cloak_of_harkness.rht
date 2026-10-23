@@ -149,23 +149,23 @@ logger.info(f"Move complete: {jump}")
 "entities": {
     ("world", "forest", "crossroads", "east"): [
         {
-            "names": ["Can", "Beer can"], "types": {"junk"},
-            "states": {"presence": "lost"},
+            "names": ["Can", "Beer can"], "types": {"junk", "can"},
+            "states": {"seen": False, "held": False},
             "aspects": ["empty", "crumpled", "slightly sticky"],
         },
         {
-            "names": ["Can", "Beer can"], "types": {"junk"},
-            "states": {"presence": "lost"},
+            "names": ["Can", "Beer can"], "types": {"junk", "can"},
+            "states": {"seen": False, "held": False},
             "aspects": ["empty", "charred"],
         },
         {
-            "names": ["Can", "Beer can"], "types": {"junk"},
-            "states": {"presence": "lost"},
+            "names": ["Can", "Beer can"], "types": {"junk", "can"},
+            "states": {"seen": False, "held": False},
             "aspects": ["empty", "crumpled"],
         },
         {
             "names": ["Pack of Rizlas", "Pack of Cigarette papers"], "types": {"junk"},
-            "states": {"seen": False},
+            "states": {"seen": False, "held": False},
             "aspects": ["damp", "unusable"],
         },
     ],
@@ -196,12 +196,12 @@ if not items:
     )
 
 unseen = [i for i in items if not i["states"].get("seen")]
-pick = random.choice(unseen)
-pick["states"]["seen"] = True
+if unseen:
+    pick = random.choice(unseen)
+    pick["states"]["seen"] = True
 
 seen = [i for i in items if i["states"].get("seen")]
 for n, item in enumerate(seen):
-    logger.debug(f"{item}")
     if n == 0:
         engine.insert_text("Looking around.", rank=Rank.EPILOGUE)
     engine.insert_text(
