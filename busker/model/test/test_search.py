@@ -59,7 +59,7 @@ class SearchTests(unittest.TestCase):
         self.assertEqual(rv, ["context"])
 
     def test_marker_path(self):
-        marker = SimpleNamespace(mark=("stage", "dustbin"))
+        marker = SimpleNamespace(mark=("stage", "floor"))
         data = {
             "type": "context",
             "entities": {
@@ -79,8 +79,7 @@ class SearchTests(unittest.TestCase):
             }
         }
         selector = Search(None)
-        query = "$['entities']..[?@['names'][0]=='Can']"
-        query = "$['entities']..[?'can' in @['types']]"
-        query = "$['entities']..[?@['types'] contains 'can']"
-        rv = selector.search(query, data, filter_context=vars(marker))
+        query = "$['entities'][?#==_.mark][?@['types'] contains 'can']"
+        rv = selector.search(query, data, filter_context=marker)
+        self.assertEqual(len(rv), 3)
         self.assertTrue(all("Beer can" in i["names"] for i in rv), rv)

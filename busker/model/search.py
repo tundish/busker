@@ -22,10 +22,22 @@ import contextlib
 
 from busker.model.types import Selector
 
-try:
-    import jsonpath
-except ModuleNotFoundError:
-    jsonpath = None
+import jsonpath
+from jsonpath.function_extensions import ExpressionType
+from jsonpath.function_extensions import FilterFunction
+
+
+class StrFilterFunction(FilterFunction):
+    """A JSONPath function extension returning the string representation of an object."""
+
+    arg_types = [ExpressionType.VALUE]
+    return_type = ExpressionType.VALUE
+
+    def __call__(self, value: object) -> object:
+        try:
+            return str(value)
+        except TypeError:
+            return jsonpath.UNDEFINED
 
 
 class JournalEnvironment(jsonpath.JSONPathEnvironment):
@@ -76,6 +88,7 @@ class Search(Selector):
         jsonpath.selectors.NameSelector.resolve = JournalEnvironment._resolve_name
         jsonpath.selectors.WildcardSelector.resolve = JournalEnvironment._resolve_wildcard
         self.env = JournalEnvironment()
+        self.env.function_extensions["str"] = StrFilterFunction()
 
     def search(self, query: str, data: dict, **kwargs) -> list:
         return self.env.findall(query, data, **kwargs)
