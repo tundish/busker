@@ -37,7 +37,7 @@ class Syntax(Lens):
         self.logger = logging.getLogger(self.__class__.__name__)
         self.journal = journal
 
-    def actions(self, path: tuple) -> dict:
+    def actions(self, path: tuple, **kwargs) -> dict:
         levels = [path[0: n] for n in range(len(path) + 1)]
         frames = [self.journal.adaptor.data.get(level, []) for level in levels]
         elements = [
@@ -49,7 +49,7 @@ class Syntax(Lens):
         rv = dict()
         for element in elements:
             results = {
-                k: self.journal.search(v, context)
+                k: self.journal.search(v, context, **kwargs)
                 for k, v in element.get("params", {}).items()
             }
             self.logger.debug(f"{results=}")

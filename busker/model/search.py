@@ -88,7 +88,7 @@ class Search(Selector):
         jsonpath.selectors.NameSelector.resolve = JournalEnvironment._resolve_name
         jsonpath.selectors.WildcardSelector.resolve = JournalEnvironment._resolve_wildcard
         self.env = JournalEnvironment()
-        self.env.function_extensions["str"] = StrFilterFunction()
+        self.env.function_extensions["str"] = StrFilterFunction()  # Experimental
 
     def search(self, query: str, data: dict, **kwargs) -> list:
         return self.env.findall(query, data, **kwargs)

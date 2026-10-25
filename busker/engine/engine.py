@@ -168,7 +168,7 @@ class Engine(Resident):
             for marker in reversed(marking.values()):
                 events = self.journal.events(marker.mark)
                 actions = dict(help=self.do_help)
-                actions.update(self.journal.actions(marker.mark))
+                actions.update(self.journal.actions(marker.mark, filter_context=marker))
                 matches = self.match_text_to_phrases(text, actions)
 
                 try:
