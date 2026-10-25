@@ -61,6 +61,13 @@ class JournalEnvironment(jsonpath.JSONPathEnvironment):
                 node.add_child(match)
                 yield match
 
+    def compare(self, left: object, operator: str, right: object) -> bool:
+        if operator == "in" and isinstance(right, (Mapping, Set, Sequence)):
+            return left in right
+        if operator == "contains" and isinstance(left, (Mapping, Set, Sequence)):
+            return right in left
+        return super().compare(left, operator, right)
+
 
 class Search(Selector):
 

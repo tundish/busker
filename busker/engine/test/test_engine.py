@@ -47,23 +47,6 @@ class EngineTests(unittest.TestCase):
         self.engine.listen = False
         time.sleep(0)
 
-    def test_marker_path(self):
-        context = {
-            "type": "context",
-            "entities": {
-                ("world", "forest", "crossroads", "east"): [
-                    {"names": ["Can", "Beer can"], "types": {"junk", "can"}, "states": {"seen": False, "held": False}, "aspects": ["empty", "crumpled", "slightly sticky"]},
-                    {"names": ["Can", "Beer can"], "types": {"junk", "can"}, "states": {"seen": False, "held": False}, "aspects": ["empty", "charred"]},
-                    {"names": ["Can", "Beer can"], "types": {"junk", "can"}, "states": {"seen": False, "held": False}, "aspects": ["empty", "crumpled"]},
-                    {"names": ["Pack of Rizlas", "Pack of Cigarette papers"], "types": {"junk"}, "states": {"seen": False, "held": False}, "aspects": ["damp", "unusable"]}
-                ],
-                ("stage", "inventory"): []
-            }
-        }
-        selector = Search(None)
-        rv = selector.search("*", context)
-        self.fail(rv)
-
     def test_world_marker(self):
         self.engine.queues[0].put("go north")
         self.engine(limit=1)

@@ -19,6 +19,7 @@ from collections import UserDict
 from collections import UserList
 from collections import UserString
 import pathlib
+from types import SimpleNamespace
 import unittest
 
 from busker.model.descent import Descent
@@ -56,3 +57,30 @@ class SearchTests(unittest.TestCase):
 
         rv = journal.search("$.maps[0].type.value", context)
         self.assertEqual(rv, ["context"])
+
+    def test_marker_path(self):
+        marker = SimpleNamespace(mark=("stage", "dustbin"))
+        data = {
+            "type": "context",
+            "entities": {
+                ("stage", "floor"): [
+                    {"names": ["Can", "Beer can"], "types": {"junk", "can"}, "states": {"seen": False, "held": False}, "aspects": ["empty", "crumpled", "slightly sticky"]},
+                    {"names": ["Can", "Beer can"], "types": {"junk", "can"}, "states": {"seen": False, "held": False}, "aspects": ["empty", "charred"]},
+                    {"names": ["Can", "Beer can"], "types": {"junk", "can"}, "states": {"seen": False, "held": False}, "aspects": ["empty", "crumpled"]},
+                    {"names": ["Pack of Rizlas", "Pack of Cigarette papers"], "types": {"junk"}, "states": {"seen": False, "held": False}, "aspects": ["damp", "unusable"]}
+                ],
+                ("stage", "dustbin"): [
+                    {"names": ["Can", "Bean can"], "types": {"junk", "can"}, "states": {"seen": False, "held": False}, "aspects": ["empty", "crumpled", "slightly sticky"]},
+                    {"names": ["Can", "Soup can"], "types": {"junk", "can"}, "states": {"seen": False, "held": False}, "aspects": ["empty", "jagged"]},
+                ],
+                ("stage", "inventory"): [
+                    {"names": ["Knife", "Penknife"], "types": {"tool"}, "states": {"seen": True, "held": True}, "aspects": ["small", "sharp"]}
+                ],
+            }
+        }
+        selector = Search(None)
+        query = "$['entities']..[?@['names'][0]=='Can']"
+        query = "$['entities']..[?'can' in @['types']]"
+        query = "$['entities']..[?@['types'] contains 'can']"
+        rv = selector.search(query, data, filter_context=vars(marker))
+        self.assertTrue(all("Beer can" in i["names"] for i in rv), rv)

@@ -22,7 +22,7 @@ classifiers = [
 ]
 
 dependencies = [
-"python-jsonpath",
+"python-jsonpath",  # TODO: Evaluate jsonpath-python
 "spiki>=0.27.0",
 ]
 
