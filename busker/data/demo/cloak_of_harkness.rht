@@ -214,7 +214,7 @@ for n, item in enumerate(seen):
 "description": "kicking things",
 "terms": ["kick"],
 "params": {
-    "entity": "$['entities']..[?@['types']>=['can']]"
+    "entity": "$['entities'][?#==_.mark][?@['types'] contains 'can']"
 },
 }
 {"seal": 20260829125737, "type": "code/python", "path": ["stage"]}
