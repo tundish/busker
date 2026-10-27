@@ -41,25 +41,23 @@ class Syntax(Lens):
         self.logger.debug(f"Building actions for {path} with {kwargs=}")
         levels = [path[0: n] for n in range(len(path) + 1)]
         frames = [self.journal.adaptor.data.get(level, []) for level in levels]
-        elements = [
+        handler_elements = [
             i for frame in frames for i in frame
             if isinstance(i, Element) and i.handler
         ]
         context = self.journal.context(path)
 
         rv = dict()
-        for element in elements:
+        for element in handler_elements:
             results = {
-                k: self.journal.search(v, context, **kwargs)
-                for k, v in element.get("params", {}).items()
+                param: [(param, i) for i in self.journal.search(query, context, **kwargs)]
+                for param, query in element.get("params", {}).items()
             }
-            self.logger.debug(f"{results=}")
-            products = set(itertools.product(*results.values()))
+            products = list(itertools.product(*results.values()))
             for term in element.get("terms", []):
                 for product in products:
-                    kwargs = dict(zip(element.get("params", []), product))
+                    kwargs = dict(product)
                     phrase = term.format(**kwargs)
                     rv[phrase.casefold()] = (element, kwargs)
 
-        self.logger.debug(f"{list(rv)=}")
         return rv

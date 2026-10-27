@@ -162,6 +162,7 @@ class Engine(Resident):
             try:
                 text = self.queues[0].get(block=True, timeout=timeout)
             except queue.Empty:
+                time.sleep(0)
                 continue
 
             marking = self.journal.marking

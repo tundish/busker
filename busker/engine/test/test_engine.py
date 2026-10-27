@@ -52,3 +52,11 @@ class EngineTests(unittest.TestCase):
         self.engine(limit=1)
         self.engine.queues[0].join()
         self.assertTrue(self.engine.cues)
+
+    def test_world_marker(self):
+        for cmd in ("go east", "look"):
+            with self.subTest(cmd=cmd):
+                self.engine.queues[0].put(cmd)
+                self.engine(limit=1)
+                self.engine.queues[0].join()
+                self.assertTrue(self.engine.cues)
