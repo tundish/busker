@@ -173,9 +173,10 @@ class Engine(Resident):
                 matches = self.match_text_to_phrases(text, actions)
 
                 try:
-                    self.logger.debug(f"Selecting first of matches {matches}")
+                    self.logger.debug(f"Matches {matches}")
                     element, kwargs = actions[matches[0]]
-                    self.logger.debug(f"Map to {element.parent.path}: {kwargs=} {element=}")
+                    self.logger.debug(f"Using {element.parent.path}: {element}")
+                    self.logger.debug(f"Args: {kwargs}")
                 except IndexError:
                     self.logger.debug(f"No match for text '{text}'")
                     # TODO: Call unknown
