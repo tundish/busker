@@ -67,7 +67,63 @@ except KeyError:
 path = pair[1].path
 bend = pair[0].bend
 jump = marker.move(path, bend=bend)
+
+stage_marker = engine.journal.marking["stage"]
+stage_marker.mark = marker.mark
+logger.debug(f"{stage_marker=}")
 logger.info(f"Move complete: {jump}")
+
+{"seal": 20260829125737, "type": "data/python", "path": ["world"]}
+{
+"type": "handler",
+"description": "looking around",
+"terms": ["look"],
+}
+{"seal": 20260829125737, "type": "code/python", "path": ["world"]}
+logger = logging.getLogger(format(marker.parent.path))
+logger.debug(f"Looking around {context}")
+world_mark = engine.journal.marking["world"].mark
+items = context.get("entities", {}).get(world_mark, [])
+if not items:
+    engine.insert_text(
+        random.choice((
+            "There's nothing here.",
+            "Nothing to see here.",
+            "There's nothing much else to see.",
+            "No, nothing to see.",
+        )),
+        rank=Rank.EPILOGUE
+    )
+
+unseen = [i for i in items if not i["states"].get("seen")]
+if unseen:
+    pick = random.choice(unseen)
+    pick["states"]["seen"] = True
+
+seen = [i for i in items if i["states"].get("seen")]
+for n, item in enumerate(seen):
+    if n == 0:
+        engine.insert_text("Looking around.", rank=Rank.EPILOGUE)
+    engine.insert_text(
+        f"A {random.choice(item['names'])}. It's {random.choice(item['aspects'])}.",
+        rank=Rank.EPILOGUE
+    )
+{"seal": 20260829125737, "type": "data/python", "path": ["world"]}
+{
+"type": "handler",
+"description": "kicking things",
+"terms": [
+    "kick {entity['names'][0]}", "kick {entity['names'][1]}"
+],
+"params": {
+    "entity": "$['entities'][?@['types'] contains 'can']"
+},
+}
+{"seal": 20260829125737, "type": "code/python", "path": ["world"]}
+logger = logging.getLogger(format(marker.parent.path))
+logger.debug(f"{context=}")
+world_mark = engine.journal.marking["world"].mark
+items = context["entities"].get(world_mark, [])
 
 {"seal": 20260829125737, "type": "data/python", "path": ["world", "forest", "crossroads", "centre"]}
 {
@@ -143,86 +199,32 @@ logger.info(f"Move complete: {jump}")
 "span": None,
 "tick": 0
 }
-{"seal": 20260829125737, "type": "data/python", "path": ["stage"]}
+{"seal": 20260829125737, "type": "data/python", "path": ["world", "forest", "crossroads", "east"]}
 {
 "type": "context",
-"entities": {
-    ("world", "forest", "crossroads", "east"): [
-        {
-            "names": ["Can", "Beer can"], "types": {"junk", "can"},
-            "states": {"seen": False, "held": False},
-            "aspects": ["empty", "crumpled", "slightly sticky"],
-        },
-        {
-            "names": ["Can", "Beer can"], "types": {"junk", "can"},
-            "states": {"seen": False, "held": False},
-            "aspects": ["empty", "charred"],
-        },
-        {
-            "names": ["Can", "Beer can"], "types": {"junk", "can"},
-            "states": {"seen": False, "held": False},
-            "aspects": ["empty", "crumpled"],
-        },
-        {
-            "names": ["Pack of Rizlas", "Pack of Cigarette papers"], "types": {"junk"},
-            "states": {"seen": False, "held": False},
-            "aspects": ["damp", "unusable"],
-        },
-    ],
-    ("stage", "inventory"): [
-    ],
-},
+"entities": [
+    {
+        "names": ["Can", "Beer can"], "types": {"junk", "can"},
+        "states": {"seen": False, "held": False},
+        "aspects": ["empty", "crumpled", "slightly sticky"],
+    },
+    {
+        "names": ["Can", "Beer can"], "types": {"junk", "can"},
+        "states": {"seen": False, "held": False},
+        "aspects": ["empty", "charred"],
+    },
+    {
+        "names": ["Can", "Beer can"], "types": {"junk", "can"},
+        "states": {"seen": False, "held": False},
+        "aspects": ["empty", "crumpled"],
+    },
+    {
+        "names": ["Pack of Rizlas", "Pack of Cigarette papers"], "types": {"junk"},
+        "states": {"seen": False, "held": False},
+        "aspects": ["damp", "unusable"],
+    },
+],
 }
-{"seal": 20260829125737, "type": "data/python", "path": ["stage"]}
-{
-"type": "handler",
-"description": "looking around",
-"terms": ["look"],
-}
-{"seal": 20260829125737, "type": "code/python", "path": ["stage"]}
-logger = logging.getLogger(format(marker.parent.path))
-logger.debug(f"Looking around {context}")
-world_mark = engine.journal.marking["world"].mark
-items = context["entities"].get(world_mark, [])
-if not items:
-    engine.insert_text(
-        random.choice((
-            "There's nothing here.",
-            "Nothing to see here.",
-            "There's nothing much else to see.",
-            "No, nothing to see.",
-        )),
-        rank=Rank.EPILOGUE
-    )
-
-unseen = [i for i in items if not i["states"].get("seen")]
-if unseen:
-    pick = random.choice(unseen)
-    pick["states"]["seen"] = True
-
-seen = [i for i in items if i["states"].get("seen")]
-for n, item in enumerate(seen):
-    if n == 0:
-        engine.insert_text("Looking around.", rank=Rank.EPILOGUE)
-    engine.insert_text(
-        f"A {random.choice(item['names'])}. It's {random.choice(item['aspects'])}.",
-        rank=Rank.EPILOGUE
-    )
-{"seal": 20260829125737, "type": "data/python", "path": ["stage"]}
-{
-"type": "handler",
-"description": "kicking things",
-"terms": ["kick"],
-"params": {
-    "entity": "$['entities'][?#==_.mark][?@['types'] contains 'can']"
-},
-}
-{"seal": 20260829125737, "type": "code/python", "path": ["stage"]}
-logger = logging.getLogger(format(marker.parent.path))
-logger.debug(f"{context=}")
-world_mark = engine.journal.marking["world"].mark
-items = context["entities"].get(world_mark, [])
-
 {"seal": 20260829125737, "type": "data/python", "path": ["stage"]}
 {
 "type": "marking",

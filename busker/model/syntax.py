@@ -38,6 +38,7 @@ class Syntax(Lens):
         self.journal = journal
 
     def actions(self, path: tuple, **kwargs) -> dict:
+        self.logger.debug(f"Building actions for {path} with {kwargs=}")
         levels = [path[0: n] for n in range(len(path) + 1)]
         frames = [self.journal.adaptor.data.get(level, []) for level in levels]
         elements = [
@@ -59,4 +60,6 @@ class Syntax(Lens):
                     kwargs = dict(zip(element.get("params", []), product))
                     phrase = term.format(**kwargs)
                     rv[phrase.casefold()] = (element, kwargs)
+
+        self.logger.debug(f"{list(rv)=}")
         return rv
