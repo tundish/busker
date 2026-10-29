@@ -27,8 +27,8 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-test = [
-]
+doc = ["pdoc"]
+test = []
 
 [project.scripts]
 busker-gui = "busker.gui.main:run"
