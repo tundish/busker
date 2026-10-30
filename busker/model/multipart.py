@@ -15,6 +15,29 @@
 # You should have received a copy of the GNU General Public License along with busker.
 # If not, see <https://www.gnu.org/licenses/>.
 
+"""
+
+```mermaid
+
+---
+title: Resource HyperTree
+config:
+  theme: base
+  themeVariables:
+    primaryColor: "#c3c3c3"
+---
+
+graph TD;
+    A(("."))
+    B((("stage",)))
+    B((("world",)))
+    A-->B;
+    A-->C;
+    B-->D;
+    C-->D;
+```
+
+"""
 import ast
 from collections.abc import Generator
 from collections.abc import Mapping
