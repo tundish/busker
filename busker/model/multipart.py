@@ -81,10 +81,11 @@ class Multipart(Adaptor):
         factory: dict = None,
     ):
         self._logger = logging.getLogger("busker.multipart")
+        self._backend: BackendType = BackendType.RHT_TXT
         self._mark_regex = re.compile(r"^\{.+?\}$", re.MULTILINE)
+
         self._seal = id(self)
         self._path = path or tuple()
-        self.backend = BackendType.RHT_TXT
 
         self._factory = {dict: dict, list: list, str: str}
         self._factory.update(factory or {})
@@ -92,19 +93,20 @@ class Multipart(Adaptor):
         self.data = defaultdict(self._factory[list])
         self.data[self._path].extend(args)
 
+    def __str__(self):
+        return "\n".join(str(i) if isinstance(i, UserString) else i for i in self.dump())
+
     @property
-    def header(self):
+    def header(self) -> dict:
+        """Return all static attributes of the document separator header."""
         if self._path is None:
             return dict(seal=self._seal, type=None, busker=__version__)
         else:
             return dict(seal=self._seal, type=None, busker=__version__, path=self._path[:])
 
-    def __str__(self):
-        return "\n".join(str(i) if isinstance(i, UserString) else i for i in self.dump())
-
     @property
     def tree(self) -> dict:
-        "Expand the document into a nested tree of frames"
+        """Expansion of the document as a nested tree of frames."""
         rv = dict()
         done = dict()
         paths = list(self.data)
@@ -233,7 +235,7 @@ class Multipart(Adaptor):
             self.data[path].append(payload)
             yield data
 
-    def dump(self, safe=False):
+    def dump(self, safe=False) -> Generator[str]:
         header = self.header
         for n, (k, v) in enumerate(self.data.items()):
             if n == 1:
