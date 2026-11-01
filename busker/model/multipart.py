@@ -80,24 +80,24 @@ class Multipart(Adaptor):
         path: tuple = None,
         factory: dict = None,
     ):
-        self.logger = logging.getLogger("busker.multipart")
+        self._logger = logging.getLogger("busker.multipart")
+        self._mark_regex = re.compile(r"^\{.+?\}$", re.MULTILINE)
+        self._seal = id(self)
+        self._path = path or tuple()
         self.backend = BackendType.RHT_TXT
-        self.mark_regex = re.compile(r"^\{.+?\}$", re.MULTILINE)
-        self.seal = id(self)
-        self.path = path or tuple()
 
-        self.factory = {dict: dict, list: list, str: str}
-        self.factory.update(factory or {})
+        self._factory = {dict: dict, list: list, str: str}
+        self._factory.update(factory or {})
 
-        self.data = defaultdict(self.factory[list])
-        self.data[self.path].extend(args)
+        self.data = defaultdict(self._factory[list])
+        self.data[self._path].extend(args)
 
     @property
     def header(self):
-        if self.path is None:
-            return dict(seal=self.seal, type=None, busker=__version__)
+        if self._path is None:
+            return dict(seal=self._seal, type=None, busker=__version__)
         else:
-            return dict(seal=self.seal, type=None, busker=__version__, path=self.path[:])
+            return dict(seal=self._seal, type=None, busker=__version__, path=self._path[:])
 
     def __str__(self):
         return "\n".join(str(i) if isinstance(i, UserString) else i for i in self.dump())
@@ -126,10 +126,20 @@ class Multipart(Adaptor):
                 done[pos] = node[key]
         return rv
 
-    def load(self, uri: str | pathlib.Path):
+    def load(self, uri: str | pathlib.Path) -> str:
+        """
+        uri
+        : A path-like object to a document file.
+
+        """
         return uri.read_text()
 
-    def save(self, uri: str | pathlib.Path):
+    def save(self, uri: str | pathlib.Path) -> str:
+        """
+        uri
+        : A path-like object to the new file.
+
+        """
         text = str(self)
         uri.write_text(text)
         return text
@@ -142,40 +152,40 @@ class Multipart(Adaptor):
         data_types=set(("application/json", "text/json", "data/json", "text/python", "text/x-python", "data/python")),
         text_types=set(("text/plain", "text/markdown", "text/speechmark"))
     ) -> Generator[dict]:
-        delimiters = list(self.mark_regex.finditer(text))
+        delimiters = list(self._mark_regex.finditer(text))
         if not delimiters:
-            self.logger.error("No delimiters found")
+            self._logger.error("No delimiters found")
             return
         if (pos := delimiters[0].start()) != 0:
-            self.logger.error(f"Header does not lead. Pos: {pos}")
+            self._logger.error(f"Header does not lead. Pos: {pos}")
             return
 
         try:
             header = json.loads(delimiters[0][0])
         except json.JSONDecodeError:
-            self.logger.error(f"Invalid Header. Pos: {pos}")
+            self._logger.error(f"Invalid Header. Pos: {pos}")
             return
 
         seal = header.get("seal")
         if seal:
-            self.seal = seal
+            self._seal = seal
         else:
-            self.logger.error(f"No seal found. Pos: {pos}")
+            self._logger.error(f"No seal found. Pos: {pos}")
             return
 
         for n, d in enumerate(delimiters):
             if (pos := d.end()) - d.start() > header_length:
-                self.logger.error(f"Delimiter too long. Pos: {pos}")
+                self._logger.error(f"Delimiter too long. Pos: {pos}")
                 return
 
             try:
                 data = json.loads(d[0])
             except json.JSONDecodeError:
-                self.logger.error(f"Invalid Delimiter. Pos: {pos}")
+                self._logger.error(f"Invalid Delimiter. Pos: {pos}")
                 return
 
             if data.get("seal") != seal:
-                self.logger.error(f"Seal mismatch. Pos: {pos}")
+                self._logger.error(f"Seal mismatch. Pos: {pos}")
                 return
 
             if len(delimiters) - n > 1:
@@ -185,41 +195,41 @@ class Multipart(Adaptor):
 
             if data.get("type") in code_types:
                 try:
-                    path = format(data.get("path", self.path))
+                    path = format(data.get("path", self._path))
                 except ValueError as err:
-                    self.logger.error(f"Invalid Path. Pos: {d.end()}", exc_info=True)
+                    self._logger.error(f"Invalid Path. Pos: {d.end()}", exc_info=True)
                     return
 
                 try:
                     data["payload"] = payload = ast.parse(payload, filename=path, mode="exec")
                 except SyntaxError as err:
-                    self.logger.error(f"Invalid Code. Pos: {d.end()}", exc_info=True)
+                    self._logger.error(f"Invalid Code. Pos: {d.end()}", exc_info=True)
                     return
 
             elif data.get("type") in data_types:
                 parser = ast.literal_eval if "python" in data["type"] else json.loads
                 try:
                     payload = parser(payload)
-                    if isinstance(payload, Mapping) and payload.get("type") in self.factory:
-                        factory = self.factory[payload["type"]]
-                        self.logger.debug(f"Data item {n}. Type: {factory.__name__}")
+                    if isinstance(payload, Mapping) and payload.get("type") in self._factory:
+                        factory = self._factory[payload["type"]]
+                        self._logger.debug(f"Data item {n}. Type: {factory.__name__}")
                         payload = factory(**payload)
-                    elif type(payload) in self.factory:
-                        factory = self.factory[type(payload)]
-                        self.logger.debug(f"Data item {n}. Type: {factory.__name__}")
+                    elif type(payload) in self._factory:
+                        factory = self._factory[type(payload)]
+                        self._logger.debug(f"Data item {n}. Type: {factory.__name__}")
                         payload = factory(payload)
                     data["payload"] = payload
                 except (SyntaxError, ValueError) as err:
-                    self.logger.error(f"Invalid Literal. Pos: {d.end()}", exc_info=True)
+                    self._logger.error(f"Invalid Literal. Pos: {d.end()}", exc_info=True)
                     return
                 except json.JSONDecodeError:
-                    self.logger.error(f"Invalid Data. Pos: {d.end()}", exc_info=True)
+                    self._logger.error(f"Invalid Data. Pos: {d.end()}", exc_info=True)
                     return
 
-            elif type(payload) in self.factory:
-                data["payload"] = payload = self.factory[type(payload)](payload)
+            elif type(payload) in self._factory:
+                data["payload"] = payload = self._factory[type(payload)](payload)
 
-            path = tuple(data.get("path", self.path))
+            path = tuple(data.get("path", self._path))
             self.data[path].append(payload)
             yield data
 
