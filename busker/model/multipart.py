@@ -28,7 +28,7 @@ A separator is a single line of text which corresponds to a valid JSON object.
 The first attribute of the JSON object is a 'seal' which is consistent throughout the
 document and which serves to distinguish a separator from other data in the document.
 
-The attributes required in a separator are shown here:
+The attributes required in a separator are tabulated here:
 
 |Attribute  |Purpose                                            |Example           |Note                                                            |
 |----------:|:-------------------------------------------------:|:----------------:|:---------------------------------------------------------------|
@@ -81,7 +81,6 @@ class Multipart(Adaptor):
         factory: dict = None,
     ):
         self._logger = logging.getLogger("busker.multipart")
-        self._backend: BackendType = BackendType.RHT_TXT
         self._mark_regex = re.compile(r"^\{.+?\}$", re.MULTILINE)
 
         self._seal = id(self)
@@ -90,7 +89,10 @@ class Multipart(Adaptor):
         self._factory = {dict: dict, list: list, str: str}
         self._factory.update(factory or {})
 
-        self.data = defaultdict(self._factory[list])
+        self.backend: BackendType = BackendType.RHT_TXT
+        """The declared backend type."""
+        self.data: dict = defaultdict(self._factory[list])
+        """The raw document data."""
         self.data[self._path].extend(args)
 
     def __str__(self):
@@ -98,7 +100,7 @@ class Multipart(Adaptor):
 
     @property
     def header(self) -> dict:
-        """Return all static attributes of the document separator header."""
+        """The static attributes of the document separator."""
         if self._path is None:
             return dict(seal=self._seal, type=None, busker=__version__)
         else:
@@ -130,6 +132,8 @@ class Multipart(Adaptor):
 
     def load(self, uri: str | pathlib.Path) -> str:
         """
+        Load the document from a file.
+
         uri
         : A path-like object to a document file.
 
@@ -138,6 +142,8 @@ class Multipart(Adaptor):
 
     def save(self, uri: str | pathlib.Path) -> str:
         """
+        Save the document to a file.
+
         uri
         : A path-like object to the new file.
 
