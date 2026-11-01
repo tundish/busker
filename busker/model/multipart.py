@@ -17,25 +17,41 @@
 
 """
 
-```mermaid
+A Busker multipart document is a human-readable (UTF-8) text file.
+It contains one or more sections. In order that the boundary of a section may be identified,
+each one is preceded by a separator.
 
----
-title: Resource HyperTree
-config:
-  theme: base
-  themeVariables:
-    primaryColor: "#c3c3c3"
----
+Document separators
+-------------------
 
-graph TD;
-    A(("."))
-    B((("stage",)))
-    B((("world",)))
-    A-->B;
-    A-->C;
-    B-->D;
-    C-->D;
-```
+A separator is a single line of text which corresponds to a valid JSON object.
+The first attribute of the JSON object is a 'seal' which is consistent throughout the
+document and which serves to distinguish a separator from other data in the document.
+
+The attributes required in a separator are shown here:
+
+|Attribute  |Purpose                                            |Example           |Note                                                            |
+|----------:|:-------------------------------------------------:|:----------------:|:---------------------------------------------------------------|
+|seal       |Signifies JSON data is a section separator         |20261101164759    | Number or String                                               |
+|type       |The type of data contained in the section          |text/plain        | [RFC 2046](https://www.rfc-editor.org/info/rfc2046) media type |
+|path       |A hierarchical path to which the section belongs   |[1, 2, 3]         | Array of Number or String                                      |
+
+Consequently, the first line of a Multipart document must be an entire JSON object,
+and its *seal* value is the one used for disambiguation, eg:
+
+`{"seal": 20261101164759, "busker": "0.39.0", "type": "text/plain", "path": [1, 2, 3]}`
+
+The location of sections in the document is declared by the *path* attribute.
+The ordered collection of sections at each path is called a *frame*.
+
+Section types
+-------------
+
+Section types are RFC 2046-style media types. Busker permits other equivalents:
+
+        code_types=set(("application/x-python-code", "application/x-python", "application/python", "code/python")),
+        data_types=set(("application/json", "text/json", "data/json", "text/python", "text/x-python", "data/python")),
+        text_types=set(("text/plain", "text/markdown", "text/speechmark"))
 
 """
 import ast

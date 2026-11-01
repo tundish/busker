@@ -6,3 +6,24 @@ Busker is a utility for managing Stage and Story.
 It provides a graphical interface for interaction with a Multipart project.
 
 It is currently being revised and is under heavy development.
+
+```mermaid
+
+---
+title: Resource HyperTree
+config:
+  theme: base
+  themeVariables:
+    primaryColor: "#c3c3c3"
+---
+
+graph TD;
+    A(("."))
+    B((("stage",)))
+    B((("world",)))
+    A-->B;
+    A-->C;
+    B-->D;
+    C-->D;
+```
+

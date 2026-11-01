@@ -18,6 +18,14 @@
 # Stage: Python code (world entity query model)
 # Story: Speech      (scene drama directives model)
 
+"""
+TODO: Document lenses
+
+RHT.
+Paths
+Element types.
+"""
+
 from collections import defaultdict
 from collections import UserString
 from collections.abc import Mapping
