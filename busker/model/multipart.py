@@ -44,15 +44,6 @@ and its *seal* value is the one used for disambiguation, eg:
 The location of sections in the document is declared by the *path* attribute.
 The ordered collection of sections at each path is called a *frame*.
 
-Section types
--------------
-
-Section types are RFC 2046-style media types. Busker permits other equivalents:
-
-        code_types=set(("application/x-python-code", "application/x-python", "application/python", "code/python")),
-        data_types=set(("application/json", "text/json", "data/json", "text/python", "text/x-python", "data/python")),
-        text_types=set(("text/plain", "text/markdown", "text/speechmark"))
-
 """
 import ast
 from collections.abc import Generator
@@ -77,14 +68,25 @@ class Multipart(Adaptor):
 
     def __init__(
         self, *args,
-        path: tuple = None,
         factory: dict = None,
+        default_path: tuple = None,
     ):
+        """
+        Contruct an object representing a Multipart document.
+
+        `factory`
+        :   A dictionary mapping generic types from the document to the object
+            classes which will be held in memory.
+
+        `default_path`
+        :   A default value for document section paths.
+
+        """
         self._logger = logging.getLogger("busker.multipart")
         self._mark_regex = re.compile(r"^\{.+?\}$", re.MULTILINE)
 
         self._seal = id(self)
-        self._path = path or tuple()
+        self._path = default_path or tuple()
 
         self._factory = {dict: dict, list: list, str: str}
         self._factory.update(factory or {})
@@ -134,7 +136,7 @@ class Multipart(Adaptor):
         """
         Load the document from a file.
 
-        uri
+        `uri`
         : A path-like object to a document file.
 
         """
@@ -144,7 +146,7 @@ class Multipart(Adaptor):
         """
         Save the document to a file.
 
-        uri
+        `uri`
         : A path-like object to the new file.
 
         """
@@ -160,6 +162,27 @@ class Multipart(Adaptor):
         data_types=set(("application/json", "text/json", "data/json", "text/python", "text/x-python", "data/python")),
         text_types=set(("text/plain", "text/markdown", "text/speechmark"))
     ) -> Generator[dict]:
+        """
+        Read a multipart document and separate it into sections.
+
+        `text`
+        : The text of the document.
+
+        `header_length`
+        : A limit on the length of the first line of the document.
+
+        `code_types`
+        : A collection of RFC 2046-style media types to be treated as executable code.
+
+        `data_types`
+        : A collection of RFC 2046-style media types to be treated as data structures.
+
+        `text_types`
+        : A collection of RFC 2046-style media types to be treated as text.
+
+        This method is a generator of document sections.
+
+        """
         delimiters = list(self._mark_regex.finditer(text))
         if not delimiters:
             self._logger.error("No delimiters found")
@@ -241,7 +264,16 @@ class Multipart(Adaptor):
             self.data[path].append(payload)
             yield data
 
-    def dump(self, safe=False) -> Generator[str]:
+    def dump(self, safe: bool = False) -> Generator[str]:
+        """
+        Write the document as a sequence of strings.
+
+        `safe`
+        :   If True, limit the depth of data structures.
+
+        This method is a generator of text blocks.
+
+        """
         header = self.header
         for n, (k, v) in enumerate(self.data.items()):
             if n == 1:
