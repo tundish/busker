@@ -21,6 +21,8 @@
 """
 TODO: Document lenses
 
+The real functionality of a Journal comes from the Lenses it uses.
+
 RHT.
 Paths
 Element types.
@@ -44,16 +46,26 @@ from busker.model.types import Selector
 
 
 class Journal:
+    """
+    Journals allow for lazy construction.
+
+    1. First create a Journal object.
+    2. Attach lenses to interpret the document.
+    3. Scan document text.
+
+    """
 
     def __init__(self, *args, uri: pathlib.Path | str = None):
         """
-        Lazy construction:
-        1. __init__
-        2. attach
-        3. scan
+
+        `*args`
+        :   Lens classes or objects for use by the Journal.
+
+        `uri`
+        : A path-like object to a document file.
 
         """
-        self.logger = logging.getLogger(self.__class__.__name__)
+        self._logger = logging.getLogger(self.__class__.__name__.lower())
         self.uri = pathlib.Path(uri)
         self.write_lock = threading.RLock()
         self.registry = defaultdict(set)
@@ -129,12 +141,11 @@ class Journal:
         Decorate each frame with its path, and each Element with its type.
 
         """
-        logger = logging.getLogger(self.__class__.__name__.lower())
         try:
             data = self.adaptor.data
         except Exception as err:
-            logger.warning(f"Journal can find no adaptor. Check {self.uri=}")
-            logger.debug(err, exc_info=True)
+            self._logger.warning(f"Journal can find no adaptor. Check {self.uri=}")
+            self._logger.debug(err, exc_info=True)
             return {}
 
         with self.write_lock:
@@ -145,10 +156,10 @@ class Journal:
                     try:
                         frame[n] = Element(obj.data)
                     except AttributeError:
-                        logger.debug(f"Not a data element: {obj}")
+                        self._logger.debug(f"Not a data element: {obj}")
                         continue
                     except ValueError:
-                        logger.debug(f"Not a data element: {obj}")
+                        self._logger.debug(f"Not a data element: {obj}")
                         if isinstance(obj, UserString):
                             frame[n].type = ElementType.CONTENT
                         continue
@@ -160,9 +171,9 @@ class Journal:
                         frame[n].type = ElementType[obj["type"].upper()]
                     except KeyError:
                         if "type" in obj:
-                            logger.error(f"Unknown resource type: {obj['type']}")
+                            self._logger.error(f"Unknown resource type: {obj['type']}")
                         else:
-                            logger.error(f"Type value missing: path {p} item {n}")
+                            self._logger.error(f"Type value missing: path {p} item {n}")
                         return
 
                 frame.refresh()
