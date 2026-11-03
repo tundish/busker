@@ -19,15 +19,12 @@
 # Story: Speech      (scene drama directives model)
 
 """
-TODO: Document lenses
+A Journal is a composite object which provides read and write access to data.
 
-The real functionality of a Journal comes from the Lenses it uses.
+The main functionality of a Journal comes from the Lenses it uses.
+You can attach or remove them at run time. Any methods supplied by these objects
+can be called as if they were methods of the Journal.
 
-`busker.model.types.Lens`
-
-RHT.
-Paths
-Element types.
 """
 
 from collections import defaultdict
@@ -61,7 +58,7 @@ class Journal:
         """
 
         `*args`
-        :   Lens classes or objects for use by the Journal.
+        :   `busker.model.types.Lens` subclasses or instantiated objects of such types.
 
         `uri`
         : A path-like object to a document file.
@@ -69,15 +66,18 @@ class Journal:
         """
         self._logger = logging.getLogger(self.__class__.__name__.lower())
         self.uri = pathlib.Path(uri)
+        """The uri of the current document."""
         self.write_lock = threading.RLock()
+        """A re-entrant lock to protect write access to data."""
         self.registry = defaultdict(set)
+        """A registry of Lenses."""
         self.attach(*args)
 
     def __getattr__(self, name):
         return self.lookup_lens(name)
 
     @functools.lru_cache
-    def lookup_lens(self, name):
+    def lookup_lens(self, name: str) -> Lens:
         try:
             return next(getattr(i, name) for i in self.registry[Lens] if hasattr(i, name))
         except StopIteration:
