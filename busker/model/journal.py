@@ -23,6 +23,8 @@ TODO: Document lenses
 
 The real functionality of a Journal comes from the Lenses it uses.
 
+`busker.model.types.Lens`
+
 RHT.
 Paths
 Element types.
@@ -77,12 +79,7 @@ class Journal:
     @functools.lru_cache
     def lookup_lens(self, name):
         try:
-            return next(
-                getattr(i, name)
-                for typ in (Selector, Lens)
-                for i in self.registry[typ]
-                if hasattr(i, name)
-            )
+            return next(getattr(i, name) for i in self.registry[Lens] if hasattr(i, name))
         except StopIteration:
             raise AttributeError(name)
 

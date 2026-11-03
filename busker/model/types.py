@@ -22,7 +22,6 @@ from collections import UserDict
 from collections import UserList
 import dataclasses
 import enum
-import pathlib
 import textwrap
 import typing
 import warnings
@@ -57,25 +56,48 @@ class Rank(enum.IntEnum):
     GLOSSARY = 16
 
 
-Accumulator = lambda: defaultdict(complex)
-
-
 class Adaptor:
-    def scan(self, path: pathlib.Path | str):
-        raise NotImplementedError
+    """Parent class for objects which provide access to persistent data."""
 
+    def scan(self, text: str):
+        """
+        `text`
+        : The text of the document.
 
-class Selector:
-    def search(self):
+        Override this method in a subclass.
+
+        """
         raise NotImplementedError
 
 
 class Lens:
+    """Parent class for objects which incorporate functionality into a `busker.model.journal.Journal`."""
     pass
 
 
+class Selector(Lens):
+    """Parent class for objects which allow search of data via a `busker.model.journal.Journal`."""
+
+    def search(self, query: str, data: dict, **kwargs) -> list:
+        """
+        `query`
+        : The query pattern for the search.
+
+        `data`
+        : The data to be searched.
+
+        Override this method in a subclass.
+
+        """
+        raise NotImplementedError
+
+
+Accumulator = lambda: defaultdict(complex)
+"""A class to store counts using complex numbers."""
+
+
 class Chain(ChainMap):
-    "Variant of ChainMap that allows direct updates to inner scopes"
+    """Variant of `collections.ChainMap` that allows direct updates to inner scopes."""
 
     def __setitem__(self, key, value):
         for mapping in self.maps:
@@ -93,7 +115,10 @@ class Chain(ChainMap):
 
 
 class Frame(UserList):
+    """A list which accepts custom attributes."""
+
     def refresh(self):
+        """A signal to referenced objects that the container has changed."""
         for obj in self.data:
             try:
                 obj.refresh(parent=self)
@@ -103,6 +128,7 @@ class Frame(UserList):
 
 
 class Element(UserDict):
+    """A dictionary which accepts custom attributes."""
 
     @property
     def content(self):
@@ -110,6 +136,7 @@ class Element(UserDict):
 
     @property
     def handler(self):
+        """Return any handler associated with this element."""
         rv = None
         if self.data.get("type") != ElementType.HANDLER.value:
             return
@@ -133,19 +160,25 @@ class Element(UserDict):
         return rv
 
     def refresh(self, parent=None):
+        """A signal to referenced objects that the container has changed."""
         self.parent = parent
         return self
 
 
 @dataclasses.dataclass(order=True)
 class Note:
+    """A lightweight object which contains text yet to be ordered alongside others."""
     text: str = dataclasses.field(compare=False)
+    """A text string"""
     rank: int = Rank.DIALOGUE
+    """The declared rank of the text."""
     clip: int = 0
+    """A secondary index for stable ordering."""
 
     def __post_init__(self):
         self.text = textwrap.dedent(self.text).lstrip()
 
 
 class Exclamation(Exception):
+    """A class for text-like Exceptions."""
     pass
