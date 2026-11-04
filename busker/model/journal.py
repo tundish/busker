@@ -46,11 +46,11 @@ from busker.model.types import Selector
 
 class Journal:
     """
-    Journals allow for lazy construction.
+    Journals are used as follows:
 
-    1. First create a Journal object.
-    2. Attach lenses to interpret the document.
-    3. Scan document text.
+    1. Create a Journal object.
+    2. Attach the lenses you want to apply to the document.
+    3. Scan the document.
 
     """
 
@@ -78,14 +78,28 @@ class Journal:
 
     @functools.lru_cache
     def lookup_lens(self, name: str) -> Lens:
+        """
+        Look up a lens from the registry.
+
+        `name`
+        : The name of the lens
+
+        """
         try:
             return next(getattr(i, name) for i in self.registry[Lens] if hasattr(i, name))
         except StopIteration:
             raise AttributeError(name)
 
-    def register(self, helper):
+    def register(self, helper: Adaptor | Lens):
+        """
+        Register a helper lens for use in the Journal.
+
+        `helper`
+        :   An adaptor or lens object
+
+        """
         rv = None
-        for cls in (Adaptor, Selector, Lens):
+        for cls in (Adaptor, Lens):
             if isinstance(helper, type) and issubclass(helper, cls):
                 helper = helper(self)
             if isinstance(helper, cls):
@@ -94,14 +108,14 @@ class Journal:
                 rv = helper
         return rv
 
-    def attach(self, *helpers: Adaptor | Selector | Lens):
+    def attach(self, *helpers: Adaptor | Lens):
         with self.write_lock:
             for helper in helpers:
                 self.register(helper)
             self.lookup_lens.cache_clear()
         _ = self.model  # Re-initialize model
 
-    def remove(self, *helpers: Adaptor | Selector | Lens):
+    def remove(self, *helpers: Adaptor | Lens):
         with self.write_lock:
             for helper in helpers:
                 for registered in self.registry.values():
