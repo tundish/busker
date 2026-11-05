@@ -31,16 +31,26 @@ from busker.model.types import Lens
 
 class Descent(Lens):
     """
-    Access to Resource HyperTree (.rht) data.
+    This lens presents a view from within the hierarchy of HyperTree data.
+    It defines the context available to an element depending on its path.
+
+    The lens is also a means by which simple functional elements may be identified.
 
     """
 
     @staticmethod
-    def merge(body: dict, item: dict):
+    def merge(body: dict, item: dict) -> dict:
         """
+        This is a helper method used to build context.
+
         Merge a new item (by copy) into the context body.
         Chains are built from the leaf up toward the root.
         Consequently ordered sequences are built first in, last out.
+
+        The mode of merging sequences depends on the type.
+        + A tuple replaces another
+        + A set is updated by another
+        + A list extends the other
 
         """
         stack = [(body.copy(), item.copy())]
@@ -73,11 +83,12 @@ class Descent(Lens):
         return body
 
     def __init__(self, journal: object):
-        self.logger = logging.getLogger(self.__class__.__name__)
+        self._logger = logging.getLogger(self.__class__.__name__)
         self.journal = journal
+        """The journal to which this lens is registered."""
 
     def context(self, path: tuple) -> Chain:
-        "Build a view of the document as seen from the supplied path"
+        """Build a view of the document as seen from the supplied path"""
         levels = [path[0: n] for n in range(len(path) + 1)]
         frames = [self.journal.adaptor.data.get(level, []) for level in levels]
         chains = [
@@ -87,6 +98,7 @@ class Descent(Lens):
         return functools.reduce(self.merge, chains)
 
     def events(self, path: tuple) -> list:
+        """Return all handler elements at a path which don't require parameters"""
         levels = [path[0: n] for n in range(len(path) + 1)]
         frames = [self.journal.adaptor.data.get(level, []) for level in levels]
         elements = [
@@ -97,6 +109,7 @@ class Descent(Lens):
         return sorted(elements, key=operator.attrgetter("rank"))
 
     def content(self, path: tuple) -> list:
+        """Return all content elements at a path"""
         levels = [path[0: n] for n in range(len(path) + 1)]
         frames = [self.journal.adaptor.data.get(level, []) for level in levels]
         return [

@@ -140,6 +140,7 @@ class Journal:
                         except KeyError:
                             continue
                     registered.discard(helper)
+                    helper.journal = None
             self.lookup_lens.cache_clear()
         _ = self.model  # Re-initialize model
 
