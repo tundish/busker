@@ -69,7 +69,7 @@ class Journal:
         """The uri of the current document."""
         self.write_lock = threading.RLock()
         """A re-entrant lock to protect write access to data."""
-        self.registry = defaultdict(set)
+        self.registry: dict = defaultdict(set)
         """A registry of Lenses."""
         self.attach(*args)
 
@@ -79,10 +79,10 @@ class Journal:
     @functools.lru_cache
     def lookup_lens(self, name: str) -> Lens:
         """
-        Look up a lens from the registry.
+        Identify a lens from the registry.
 
         `name`
-        : The name of the lens
+        : The name of a method supplied by the lens
 
         """
         try:
@@ -90,9 +90,9 @@ class Journal:
         except StopIteration:
             raise AttributeError(name)
 
-    def register(self, helper: Adaptor | Lens):
+    def _register(self, helper: Adaptor | Lens):
         """
-        Register a helper lens for use in the Journal.
+        Register a helper lens or adaptor for use in the Journal.
 
         `helper`
         :   An adaptor or lens object
@@ -109,29 +109,51 @@ class Journal:
         return rv
 
     def attach(self, *helpers: Adaptor | Lens):
+        """
+        Attach a helper lens or adaptor to the Journal.
+
+        `helpers`
+        :   Objects or classes
+
+        """
         with self.write_lock:
             for helper in helpers:
-                self.register(helper)
+                self._register(helper)
             self.lookup_lens.cache_clear()
         _ = self.model  # Re-initialize model
 
     def remove(self, *helpers: Adaptor | Lens):
+        """
+        Remove a helper lens or adaptor from the Journal.
+
+        `helpers`
+        :   Objects or classes
+
+        """
         with self.write_lock:
             for helper in helpers:
                 for registered in self.registry.values():
+                    if isinstance(helper, type):
+                        try:
+                            types = {type(i): i for i in registered}
+                            helper = types[helper]
+                        except KeyError:
+                            continue
                     registered.discard(helper)
             self.lookup_lens.cache_clear()
         _ = self.model  # Re-initialize model
 
     @property
-    def adaptor(self):
+    def adaptor(self) -> Adaptor:
+        """The current adaptor for the backend data."""
         return next(
             (i for i in self.registry.get(Adaptor, []) if self.uri.suffix in i.backend.value),
             None
         )
 
     @property
-    def marking(self):
+    def marking(self) -> dict:
+        """A dictionary of all markers. Stored by name."""
         store = defaultdict(list)
         for frame in self.adaptor.data.values():
             for element in frame:
@@ -149,7 +171,9 @@ class Journal:
     @property
     def model(self) -> Mapping:
         """
-        Decorate each frame with its path, and each Element with its type.
+        A nested dictionary of objects. This is the internal model of the Journal.
+        The original backend data is enriched with derived attributes.
+        Each frame with its path, and each Element with its type.
 
         """
         try:
@@ -190,7 +214,8 @@ class Journal:
                 frame.refresh()
         return data
 
-    def scan(self, **kwargs):
+    def scan(self, **kwargs) -> list:
+        """Read the backend data, and scan it into the internal model."""
         with self.write_lock:
             adaptor = self.adaptor
             data = adaptor.load(self.uri)
