@@ -103,8 +103,8 @@ class Search(Selector):
         Search the document model using a filter query.
 
         The query syntax is [JSONPath](https://www.rfc-editor.org/info/rfc9535/).
-        However, since we are searching a Journal model, which contains enriched objects,
-        not simply raw data, two accessors are available.
+        However since we are searching a Journal model which contains not simply raw data,
+        but enriched objects; two accessors are available.
 
         + Dictionary lookup, ie: `['key']` uses the Mapping API of a data object.
         + The dot selector `.*` is not shorthand for `[*]`. Instead, it specifies

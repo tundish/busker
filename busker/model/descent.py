@@ -15,6 +15,14 @@
 # You should have received a copy of the GNU General Public License along with busker.
 # If not, see <https://www.gnu.org/licenses/>.
 
+"""
+
+> A black pool opened up at my feet. I dived in. It had no bottom.
+>
+> -- <cite>Philip Marlowe, from 'Murder My Sweet' by Raymond Chandler</cite>
+
+"""
+
 from collections.abc import Mapping
 from collections.abc import MutableSequence
 from collections.abc import Set
