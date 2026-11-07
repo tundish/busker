@@ -15,6 +15,17 @@
 # You should have received a copy of the GNU General Public License along with busker.
 # If not, see <https://www.gnu.org/licenses/>.
 
+"""
+> The axioms of geometry are only definitions in disguise.
+> What then are we to think of the question: Is Euclidean geometry true? It has no meaning.
+> We might as well ask if the metric system is true and if the old weights and measures are false;
+> if Cartesian coordinates are true and polar coordinates are false.
+> One geometry cannot be more true than another; it can only be more convenient.
+>
+> -- <cite>Henri Poincaré</cite>
+
+"""
+
 from collections import defaultdict
 from collections import namedtuple
 from collections.abc import Generator
