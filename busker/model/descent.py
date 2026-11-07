@@ -19,7 +19,7 @@
 
 > A black pool opened up at my feet. I dived in. It had no bottom.
 >
-> -- <cite>Philip Marlowe, from 'Murder My Sweet' by Raymond Chandler</cite>
+> -- <cite>Philip Marlowe, from 'Murder, My Sweet' by Raymond Chandler</cite>
 
 """
 

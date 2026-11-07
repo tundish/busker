@@ -19,11 +19,10 @@
 # Story: Speech      (scene drama directives model)
 
 """
-A Journal is a composite object which provides read and write access to data.
 
-The main functionality of a Journal comes from the Lenses it uses.
-You can attach or remove them at run time. Any methods supplied by these objects
-can be called as if they were methods of the Journal.
+> The whole is other than the sum of its parts.
+>
+> -- <cite>Kurt Koffka</cite>
 
 """
 
@@ -46,6 +45,12 @@ from busker.model.types import Selector
 
 class Journal:
     """
+    A Journal is a composite object which provides read and write access to data.
+
+    The main functionality of a Journal comes from the Lenses it uses.
+    You can attach or remove them at run time. Any methods supplied by these objects
+    can be called as if they were methods of the Journal.
+
     Journals are used as follows:
 
     1. Create a Journal object.
