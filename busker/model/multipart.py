@@ -17,6 +17,10 @@
 
 """
 
+> One thing leads to the next thing, it leads to the next thing, it leads to the next thing.
+>
+> -- <cite>Roots Manuva</cite>
+
 A Busker multipart document is a human-readable (UTF-8) text file.
 It contains one or more sections. In order that the boundary of a section may be identified,
 each one is preceded by a separator.

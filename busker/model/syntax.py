@@ -15,6 +15,14 @@
 # You should have received a copy of the GNU General Public License along with busker.
 # If not, see <https://www.gnu.org/licenses/>.
 
+"""
+
+> Je kunt niet zomaar iets uit een vers halen, zonder eerst de context te bepalen.
+>
+> -- <cite>Simeon Visscher</cite>
+
+"""
+
 from collections.abc import Mapping
 from collections.abc import MutableSequence
 from collections.abc import Set

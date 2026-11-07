@@ -15,6 +15,14 @@
 # You should have received a copy of the GNU General Public License along with busker.
 # If not, see <https://www.gnu.org/licenses/>.
 
+"""
+
+> I keep the subject of my inquiry constantly before me.
+>
+> -- <cite>Isaac Newton</cite>
+
+"""
+
 from collections.abc import Mapping
 from collections.abc import Set
 from collections.abc import Sequence
@@ -25,6 +33,39 @@ from busker.model.types import Selector
 import jsonpath
 from jsonpath.function_extensions import ExpressionType
 from jsonpath.function_extensions import FilterFunction
+
+
+class Search(Selector):
+    """
+    This lens provides a search function for HyperTree data.
+
+    """
+
+    def __init__(self, journal: object):
+        self.journal = journal
+        """The journal to which this lens is registered."""
+
+        jsonpath.selectors.NameSelector.resolve = JournalEnvironment._resolve_name
+        jsonpath.selectors.WildcardSelector.resolve = JournalEnvironment._resolve_wildcard
+        self.env = JournalEnvironment()
+        """The JSONPath query environment"""
+
+        self.env.function_extensions["str"] = StrFilterFunction()  # Experimental
+
+    def search(self, query: str, data: dict, **kwargs) -> list:
+        """
+        Search the document model using a filter query.
+
+        The query syntax is [JSONPath](https://www.rfc-editor.org/info/rfc9535/).
+        However since we are searching a Journal model which contains not simply raw data,
+        but enriched objects; two accessors are available.
+
+        + Dictionary lookup, ie: `['key']` uses the Mapping API of a data object.
+        + The dot selector `.*` is not shorthand for `[*]`. Instead, it specifies
+          attribute access.
+
+        """
+        return self.env.findall(query, data, **kwargs)
 
 
 class StrFilterFunction(FilterFunction):
@@ -79,36 +120,3 @@ class JournalEnvironment(jsonpath.JSONPathEnvironment):
         if operator == "contains" and isinstance(left, (Mapping, Set, Sequence)):
             return right in left
         return super().compare(left, operator, right)
-
-
-class Search(Selector):
-    """
-    This lens provides a search function for HyperTree data.
-
-    """
-
-    def __init__(self, journal: object):
-        self.journal = journal
-        """The journal to which this lens is registered."""
-
-        jsonpath.selectors.NameSelector.resolve = JournalEnvironment._resolve_name
-        jsonpath.selectors.WildcardSelector.resolve = JournalEnvironment._resolve_wildcard
-        self.env = JournalEnvironment()
-        """The JSONPath query environment"""
-
-        self.env.function_extensions["str"] = StrFilterFunction()  # Experimental
-
-    def search(self, query: str, data: dict, **kwargs) -> list:
-        """
-        Search the document model using a filter query.
-
-        The query syntax is [JSONPath](https://www.rfc-editor.org/info/rfc9535/).
-        However since we are searching a Journal model which contains not simply raw data,
-        but enriched objects; two accessors are available.
-
-        + Dictionary lookup, ie: `['key']` uses the Mapping API of a data object.
-        + The dot selector `.*` is not shorthand for `[*]`. Instead, it specifies
-          attribute access.
-
-        """
-        return self.env.findall(query, data, **kwargs)
