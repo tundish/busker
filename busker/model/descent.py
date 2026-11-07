@@ -105,18 +105,19 @@ class Descent(Lens):
         ]
         return functools.reduce(self.merge, chains)
 
-    def events(self, path: tuple) -> list:
-        """Return all handler elements at a path which don't require parameters"""
+    def monitors(self, path: tuple) -> list[Element]:
+        """Return all monitor elements at a path"""
+        # TODO: Express link with proclet synchronization?
         levels = [path[0: n] for n in range(len(path) + 1)]
         frames = [self.journal.adaptor.data.get(level, []) for level in levels]
         elements = [
             i for frame in frames for i in frame
-            if isinstance(i, Element) and i.handler
+            if isinstance(i, Element) and i.monitor
             and not (i.get("params") or i.get("terms"))
         ]
         return sorted(elements, key=operator.attrgetter("rank"))
 
-    def content(self, path: tuple) -> list:
+    def contents(self, path: tuple) -> list[Element]:
         """Return all content elements at a path"""
         levels = [path[0: n] for n in range(len(path) + 1)]
         frames = [self.journal.adaptor.data.get(level, []) for level in levels]

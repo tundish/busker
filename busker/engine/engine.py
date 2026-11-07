@@ -167,7 +167,7 @@ class Engine(Resident):
 
             marking = self.journal.marking
             for marker in reversed(marking.values()):
-                events = self.journal.events(marker.mark)
+                monitors = self.journal.monitors(marker.mark)
                 actions = dict(help=self.do_help)
                 actions.update(self.journal.actions(marker.mark, filter_context=marker))
                 matches = self.match_text_to_phrases(text, actions)
@@ -192,19 +192,19 @@ class Engine(Resident):
                         self.logger.warning(err)
                         self.logger.debug(err, exc_info=True)
                 else:
-                    bisect.insort_right(events, element, key=operator.attrgetter("rank"))
+                    bisect.insort_right(monitors, element, key=operator.attrgetter("rank"))
 
                 # Activate pre-dialogue handlers
-                for element in itertools.takewhile(lambda el: el.rank < Rank.DIALOGUE, events):
+                for element in itertools.takewhile(lambda el: el.rank < Rank.DIALOGUE, monitors):
                     self.execute_handler(element, marker, **kwargs)
 
                 # Insert content
                 context = dict(self.journal.context(marker.mark), marker=marker)
-                for text in self.journal.content(marker.mark):
+                for text in self.journal.contents(marker.mark):
                     self.insert_text(text, context=context, marker=marker)
 
                 # Activate post-dialogue handlers
-                for element in itertools.dropwhile(lambda el: el.rank < Rank.DIALOGUE, events):
+                for element in itertools.dropwhile(lambda el: el.rank < Rank.DIALOGUE, monitors):
                     self.execute_handler(element, marker, **kwargs)
 
             for cue in self.play_scene(self.scene):

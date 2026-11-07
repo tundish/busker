@@ -159,6 +159,31 @@ class Element(UserDict):
         self.rank = self.data.get("rank", Rank.ELLIPSIS)
         return rv
 
+    @property
+    def monitor(self):
+        """Return any monitor associated with this element."""
+        rv = None
+        if self.data.get("type") != ElementType.MONITOR.value:
+            return
+
+        try:
+            pos = self.parent.index(self)
+        except ValueError:
+            return
+
+        try:
+            rv = self.parent[pos + 1]
+        except IndexError:
+            warnings.warn(f"Expecting element at path {self.parent.path} after pos: {pos}")
+            return
+
+        if not isinstance(rv, ast.AST):
+            warnings.warn(f"Expecting code at path {self.parent.path} after pos: {pos}")
+            return
+
+        self.rank = self.data.get("rank", Rank.ELLIPSIS)
+        return rv
+
     def refresh(self, parent=None):
         """A signal to referenced objects that the container has changed."""
         self.parent = parent

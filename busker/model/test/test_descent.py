@@ -67,7 +67,7 @@ class DescentTests(unittest.TestCase):
         action_text = textwrap.dedent("""
         {"seal": 127416676279376, "type": "data/python", "path": []}
         {
-        "type": "handler",
+        "type": "monitor",
         "description": "After visiting a path 3 times, discard one of the goods",
         "rank": 10,
         }
@@ -77,7 +77,7 @@ class DescentTests(unittest.TestCase):
             logging.getLogger(format(marker.mark)).debug(f"Removed {taken} from set of goods")
         {"seal": 127416676279376, "type": "data/python", "path": []}
         {
-        "type": "handler",
+        "type": "monitor",
         "description": "Play an extra note in every fourth chord",
         "rank": 5,
         }
@@ -95,22 +95,22 @@ class DescentTests(unittest.TestCase):
         text = TravelTests.texts[2] + action_text
         journal = self.build_journal(text)
         engine = Engine(journal)
-        descent = list(journal.registry[Lens])[0]
+        descent = next(i for i in journal.registry[Lens] if isinstance(i, Descent))
         marker = Marker(name="Test", mark=("b", 1))
-        events = descent.events(marker.mark)
-        self.assertIsInstance(events, list)
-        self.assertEqual(len(events), 2, events)
+        monitors = descent.monitors(marker.mark)
+        self.assertIsInstance(monitors, list)
+        self.assertEqual(len(monitors), 2, monitors)
 
-        rv = events[0]
+        rv = monitors[0]
         self.assertIsInstance(rv, Element)
-        self.assertTrue(rv.handler)
+        self.assertTrue(rv.monitor)
         self.assertEqual(rv.rank, 5)
 
         self.assertEqual(rv, journal.model[()][-2])
-        self.assertEqual(rv.handler, journal.model[()][-1])
+        self.assertEqual(rv.monitor, journal.model[()][-1])
 
         self.assertEqual(descent.context(marker.mark).get("chord", None), ("C", "F", "G"))
-        code = compile(rv.handler, format(marker.mark), mode="exec")
+        code = compile(rv.monitor, format(marker.mark), mode="exec")
 
         context = descent.context(marker.mark)
         l = dict(engine=engine, context=context, marker=marker)
@@ -121,15 +121,15 @@ class DescentTests(unittest.TestCase):
         self.assertTrue(check.output)
         self.assertIn("Playing '('C', 'F', 'G', 'C')'", check.output[0])
 
-        rv = events[1]
+        rv = monitors[1]
         self.assertIsInstance(rv, Element)
-        self.assertTrue(rv.handler)
+        self.assertTrue(rv.monitor)
         self.assertEqual(rv.rank, 10)
 
         self.assertEqual(rv, journal.model[()][-4])
-        self.assertEqual(rv.handler, journal.model[()][-3])
+        self.assertEqual(rv.monitor, journal.model[()][-3])
 
-        code = compile(rv.handler, format(marker.mark), mode="exec")
+        code = compile(rv.monitor, format(marker.mark), mode="exec")
         context = descent.context(marker.mark)
         goods = context["goods"].copy()
         l = dict(engine=engine, context=context, marker=marker)
