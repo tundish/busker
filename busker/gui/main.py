@@ -16,34 +16,22 @@
 # If not, see <https://www.gnu.org/licenses/>.
 
 import argparse
-import asyncio
-from collections.abc import Generator
-import concurrent.futures
-import contextvars
-import dataclasses
-import datetime
 import functools
-import itertools
 import logging
-import logging.handlers
-import operator
 import pathlib
-import tempfile
-import time
 import tkinter as tk
 from tkinter import ttk
 from tkinter import font as tkfont
-from types import SimpleNamespace as Result
+from types import SimpleNamespace as SN
 import queue
 import sys
-import weakref
 
 
 import busker
 from busker.gui.menu import Controller
 from busker.gui.menu import LogBridge
 from busker.gui.menu import Scenario
-from busker.model.journal import Journal
+
 from busker.model.types import BackendType
 
 
@@ -61,7 +49,7 @@ Need to manage the write lock, etc.
 
 def build_tree_panel(parent: tk.Widget):
     logger = logging.getLogger("tree_panel")
-    rv = Result()
+    rv = SN()
     style = ttk.Style()
     family = next(iter({"Courier New", "Liberation Mono", "Ubuntu Mono"}.intersection(set(tkfont.families()))))
     logger.info(f"Selected font family '{family}'")
@@ -94,7 +82,7 @@ def build_tree_panel(parent: tk.Widget):
 
 def build_context_menus(parent: tk.Widget):
     logger = logging.getLogger("context_menu")
-    rv = Result()
+    rv = SN()
     rv.menus = [
         tk.Menu(parent, tearoff=0, takefocus=1)
     ]
@@ -118,7 +106,7 @@ def build_context_menus(parent: tk.Widget):
 
 def build_log_panel(parent: tk.Widget):
     logger = logging.getLogger("log_panel")
-    rv = Result(name="Log")
+    rv = SN(name="Log")
     rv.frame = ttk.Frame(parent)
     rv.frame.columnconfigure(0, weight=1)
     rv.frame.columnconfigure(1, weight=0)
@@ -137,7 +125,7 @@ def build_log_panel(parent: tk.Widget):
 
 
 def build_status_panel(parent: tk.Widget):
-    rv = Result()
+    rv = SN()
     rv.frame = ttk.Frame(parent)
     rv.frame.rowconfigure(0, weight=1)
     rv.frame.columnconfigure(0, weight=1)
@@ -151,7 +139,7 @@ def build_status_panel(parent: tk.Widget):
 
 def build_content(tree: tk.Widget, path=None):
     logger = logging.getLogger("build_content")
-    rv = Result()
+    rv = SN()
     rv.content = Scenario.discover(path)
     logger.info(rv.content)
     for s in rv.content:
@@ -167,7 +155,7 @@ def build_content(tree: tk.Widget, path=None):
 
 def build_main_menu(parent: tk.Widget):
     logger = logging.getLogger("main_menu")
-    rv = Result()
+    rv = SN()
     rv.menu = tk.Menu(parent, tearoff=0, takefocus=1)
 
     def on_select(event=None):
@@ -183,7 +171,7 @@ def build_main_menu(parent: tk.Widget):
 
 
 def build_gui(args: argparse.Namespace):
-    rv = Result()
+    rv = SN()
     rv.root = tk.Tk()
     rv.root.title(f"Busker {busker.__version__}")
     rv.root.columnconfigure(0, weight=1)

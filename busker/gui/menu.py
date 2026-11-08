@@ -15,27 +15,18 @@
 # You should have received a copy of the GNU General Public License along with busker.
 # If not, see <https://www.gnu.org/licenses/>.
 
-import argparse
 import asyncio
 from collections.abc import Generator
-import concurrent.futures
-import contextvars
 import dataclasses
 import datetime
-import functools
 import itertools
 import logging
-import logging.handlers
 import operator
 import pathlib
 import tempfile
 import time
 import tkinter as tk
-from tkinter import ttk
-from tkinter import font as tkfont
-from types import SimpleNamespace as Result
 import queue
-import sys
 import weakref
 
 
