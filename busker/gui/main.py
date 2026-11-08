@@ -40,8 +40,12 @@ import weakref
 
 
 import busker
+from busker.gui.menu import Controller
+from busker.gui.menu import LogBridge
+from busker.gui.menu import Scenario
 from busker.model.journal import Journal
 from busker.model.types import BackendType
+
 
 """
 Demo of multiple threads accessing the same Journal, eg:
@@ -53,100 +57,6 @@ Demo of multiple threads accessing the same Journal, eg:
 Need to manage the write lock, etc.
 
 """
-
-
-class Scenario:
-    "A manager of journals"
-
-    instances = weakref.WeakValueDictionary()
-
-    @classmethod
-    def discover(cls, playlist_path: pathlib.Path):
-        patterns = [playlist_path.glob(f"*/*{i}") for t in BackendType for i in t.value]
-        resources = sorted(path for pattern in patterns for path in pattern)
-        return [
-            cls(parent, *children)
-            for parent, children in itertools.groupby(resources, key=operator.attrgetter("parent"))
-        ]
-
-    @staticmethod
-    def stats(path):
-        return dict(
-            mtime=time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(path.stat().st_mtime)),
-            size=f"{path.stat().st_size/1E3:0.3f}K" if path.is_file() else "",
-        )
-
-    def __init__(self, path: pathlib.Path, *args: tuple[Journal], **kwargs):
-        # TODO: Temporary session directory?
-        self.path = path
-        self.args = list(args)
-
-    def __repr__(self):
-        return f"{self.path.name}@{self.path.parent.as_posix()}"
-
-    def clone(self, name, debug=False):
-        with tempfile.TemporaryDirectory(prefix="busker_", delete=not debug) as temp_dir:
-            temp_path = pathlib.Path(temp_dir)
-            # TODO: get journal write locks.
-
-    @property
-    def journals(self):
-        # TODO: Discover
-        return self.args
-
-
-class LogBridge(logging.Handler):
-
-    def __init__(self, log_queue: queue.Queue, level=logging.NOTSET, fmt=None, defaults=None):
-        super().__init__(level=level)
-        self.log_queue = log_queue
-        fmt = fmt or "{asctime}| {levelname:>8}| {name:<18} | {message}"
-        self.setFormatter(logging.Formatter(fmt=fmt, datefmt=None, style="{", validate=True, defaults=defaults))
-
-    def emit(self, record):
-        msg = self.formatter.format(record)
-        self.log_queue.put(msg, block=False)
-
-
-class Controller:
-
-    @staticmethod
-    def select_tree_item(event=None, gui=None, parent=None):
-        logger = logging.getLogger("context_menu")
-        logger.info(f"{parent=} {event=}")
-        row = parent.identify_row(event.y)
-        parent.selection_set(row)
-        iid = parent.selection()
-        text = parent.item(iid, "text")
-        logger.info(f"selected {iid=} {text=}")
-
-    @staticmethod
-    def display_tree_item_context_menu(event=None, gui=None, parent=None):
-        logger = logging.getLogger("context_menu")
-        row = parent.identify_row(event.y)
-        parent.selection_set(row)
-        logger.info(f"{row=}")
-        # TODO: Pick the menu here.
-        try:
-            logger.info(event)
-            gui.menus[0].tk_popup(event.x_root, event.y_root)
-        finally:
-            gui.menus[0].grab_release()
-
-    @staticmethod
-    def monitor(gui):
-        logger = logging.getLogger("monitor")
-
-        while True:
-            try:
-                text = gui.log_panel.log_queue.get(block=False)
-                gui.log_panel.text_widget.insert(tk.END, f"{text}\n")
-                gui.log_panel.text_widget.see(tk.END)
-            except queue.Empty:
-                break
-
-        gui.status_panel.clock_display.configure(text=datetime.datetime.now().strftime("%H:%M"))
-        gui.root.after(150, Controller.monitor, gui)
 
 
 def build_tree_panel(parent: tk.Widget):
@@ -167,7 +77,7 @@ def build_tree_panel(parent: tk.Widget):
     rv.frame.rowconfigure(0, weight=1)
 
     def on_select(event=None):
-        logger.info(f"selected {event}")
+        logger.debug(f"selected {event}")
 
     rv.tree_widget = ttk.Treeview(rv.frame, show="tree headings", columns=("size", "modified"))
     rv.tree_widget["columns"] = ("size", "saved")
@@ -288,7 +198,7 @@ def build_gui(args: argparse.Namespace):
     base_split.grid(row=0, column=0, sticky="NESW")
 
     rv.tree_panel = build_tree_panel(base_split)
-    base_split.add(rv.tree_panel.frame)
+    base_split.add(rv.tree_panel.frame, weight=0)
 
     # root.configure(menu=menubar)
     # https://tkdocs.com/tutorial/menus.html
@@ -349,6 +259,14 @@ def run():
         stream=sys.stderr,
         level=level,
     )
+    logger = logging.getLogger("main")
+    if args.playlist:
+        if args.playlist.is_file():
+            p.print_help()
+            logger.error(f"'{args.playlist}' is a file. A playlist is a directory.")
+            sys.exit(2)
+        elif args.playlist.is_dir():
+            p.print_help()
     rv = main(args)
     sys.exit(rv)
 
