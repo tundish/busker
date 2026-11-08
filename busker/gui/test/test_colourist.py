@@ -12,6 +12,7 @@ from test.support import requires
 
 
 class Colourist:
+    # TODO: How to apply to JSON, Python, Speechmark
     pass
 
 
