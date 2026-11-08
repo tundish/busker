@@ -18,7 +18,6 @@
 import asyncio
 from collections.abc import Generator
 import dataclasses
-import datetime
 import itertools
 import logging
 import operator
@@ -97,44 +96,3 @@ class LogBridge(logging.Handler):
     def emit(self, record):
         msg = self.formatter.format(record)
         self.log_queue.put(msg, block=False)
-
-
-class Controller:
-
-    @staticmethod
-    def select_tree_item(event=None, gui=None, parent=None):
-        logger = logging.getLogger("context_menu")
-        logger.info(f"{parent=} {event=}")
-        row = parent.identify_row(event.y)
-        parent.selection_set(row)
-        iid = parent.selection()
-        text = parent.item(iid, "text")
-        logger.info(f"selected {iid=} {text=}")
-
-    @staticmethod
-    def display_tree_item_context_menu(event=None, gui=None, parent=None):
-        logger = logging.getLogger("context_menu")
-        row = parent.identify_row(event.y)
-        parent.selection_set(row)
-        logger.info(f"{row=}")
-        # TODO: Pick the menu here.
-        try:
-            logger.info(event)
-            gui.menus[0].tk_popup(event.x_root, event.y_root)
-        finally:
-            gui.menus[0].grab_release()
-
-    @staticmethod
-    def monitor(gui):
-        logger = logging.getLogger("monitor")
-
-        while True:
-            try:
-                text = gui.log_panel.log_queue.get(block=False)
-                gui.log_panel.text_widget.insert(tk.END, f"{text}\n")
-                gui.log_panel.text_widget.see(tk.END)
-            except queue.Empty:
-                break
-
-        gui.status_panel.clock_display.configure(text=datetime.datetime.now().strftime("%H:%M"))
-        gui.root.after(150, Controller.monitor, gui)

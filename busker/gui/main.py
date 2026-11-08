@@ -16,6 +16,7 @@
 # If not, see <https://www.gnu.org/licenses/>.
 
 import argparse
+import datetime
 import functools
 import logging
 import pathlib
@@ -28,7 +29,6 @@ import sys
 
 
 import busker
-from busker.gui.menu import Controller
 from busker.gui.menu import LogBridge
 from busker.gui.menu import Scenario
 
@@ -45,6 +45,47 @@ Demo of multiple threads accessing the same Journal, eg:
 Need to manage the write lock, etc.
 
 """
+
+
+class Controller:
+
+    @staticmethod
+    def select_tree_item(event=None, gui=None, parent=None):
+        logger = logging.getLogger("context_menu")
+        logger.info(f"{parent=} {event=}")
+        row = parent.identify_row(event.y)
+        parent.selection_set(row)
+        iid = parent.selection()
+        text = parent.item(iid, "text")
+        logger.info(f"selected {iid=} {text=}")
+
+    @staticmethod
+    def display_tree_item_context_menu(event=None, gui=None, parent=None):
+        logger = logging.getLogger("context_menu")
+        row = parent.identify_row(event.y)
+        parent.selection_set(row)
+        logger.info(f"{row=}")
+        # TODO: Pick the menu here.
+        try:
+            logger.info(event)
+            gui.menus[0].tk_popup(event.x_root, event.y_root)
+        finally:
+            gui.menus[0].grab_release()
+
+    @staticmethod
+    def monitor(gui):
+        logger = logging.getLogger("monitor")
+
+        while True:
+            try:
+                text = gui.log_pnl.log_queue.get(block=False)
+                gui.log_pnl.text_widget.insert(tk.END, f"{text}\n")
+                gui.log_pnl.text_widget.see(tk.END)
+            except queue.Empty:
+                break
+
+        gui.status_pnl.clock_display.configure(text=datetime.datetime.now().strftime("%H:%M"))
+        gui.root.after(150, Controller.monitor, gui)
 
 
 def build_tree_panel(parent: tk.Widget):
@@ -101,6 +142,26 @@ def build_context_menus(parent: tk.Widget):
         "<ButtonRelease-3>",
         functools.partial(Controller.display_tree_item_context_menu, gui=rv, parent=parent)
     )
+    return rv
+
+
+def build_edit_panel(parent: tk.Widget):
+    logger = logging.getLogger("edit_panel")
+    rv = SN(name="Editor")
+    rv.frame = ttk.Frame(parent)
+    rv.frame.columnconfigure(0, weight=1)
+    rv.frame.columnconfigure(1, weight=0)
+    rv.frame.rowconfigure(0, weight=1)
+
+    rv.text_widget = tk.Text(rv.frame)
+    rv.text_widget.grid(row=0, column=0, sticky="NESW")
+    scroll_bar = ttk.Scrollbar(rv.frame, orient=tk.VERTICAL, command=rv.text_widget.yview)
+    scroll_bar.grid(row=0, column=1, sticky="NS")
+    rv.text_widget.configure(yscrollcommand=scroll_bar.set)
+
+    rv.log_queue = queue.Queue()
+    logging.getLogger().addHandler(LogBridge(rv.log_queue))
+    parent.after(500, logger.info(f"Busker {busker.__version__}"))
     return rv
 
 
@@ -185,21 +246,23 @@ def build_gui(args: argparse.Namespace):
     base_split = ttk.PanedWindow(base, orient=tk.HORIZONTAL)
     base_split.grid(row=0, column=0, sticky="NESW")
 
-    rv.tree_panel = build_tree_panel(base_split)
-    base_split.add(rv.tree_panel.frame, weight=0)
+    rv.tree_pnl = build_tree_panel(base_split)
+    base_split.add(rv.tree_pnl.frame, weight=0)
 
     # root.configure(menu=menubar)
     # https://tkdocs.com/tutorial/menus.html
-    rv.context_menus = build_context_menus(rv.tree_panel.tree_widget)
-    rv.content = build_content(rv.tree_panel.tree_widget, path=args.playlist)
+    rv.context_menus = build_context_menus(rv.tree_pnl.tree_widget)
+    rv.content = build_content(rv.tree_pnl.tree_widget, path=args.playlist)
 
     book = ttk.Notebook(base_split)
     base_split.add(book)
 
-    rv.log_panel = build_log_panel(base_split)
-    book.add(rv.log_panel.frame, text=rv.log_panel.name)
-    rv.status_panel = build_status_panel(base)
-    rv.status_panel.frame.grid(row=1, column=0, sticky="NESW")
+    rv.edit_pnl = build_edit_panel(base_split)
+    book.add(rv.edit_pnl.frame, text=rv.edit_pnl.name)
+    rv.log_pnl = build_log_panel(base_split)
+    book.add(rv.log_pnl.frame, text=rv.log_pnl.name)
+    rv.status_pnl = build_status_panel(base)
+    rv.status_pnl.frame.grid(row=1, column=0, sticky="NESW")
 
     rv.main_menu = build_main_menu(base)
     rv.root.configure(menu=rv.main_menu.menu)
