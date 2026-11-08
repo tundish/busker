@@ -255,6 +255,7 @@ def build_gui(args: argparse.Namespace):
     rv.content = build_content(rv.tree_pnl.tree_widget, path=args.playlist)
 
     book = ttk.Notebook(base_split)
+    book.enable_traversal()
     base_split.add(book)
 
     rv.edit_pnl = build_edit_panel(base_split)
