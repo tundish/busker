@@ -80,8 +80,8 @@ class Controller:
         while True:
             try:
                 text = gui.log_pnl.log_queue.get(block=False)
-                gui.log_pnl.text_widget.insert(tk.END, f"{text}\n")
-                gui.log_pnl.text_widget.see(tk.END)
+                gui.log_pnl.text_wgt.insert(tk.END, f"{text}\n")
+                gui.log_pnl.text_wgt.see(tk.END)
             except queue.Empty:
                 break
 
@@ -109,16 +109,16 @@ def build_tree_panel(parent: tk.Widget):
     def on_select(event=None):
         logger.debug(f"selected {event}")
 
-    rv.tree_widget = ttk.Treeview(rv.frame, show="tree headings", columns=("size", "modified"))
-    rv.tree_widget["columns"] = ("size", "saved")
-    rv.tree_widget.column("#0", minwidth=fonts[0].measure("0" * 36))
-    rv.tree_widget.column("#1", minwidth=fonts[0].measure("0" * 20))
-    rv.tree_widget.column("#2", minwidth=fonts[0].measure("0" * 6))
-    rv.tree_widget.grid(row=0, column=0, sticky="NESW")
-    scroll_bar = ttk.Scrollbar(rv.frame, orient=tk.VERTICAL, command=rv.tree_widget.yview)
+    rv.tree_wgt = ttk.Treeview(rv.frame, show="tree headings", columns=("size", "modified"))
+    rv.tree_wgt["columns"] = ("size", "saved")
+    rv.tree_wgt.column("#0", minwidth=fonts[0].measure("0" * 36))
+    rv.tree_wgt.column("#1", minwidth=fonts[0].measure("0" * 20))
+    rv.tree_wgt.column("#2", minwidth=fonts[0].measure("0" * 6))
+    rv.tree_wgt.grid(row=0, column=0, sticky="NESW")
+    scroll_bar = ttk.Scrollbar(rv.frame, orient=tk.VERTICAL, command=rv.tree_wgt.yview)
     scroll_bar.grid(row=0, column=1, sticky="NS")
-    rv.tree_widget.configure(yscrollcommand=scroll_bar.set, selectmode="browse")
-    rv.tree_widget.bind('<<TreeviewSelect>>', on_select)
+    rv.tree_wgt.configure(yscrollcommand=scroll_bar.set, selectmode="browse")
+    rv.tree_wgt.bind('<<TreeviewSelect>>', on_select)
     return rv
 
 
@@ -154,11 +154,11 @@ def build_log_panel(parent: tk.Widget):
     rv.frame.columnconfigure(1, weight=0)
     rv.frame.rowconfigure(0, weight=1)
 
-    rv.text_widget = tk.Text(rv.frame)
-    rv.text_widget.grid(row=0, column=0, sticky="NESW")
-    scroll_bar = ttk.Scrollbar(rv.frame, orient=tk.VERTICAL, command=rv.text_widget.yview)
+    rv.text_wgt = tk.Text(rv.frame)
+    rv.text_wgt.grid(row=0, column=0, sticky="NESW")
+    scroll_bar = ttk.Scrollbar(rv.frame, orient=tk.VERTICAL, command=rv.text_wgt.yview)
     scroll_bar.grid(row=0, column=1, sticky="NS")
-    rv.text_widget.configure(yscrollcommand=scroll_bar.set)
+    rv.text_wgt.configure(yscrollcommand=scroll_bar.set)
 
     rv.log_queue = queue.Queue()
     logging.getLogger().addHandler(LogBridge(rv.log_queue))
@@ -232,15 +232,15 @@ def build_gui(args: argparse.Namespace):
 
     # root.configure(menu=menubar)
     # https://tkdocs.com/tutorial/menus.html
-    rv.context_menus = build_context_menus(rv.tree_pnl.tree_widget)
-    rv.content = build_content(rv.tree_pnl.tree_widget, path=args.playlist)
+    rv.context_menus = build_context_menus(rv.tree_pnl.tree_wgt)
+    rv.content = build_content(rv.tree_pnl.tree_wgt, path=args.playlist)
 
     book = ttk.Notebook(base_split)
     book.enable_traversal()
     base_split.add(book)
 
     rv.edit_pnl = build_edit_panel(base_split)
-    book.add(rv.edit_pnl.frame, text=rv.edit_pnl.name)
+    book.add(rv.edit_pnl.split, text=rv.edit_pnl.name)
     rv.log_pnl = build_log_panel(base_split)
     book.add(rv.log_pnl.frame, text=rv.log_pnl.name)
     rv.status_pnl = build_status_panel(base)
