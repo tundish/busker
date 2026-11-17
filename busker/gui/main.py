@@ -29,6 +29,7 @@ import sys
 
 
 import busker
+from busker.gui.edit import build_edit_panel
 from busker.gui.menu import LogBridge
 from busker.gui.menu import Scenario
 
@@ -142,26 +143,6 @@ def build_context_menus(parent: tk.Widget):
         "<ButtonRelease-3>",
         functools.partial(Controller.display_tree_item_context_menu, gui=rv, parent=parent)
     )
-    return rv
-
-
-def build_edit_panel(parent: tk.Widget):
-    logger = logging.getLogger("edit_panel")
-    rv = SN(name="Editor")
-    rv.frame = ttk.Frame(parent)
-    rv.frame.columnconfigure(0, weight=1)
-    rv.frame.columnconfigure(1, weight=0)
-    rv.frame.rowconfigure(0, weight=1)
-
-    rv.text_widget = tk.Text(rv.frame)
-    rv.text_widget.grid(row=0, column=0, sticky="NESW")
-    scroll_bar = ttk.Scrollbar(rv.frame, orient=tk.VERTICAL, command=rv.text_widget.yview)
-    scroll_bar.grid(row=0, column=1, sticky="NS")
-    rv.text_widget.configure(yscrollcommand=scroll_bar.set)
-
-    rv.log_queue = queue.Queue()
-    logging.getLogger().addHandler(LogBridge(rv.log_queue))
-    parent.after(500, logger.info(f"Busker {busker.__version__}"))
     return rv
 
 
