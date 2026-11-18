@@ -17,12 +17,18 @@
 
 import argparse
 import datetime
-import functools
+from functools import partial
 import logging
 import pathlib
 import tkinter as tk
 from tkinter import ttk
 from tkinter import font as tkfont
+try:
+    from tkinter.fontchooser import FontChooser
+except ModuleNotFoundError:
+    # < 3.16
+    FontChooser = None
+
 from types import SimpleNamespace as SN
 import queue
 import sys
@@ -48,7 +54,12 @@ Need to manage the write lock, etc.
 """
 
 
-class Controller:
+class Clerk:
+    """
+    Provides validation and logical consistency.
+    Only loosely bound to a GUI.
+
+    """
 
     @staticmethod
     def select_tree_item(event=None, gui=None, parent=None):
@@ -86,7 +97,12 @@ class Controller:
                 break
 
         gui.status_pnl.clock_display.configure(text=datetime.datetime.now().strftime("%H:%M"))
-        gui.root.after(150, Controller.monitor, gui)
+        gui.root.after(150, Clerk.monitor, gui)
+
+
+    def set_global_font(self, font: Font = None):
+        logger = logging.getLogger("set_global_font")
+        logger.info(font)
 
 
 def build_tree_panel(parent: tk.Widget):
@@ -137,11 +153,11 @@ def build_context_menus(parent: tk.Widget):
     rv.menus[0].add_command(label ="Rename")
     parent.bind(
         "<Button-3>",
-        functools.partial(Controller.select_tree_item, gui=rv, parent=parent)
+        partial(Clerk.select_tree_item, gui=rv, parent=parent)
     )
     parent.bind(
         "<ButtonRelease-3>",
-        functools.partial(Controller.display_tree_item_context_menu, gui=rv, parent=parent)
+        partial(Clerk.display_tree_item_context_menu, gui=rv, parent=parent)
     )
     return rv
 
@@ -195,7 +211,7 @@ def build_content(tree: tk.Widget, path=None):
     return rv
 
 
-def build_main_menu(parent: tk.Widget):
+def build_main_menu(parent: tk.Widget, clerk: Clerk = None):
     logger = logging.getLogger("main_menu")
     rv = SN()
     rv.menu = tk.Menu(parent, tearoff=0, takefocus=1)
@@ -204,7 +220,14 @@ def build_main_menu(parent: tk.Widget):
         logger.info(f"selected {event}")
 
     rv.menu.add_command(label="File", underline=0)
-    rv.menu.add_command(label="Edit", underline=0)
+
+    view_menu = tk.Menu(parent)
+    if FontChooser is not None:
+        clerk.font_chooser = FontChooser(title="Global Font", command=clerk.set_global_font)
+        view_menu.add_command(label="Fonts...", underline=0, command=clerk.font_chooser.show)
+
+    rv.menu.add_cascade(menu=view_menu, label="View", underline=0)
+
     rv.menu.add_command(label="Help", underline=0)
     # rv.menu.add_command(label="Reload", underline=0, accelerator="Ctrl+R", command=on_select)
     # parent.bind("<Button-3>", do_popup)
@@ -213,7 +236,7 @@ def build_main_menu(parent: tk.Widget):
 
 
 def build_gui(args: argparse.Namespace):
-    rv = SN()
+    rv = SN(clerk=Clerk())
     rv.root = tk.Tk()
     rv.root.title(f"Busker {busker.__version__}")
     rv.root.columnconfigure(0, weight=1)
@@ -246,12 +269,12 @@ def build_gui(args: argparse.Namespace):
     rv.status_pnl = build_status_panel(base)
     rv.status_pnl.frame.grid(row=1, column=0, sticky="NESW")
 
-    rv.main_menu = build_main_menu(base)
+    rv.main_menu = build_main_menu(base, rv.clerk)
     rv.root.configure(menu=rv.main_menu.menu)
     base.grid(row=0, column=0, sticky="NESW")
     rv.root.grid()
 
-    rv.root.after(500, Controller.monitor, rv)
+    rv.root.after(500, Clerk.monitor, rv)
     return rv
 
 
