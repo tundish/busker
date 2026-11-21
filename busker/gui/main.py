@@ -39,6 +39,7 @@ from busker.gui.edit import build_edit_panel
 from busker.gui.clerk import Clerk
 from busker.gui.menu import LogBridge
 from busker.gui.menu import Scenario
+from busker.gui.theme import Theme
 
 from busker.model.types import BackendType
 
@@ -186,8 +187,7 @@ def build_main_menu(parent: tk.Widget, clerk: Clerk = None):
 
 
 def build_gui(args: argparse.Namespace):
-    rv = SN(clerk=Clerk())
-    rv.root = tk.Tk()
+    rv = SN(root=(root:=tk.Tk()), clerk=Clerk(root), theme=Theme(root))
     rv.root.title(f"Busker {busker.__version__}")
     rv.root.columnconfigure(0, weight=1)
     rv.root.rowconfigure(0, weight=1)
@@ -235,6 +235,7 @@ def start():
 def main(args):
     args.playlist.mkdir(parents=True, exist_ok=True)
     gui = build_gui(args)
+    print(f"{gui.theme.theme_names=}")
     gui.root.mainloop()
     return 0
 

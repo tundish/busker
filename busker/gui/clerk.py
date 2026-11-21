@@ -34,6 +34,9 @@ class Clerk:
 
     """
 
+    def __init__(self, root):
+        self.root = root
+
     @staticmethod
     def select_tree_item(event=None, gui=None, parent=None):
         logger = logging.getLogger("context_menu")

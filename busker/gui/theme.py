@@ -15,6 +15,7 @@
 # You should have received a copy of the GNU General Public License along with busker.
 # If not, see <https://www.gnu.org/licenses/>.
 
+from collections import namedtuple
 import datetime
 from functools import partial
 import logging
@@ -32,5 +33,19 @@ class Theme:
     Provides validation and logical consistency.
     Only loosely bound to a GUI.
 
+    see bootstack/widgets/theme_toggle
+    # TODO: apply fnmatch selection of elements
+
     """
-    pass
+
+    Params = namedtuple("ThemeParams", ["mode"])
+
+    def __init__(self, root):
+        self.root = root
+
+    @property
+    def theme_names(self):
+        style = ttk.Style()
+        print(f"{style.element_names()=}")
+        return style.theme_names()
+
