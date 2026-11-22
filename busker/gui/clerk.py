@@ -26,6 +26,43 @@ from tkinter import font as tkfont
 from types import SimpleNamespace as SN
 import queue
 
+class Message:
+    """
+        `serial`
+        : The serial number of the event.
+        `num`
+        : The mouse button that was pressed or released (for button events).
+        `focus`
+        : Whether the window has the focus (for Enter and Leave events).
+        `height`
+        : The new height of the window (for Configure and Expose events).
+        `width`
+        : The new height and width of the window (for Configure and Expose events).
+        `keycode`
+        : The keycode of the key that was pressed or released.
+        `state`
+        : The state of the event, as a number (for most events) or a string (for Visibility events).
+        `time`
+        : The timestamp of the event, in milliseconds.
+        `x, y`
+        : The pointer position relative to the widget, in pixels.
+        `x_root, y_root`
+        : The pointer position relative to the top-left corner of the screen, in pixels.
+        `char`
+        : The character typed, as a string (for key events).
+        `send_event`
+        : True if the event was sent by another application.
+        `keysym`
+        : The symbolic name of the key that was pressed or released.
+        `keysym_num`
+        : The numeric value of keysym.
+        `type`
+        : The EventType of the event.
+        `widget`
+        : The widget on which the event occurred.
+        `delta`
+        : The amount the mouse wheel was rotated (for MouseWheel events)
+    """
 
 class Clerk:
     """
@@ -36,6 +73,7 @@ class Clerk:
 
     def __init__(self, root):
         self.root = root
+        self.messages = dict()
 
     @staticmethod
     def select_tree_item(event=None, gui=None, parent=None):
@@ -79,3 +117,13 @@ class Clerk:
     def set_global_font(self, font: Font = None):
         logger = logging.getLogger("set_global_font")
         logger.info(font)
+
+    def register(self, new_evt, callable_):
+        def fn(evt: tk.Event):
+            pass
+        self.root.event_add(f"<<{new_evt}>>", "<Button-3>", "<KeyPress>")
+        self.root.bind(f"<<{new_evt}>>", callable_)  # Or wrap callable?
+        return False
+
+    def dispatch(self, evt):
+        self.root.event_generate(tk_evt, **kwargs)

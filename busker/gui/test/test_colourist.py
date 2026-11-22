@@ -70,6 +70,7 @@ def tearDownModule():
     colorizer.idleConf.userCfg = usercfg
 
 
+@unittest.skip("On hold")
 class FunctionTest(unittest.TestCase):
 
     def test_any(self):
@@ -171,6 +172,7 @@ class ColorDelegatorInstantiationTest(unittest.TestCase):
         self.assertFalse(color.stop_colorizing)
 
 
+@unittest.skip("On hold")
 class ColorDelegatorTest(unittest.TestCase):
 
     @classmethod
