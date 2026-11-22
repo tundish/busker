@@ -173,11 +173,19 @@ def build_main_menu(parent: tk.Widget, clerk: Clerk = None):
     rv.menu.add_command(label="File", underline=0)
 
     view_menu = tk.Menu(parent)
+    rv.menu.add_cascade(menu=view_menu, label="View", underline=0)
+
+    theme_menu = tk.Menu(master=view_menu)
+    view_menu.add_cascade(menu=theme_menu, label="Theme", underline=0)
+    theme_mode_var = tk.BooleanVar(master=theme_menu)
+    theme_name_var = tk.StringVar(master=theme_menu)
+    theme_menu.add_checkbutton(label="Dark mode", var=theme_mode_var)
+    btn = ttk.Checkbutton(master=view_menu, text="Dark mode", var=theme_name_var)
+    print(f"{btn=}")
     if FontChooser is not None:
         clerk.font_chooser = FontChooser(title="Global Font", command=clerk.set_global_font)
-        view_menu.add_command(label="Fonts...", underline=0, command=clerk.font_chooser.show)
+        theme_menu.add_command(label="Fonts...", underline=0, command=clerk.font_chooser.show)
 
-    rv.menu.add_cascade(menu=view_menu, label="View", underline=0)
 
     rv.menu.add_command(label="Help", underline=0)
     # rv.menu.add_command(label="Reload", underline=0, accelerator="Ctrl+R", command=on_select)

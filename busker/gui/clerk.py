@@ -121,8 +121,10 @@ class Clerk:
     def register(self, new_evt, callable_):
         def fn(evt: tk.Event):
             pass
+        # tk.EventType
         self.root.event_add(f"<<{new_evt}>>", "<Button-3>", "<KeyPress>")
         self.root.bind(f"<<{new_evt}>>", callable_)  # Or wrap callable?
+        rv = self.root.event_info(f"<<{new_evt}>>")
         return False
 
     def dispatch(self, evt):
