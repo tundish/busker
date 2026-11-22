@@ -162,7 +162,7 @@ def build_content(tree: tk.Widget, path=None):
     return rv
 
 
-def build_main_menu(parent: tk.Widget, clerk: Clerk = None):
+def build_main_menu(parent: tk.Widget, gui: SN = None):
     logger = logging.getLogger("main_menu")
     rv = SN()
     rv.menu = tk.Menu(parent, tearoff=0, takefocus=1)
@@ -175,17 +175,17 @@ def build_main_menu(parent: tk.Widget, clerk: Clerk = None):
     view_menu = tk.Menu(parent)
     rv.menu.add_cascade(menu=view_menu, label="View", underline=0)
 
-    theme_menu = tk.Menu(master=view_menu)
+    theme_menu = tk.Menu(master=view_menu, tearoff=False)
     view_menu.add_cascade(menu=theme_menu, label="Theme", underline=0)
     theme_mode_var = tk.BooleanVar(master=theme_menu)
     theme_name_var = tk.StringVar(master=theme_menu)
     theme_menu.add_checkbutton(label="Dark mode", var=theme_mode_var)
-    btn = ttk.Checkbutton(master=view_menu, text="Dark mode", var=theme_name_var)
-    print(f"{btn=}")
-    if FontChooser is not None:
-        clerk.font_chooser = FontChooser(title="Global Font", command=clerk.set_global_font)
-        theme_menu.add_command(label="Fonts...", underline=0, command=clerk.font_chooser.show)
+    for theme_name in gui.theme.theme_names:
+        theme_menu.add_radiobutton(label=theme_name, var=theme_name_var)
 
+    if FontChooser is not None:  # FIXME: Do in Theme
+        gui.theme.font_chooser = FontChooser(title="Global Font", command=gui.theme.set_global_font)
+        theme_menu.add_command(label="Fonts...", underline=0, command=gui.theme.font_chooser.show)
 
     rv.menu.add_command(label="Help", underline=0)
     # rv.menu.add_command(label="Reload", underline=0, accelerator="Ctrl+R", command=on_select)
@@ -227,7 +227,7 @@ def build_gui(args: argparse.Namespace):
     rv.status_pnl = build_status_panel(base)
     rv.status_pnl.frame.grid(row=1, column=0, sticky="NESW")
 
-    rv.main_menu = build_main_menu(base, rv.clerk)
+    rv.main_menu = build_main_menu(base, gui=rv)
     rv.root.configure(menu=rv.main_menu.menu)
     base.grid(row=0, column=0, sticky="NESW")
     rv.root.grid()

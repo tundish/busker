@@ -114,10 +114,6 @@ class Clerk:
         gui.root.after(150, Clerk.monitor, gui)
 
 
-    def set_global_font(self, font: Font = None):
-        logger = logging.getLogger("set_global_font")
-        logger.info(font)
-
     def register(self, new_evt, callable_):
         def fn(evt: tk.Event):
             pass

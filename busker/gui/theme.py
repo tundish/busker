@@ -23,6 +23,11 @@ import logging
 import tkinter as tk
 from tkinter import ttk
 from tkinter import font as tkfont
+try:
+    from tkinter.fontchooser import FontChooser
+except ModuleNotFoundError:
+    # < 3.16
+    FontChooser = None
 
 from types import SimpleNamespace as SN
 import queue
@@ -48,4 +53,9 @@ class Theme:
         style = ttk.Style()
         print(f"{style.element_names()=}")
         return style.theme_names()
+
+    def set_global_font(self, font: tkfont.Font = None):
+        logger = logging.getLogger("set_global_font")
+        logger.info(font)
+
 
