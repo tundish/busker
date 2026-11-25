@@ -1,0 +1,15 @@
+[metadata]
+
+[metadata.categories]
+platform = ["android", "linux", "osx", "windows"]
+aspect = ["tall", "wide"]
+variant = ["light", "dark"]
+
+[default]
+padx = 2
+pady = 2
+
+[[hints]]
+all = []
+any = ["windows"]
+font = ["Helvetica", 12]
