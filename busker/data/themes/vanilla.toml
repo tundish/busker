@@ -10,6 +10,7 @@ padx = 2
 pady = 2
 
 [[hints]]
+widget = "T*Box"
 all = []
 any = ["windows"]
 font = ["Helvetica", 12]
